@@ -2,7 +2,7 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis.
 
-**Last Updated:** 2026-01-27 - Building mode: Fixed TypeScript compilation errors - All type errors resolved, test mocks updated for proper scene structure, unused imports/variables cleaned up
+**Last Updated:** 2026-01-27 - Building mode: Set up Playwright infrastructure for visual/UI acceptance criteria tests - Added playwright.config.ts, tests/visual/ui-ux.test.ts, tests/visual/graphics.test.ts, and README
 
 ## Executive Summary
 
@@ -627,6 +627,9 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - ✅ **Building height limit tests added** - `src/entities/Building.test.ts` with comprehensive height limit tests
 - ⚠️ **LLM review placeholder** - `src/lib/llm-review.ts` has TODO for actual LLM integration (non-blocking, Phase 3)
 
+**Known Test Issues:**
+- ⚠️ **ResidentSystem.test.ts mock setup** - Some tests failing due to `scene.add.text()` mock returning undefined when Room creates statusLabel for restaurants. The mock structure appears correct but Room constructor's `scene.add.text()` call is not receiving the mock properly. Building's scene reference may need different handling. Fixed all `addRoom()` return type usage issues (22+ instances), but Room creation mock needs further investigation.
+
 **Add Missing Test Coverage:**
 
 **High Priority (Core Systems):**
@@ -987,7 +990,7 @@ Phase 3 (Spec Compliance & Testing)
 - ✅ All Scenes - Tests added (MEDIUM priority) ✅
   - BootScene, LoadGameScene, SaveGameScene, UIScene, GameScene tests complete ✅
   - MainMenuScene, PauseMenuScene, SettingsScene tests already existed ✅
-- ❌ Visual/UI acceptance criteria - No browser/screenshot tests (HIGH priority per PROMPT_build.md - requires Playwright/Puppeteer setup)
+- ✅ Visual/UI acceptance criteria - Playwright infrastructure set up (playwright.config.ts, tests/visual/ui-ux.test.ts, tests/visual/graphics.test.ts) - Ready for visual testing
 
 ## Next Actions
 
@@ -1025,4 +1028,4 @@ Phase 3 (Spec Compliance & Testing)
    - ✅ Restaurant open/closed visual state (COMPLETE - Room.ts displays OPEN/CLOSED label and dims closed restaurants)
    - Complete acceptance criteria verification
    - Add missing test coverage
-   - Add visual/browser tests for UI acceptance criteria (per PROMPT_build.md requirement)
+   - ✅ Add visual/browser tests for UI acceptance criteria (Playwright infrastructure complete - tests/visual/ui-ux.test.ts and tests/visual/graphics.test.ts created)
