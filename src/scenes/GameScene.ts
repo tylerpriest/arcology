@@ -37,6 +37,8 @@ export class GameScene extends Phaser.Scene {
   private dragStartY = 0;
   private cameraStartX = 0;
   private cameraStartY = 0;
+  private dragThreshold = 5; // Minimum pixels to move before starting drag
+  private hasMovedDuringDrag = false;
   private ghostPreview: Phaser.GameObjects.Graphics | null = null;
   private selectedRoomId: string | null = null;
   private uiManager!: UIManager;
@@ -107,6 +109,9 @@ export class GameScene extends Phaser.Scene {
     // We want: scrollY + topBarHeight + visibleHeight/2 = lobbyY
     // So: scrollY = lobbyY - topBarHeight - visibleHeight/2
     this.cameras.main.scrollY = lobbyY - topBarHeight - visibleHeight / 2;
+    
+    // Set initial zoom to maximum zoom out (0.25x)
+    this.cameras.main.setZoom(0.25);
 
     // Create Venus atmosphere background (behind everything)
     this.venusAtmosphere = new VenusAtmosphere(this);
@@ -183,6 +188,11 @@ export class GameScene extends Phaser.Scene {
 
     // Set up input handlers
     this.setupInput();
+    
+    // Clear pan keys when window loses focus (prevents stuck keys)
+    window.addEventListener('blur', () => {
+      this.panKeys.clear();
+    });
 
     // Listen to registry changes for room selection
     this.registry.events.on('changedata-selectedRoom', (_: Phaser.Game, value: string | undefined) => {
@@ -245,9 +255,19 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupInput(): void {
-    // Camera drag
+    // Camera drag - support both right-click and left-click (when no room selected)
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const selectedRoom = this.registry.get('selectedRoom') as string | undefined;
+      
       if (pointer.rightButtonDown()) {
+        // Right-click always enables drag
+        this.isDragging = true;
+        this.dragStartX = pointer.x;
+        this.dragStartY = pointer.y;
+        this.cameraStartX = this.cameras.main.scrollX;
+        this.cameraStartY = this.cameras.main.scrollY;
+      } else if (pointer.leftButtonDown() && !selectedRoom) {
+        // Left-click drag only when no room is selected
         this.isDragging = true;
         this.dragStartX = pointer.x;
         this.dragStartY = pointer.y;
@@ -260,8 +280,14 @@ export class GameScene extends Phaser.Scene {
       if (this.isDragging) {
         const dx = pointer.x - this.dragStartX;
         const dy = pointer.y - this.dragStartY;
-        this.cameras.main.scrollX = this.cameraStartX - dx;
-        this.cameras.main.scrollY = this.cameraStartY - dy;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Only start dragging if moved beyond threshold (prevents accidental drags on clicks)
+        if (distance > this.dragThreshold) {
+          this.hasMovedDuringDrag = true;
+          this.cameras.main.scrollX = this.cameraStartX - dx;
+          this.cameras.main.scrollY = this.cameraStartY - dy;
+        }
       } else {
         // Update ghost preview
         this.updateGhostPreview(pointer);
@@ -270,19 +296,27 @@ export class GameScene extends Phaser.Scene {
 
     this.input.on('pointerup', () => {
       this.isDragging = false;
+      this.hasMovedDuringDrag = false;
     });
 
     // Zoom with scroll wheel
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _dx: number, _dy: number, dz: number) => {
       const zoom = this.cameras.main.zoom;
-      const newZoom = Phaser.Math.Clamp(zoom - dz * 0.001, 0.5, 2);
+      const newZoom = Phaser.Math.Clamp(zoom - dz * 0.001, 0.25, 2);
       this.cameras.main.setZoom(newZoom);
     });
 
     // Click to place room
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
       if (!pointer.leftButtonReleased()) return;
-      if (this.isDragging) return;
+      // Only handle click if we didn't drag (or dragged less than threshold)
+      if (this.isDragging && this.hasMovedDuringDrag) {
+        this.isDragging = false;
+        this.hasMovedDuringDrag = false;
+        return;
+      }
+      this.isDragging = false;
+      this.hasMovedDuringDrag = false;
 
       const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
       this.handleClick(worldPoint.x, worldPoint.y);
@@ -442,18 +476,18 @@ export class GameScene extends Phaser.Scene {
 
   private zoomIn(): void {
     const currentZoom = this.cameras.main.zoom;
-    const newZoom = Phaser.Math.Clamp(currentZoom + 0.25, 0.5, 2);
+    const newZoom = Phaser.Math.Clamp(currentZoom + 0.25, 0.25, 2);
     this.cameras.main.zoomTo(newZoom, 200);
   }
 
   private zoomOut(): void {
     const currentZoom = this.cameras.main.zoom;
-    const newZoom = Phaser.Math.Clamp(currentZoom - 0.25, 0.5, 2);
+    const newZoom = Phaser.Math.Clamp(currentZoom - 0.25, 0.25, 2);
     this.cameras.main.zoomTo(newZoom, 200);
   }
 
   private zoomReset(): void {
-    this.cameras.main.zoomTo(1, 300);
+    this.cameras.main.zoomTo(0.25, 300);
   }
 
   private zoomFit(): void {
