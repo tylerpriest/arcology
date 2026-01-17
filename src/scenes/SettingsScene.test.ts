@@ -28,6 +28,8 @@ const createMockAudioSystem = () => {
     setMasterVolume: vi.fn(),
     setUIVolume: vi.fn(),
     setAmbientVolume: vi.fn(),
+    setMuted: vi.fn(),
+    isMuted: vi.fn().mockReturnValue(false),
   };
 };
 
@@ -98,6 +100,7 @@ describe('SettingsScene', () => {
         uiVolume: 75,
         ambientVolume: 25,
         defaultGameSpeed: 2,
+        muted: true,
       };
       localStorage.setItem('arcology_settings', JSON.stringify(savedSettings));
 
@@ -109,6 +112,10 @@ describe('SettingsScene', () => {
       expect(sliders[0].value).toBe('50');
       expect(sliders[1].value).toBe('75');
       expect(sliders[2].value).toBe('25');
+      
+      // Check mute toggle is in muted state
+      const muteToggle = document.querySelector('[style*="left: 24px"]');
+      expect(muteToggle).toBeTruthy();
     });
 
     test('updates AudioSystem when GameScene is active', () => {
@@ -117,6 +124,7 @@ describe('SettingsScene', () => {
       expect(mockAudioSystem.setMasterVolume).toHaveBeenCalled();
       expect(mockAudioSystem.setUIVolume).toHaveBeenCalled();
       expect(mockAudioSystem.setAmbientVolume).toHaveBeenCalled();
+      expect(mockAudioSystem.setMuted).toHaveBeenCalled();
     });
 
     test('handles missing GameScene gracefully', () => {
@@ -216,6 +224,7 @@ describe('SettingsScene', () => {
         uiVolume: 75,
         ambientVolume: 25,
         defaultGameSpeed: 4,
+        muted: true,
       }));
 
       scene = new SettingsScene();
@@ -233,6 +242,7 @@ describe('SettingsScene', () => {
       expect(saved.uiVolume).toBe(100);
       expect(saved.ambientVolume).toBe(50);
       expect(saved.defaultGameSpeed).toBe(1);
+      expect(saved.muted).toBe(false);
     });
 
     test('reset button updates AudioSystem', () => {
@@ -247,6 +257,7 @@ describe('SettingsScene', () => {
       expect(mockAudioSystem.setMasterVolume).toHaveBeenCalledWith(0.8);
       expect(mockAudioSystem.setUIVolume).toHaveBeenCalledWith(1.0);
       expect(mockAudioSystem.setAmbientVolume).toHaveBeenCalledWith(0.5);
+      expect(mockAudioSystem.setMuted).toHaveBeenCalledWith(false);
     });
   });
 
@@ -319,6 +330,83 @@ describe('SettingsScene', () => {
       scene.shutdown();
 
       expect(document.querySelector('.settings-menu')?.parentNode).toBeNull();
+    });
+  });
+
+  describe('mute toggle', () => {
+    test('mute toggle exists in UI', () => {
+      scene.create();
+
+      const muteLabel = Array.from(document.querySelectorAll('label')).find(
+        (label) => label.textContent === 'Mute Audio'
+      );
+      expect(muteLabel).toBeTruthy();
+    });
+
+    test('mute toggle updates AudioSystem and saves to localStorage', () => {
+      scene.create();
+
+      const muteToggle = document.querySelector('[style*="left: 2px"]')?.parentElement as HTMLElement;
+      expect(muteToggle).toBeTruthy();
+      
+      muteToggle.click();
+
+      expect(mockAudioSystem.setMuted).toHaveBeenCalledWith(true);
+      
+      const saved = JSON.parse(localStorage.getItem('arcology_settings') || '{}');
+      expect(saved.muted).toBe(true);
+    });
+
+    test('mute toggle visual state updates when clicked', () => {
+      scene.create();
+
+      const muteToggle = document.querySelector('[style*="left: 2px"]')?.parentElement as HTMLElement;
+      const toggleSwitch = muteToggle.querySelector('div[style*="left:"]') as HTMLElement;
+      
+      expect(toggleSwitch.style.left).toBe('2px');
+      
+      muteToggle.click();
+
+      // After click, toggle should be in muted position
+      const updatedToggle = document.querySelector('[style*="left: 24px"]') as HTMLElement;
+      expect(updatedToggle).toBeTruthy();
+    });
+
+    test('mute toggle can be toggled back to unmuted', () => {
+      // Set initial state to muted
+      localStorage.setItem('arcology_settings', JSON.stringify({
+        masterVolume: 80,
+        uiVolume: 100,
+        ambientVolume: 50,
+        defaultGameSpeed: 1,
+        muted: true,
+      }));
+
+      scene = new SettingsScene();
+      Object.assign(scene, mockScene);
+      scene.create();
+
+      const muteToggle = document.querySelector('[style*="left: 24px"]')?.parentElement as HTMLElement;
+      expect(muteToggle).toBeTruthy();
+      
+      muteToggle.click();
+
+      expect(mockAudioSystem.setMuted).toHaveBeenCalledWith(false);
+      
+      const saved = JSON.parse(localStorage.getItem('arcology_settings') || '{}');
+      expect(saved.muted).toBe(false);
+    });
+
+    test('mute label click also toggles mute', () => {
+      scene.create();
+
+      const muteLabel = Array.from(document.querySelectorAll('label')).find(
+        (label) => label.textContent === 'Mute Audio'
+      ) as HTMLLabelElement;
+      
+      muteLabel.click();
+
+      expect(mockAudioSystem.setMuted).toHaveBeenCalledWith(true);
     });
   });
 });

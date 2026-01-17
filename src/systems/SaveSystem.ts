@@ -451,7 +451,7 @@ export class SaveSystem {
         economy: { money: 0, dailyIncome: 0, dailyExpenses: 0, lastQuarterDay: 0, quarterlyRevenue: 0 },
         time: { day: 0, hour: 0, minute: 0, dayOfWeek: 0, speed: 1, lastAutoSaveDay: 0 },
         resources: { rawFood: 0, processedFood: 0 },
-        settings: { masterVolume: 80, uiVolume: 100, ambientVolume: 50, defaultGameSpeed: 1 },
+        settings: { masterVolume: 80, uiVolume: 100, ambientVolume: 50, defaultGameSpeed: 1, muted: false },
       });
       return true;
     } catch (error) {
@@ -491,6 +491,7 @@ export class SaveSystem {
           uiVolume: settings.uiVolume,
           ambientVolume: settings.ambientVolume,
           defaultGameSpeed: settings.defaultGameSpeed,
+          muted: settings.muted ?? false,
         };
       }
     } catch (error) {
@@ -503,6 +504,7 @@ export class SaveSystem {
       uiVolume: 100,
       ambientVolume: 50,
       defaultGameSpeed: 1,
+      muted: false,
     };
   }
 
@@ -516,6 +518,7 @@ export class SaveSystem {
         uiVolume: settings.uiVolume,
         ambientVolume: settings.ambientVolume,
         defaultGameSpeed: settings.defaultGameSpeed as 1 | 2 | 4,
+        muted: settings.muted,
       };
       localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(gameSettings));
     } catch (error) {

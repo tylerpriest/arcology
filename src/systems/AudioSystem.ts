@@ -61,6 +61,7 @@ export class AudioSystem {
         this.masterVolume = (settings.masterVolume || 80) / 100;
         this.uiVolume = (settings.uiVolume || 100) / 100;
         this.ambientVolume = (settings.ambientVolume || 50) / 100;
+        this.muted = settings.muted ?? false;
       }
     } catch (error) {
       console.error('Failed to load audio settings:', error);

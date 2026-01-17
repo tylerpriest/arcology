@@ -10,9 +10,6 @@ import Phaser from 'phaser';
 // Mock GameScene for ResidentSystem
 const createMockGameScene = () => {
   const timeSystem = new TimeSystem();
-  const building = new Building({} as Phaser.Scene);
-  const resourceSystem = new ResourceSystem();
-  const restaurantSystem = new RestaurantSystem(building, resourceSystem, timeSystem);
   
   const elevatorSystem = {
     getAllShafts: () => [],
@@ -20,12 +17,8 @@ const createMockGameScene = () => {
     callElevator: () => {},
   };
 
+  // Create mock scene with all properties from the start
   const mockScene = {
-    building,
-    timeSystem,
-    resourceSystem,
-    restaurantSystem,
-    elevatorSystem,
     add: {
       graphics: () => ({
         setDepth: () => {},
@@ -36,6 +29,7 @@ const createMockGameScene = () => {
         fillRoundedRect: () => {},
         fillCircle: () => {},
         lineStyle: () => {},
+        strokeRect: () => {},
         strokeRoundedRect: () => {},
         strokeCircle: () => {},
         lineBetween: () => {},
@@ -46,6 +40,9 @@ const createMockGameScene = () => {
         setDepth: () => {},
         setPosition: () => {},
         setText: () => {},
+        setAlpha: () => {},
+        setColor: () => {},
+        setStyle: () => {},
         destroy: () => {},
       }),
     },
@@ -53,8 +50,23 @@ const createMockGameScene = () => {
       get: () => 12,
       set: () => {},
     },
+    building: null as any, // Will be set after creation
+    timeSystem,
+    resourceSystem: null as any, // Will be set after creation
+    restaurantSystem: null as any, // Will be set after creation
+    elevatorSystem,
     on: () => {},
   } as any;
+  
+  // Create Building with the mock scene
+  const building = new Building(mockScene as unknown as Phaser.Scene);
+  const resourceSystem = new ResourceSystem();
+  const restaurantSystem = new RestaurantSystem(building, resourceSystem, timeSystem);
+  
+  // Update mock scene with actual instances
+  mockScene.building = building;
+  mockScene.resourceSystem = resourceSystem;
+  mockScene.restaurantSystem = restaurantSystem;
   
   return mockScene;
 };
@@ -78,7 +90,8 @@ describe('ResidentSystem - Tenant Type System', () => {
     });
 
     test('resident type is included in serialize', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       const serialized = resident.serialize();
@@ -86,7 +99,8 @@ describe('ResidentSystem - Tenant Type System', () => {
     });
 
     test('getResidentialTenants returns only residents', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       const tenants = residentSystem.getResidentialTenants();
@@ -341,7 +355,8 @@ describe('ResidentSystem - Tenant Type System', () => {
 
   describe('Type persistence in save/load', () => {
     test('resident type is saved and restored', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       resident.type = 'resident';
       
@@ -368,7 +383,8 @@ describe('ResidentSystem - Core Functionality', () => {
 
   describe('Resident spawning', () => {
     test('spawns resident in apartment with available capacity', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       
       const resident = residentSystem.spawnResident(apartment);
       
@@ -380,7 +396,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('spawned resident is added to residents list', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       
       const resident = residentSystem.spawnResident(apartment);
       
@@ -389,8 +406,10 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('spawned resident gets job if office available', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
-      const office = mockScene.building.addRoom('office', 1, 5);
+      mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('office', 1, 5);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
+      const office = mockScene.building.getRoomAt(1, 5)!;
       
       const resident = residentSystem.spawnResident(apartment);
       
@@ -399,7 +418,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('spawned resident has no job if no offices available', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       // No offices
       
       const resident = residentSystem.spawnResident(apartment);
@@ -411,7 +431,8 @@ describe('ResidentSystem - Core Functionality', () => {
 
   describe('Move-out conditions', () => {
     test('removes resident who has starved too long', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       // Set resident to starved state (hunger 0 for 24+ hours)
@@ -461,8 +482,10 @@ describe('ResidentSystem - Core Functionality', () => {
 
   describe('Job assignment', () => {
     test('assignJobs assigns jobs to unemployed residents', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
-      const office = mockScene.building.addRoom('office', 1, 5);
+      mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('office', 1, 5);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
+      const office = mockScene.building.getRoomAt(1, 5)!;
       
       const resident = residentSystem.spawnResident(apartment);
       // Remove job to make unemployed
@@ -478,7 +501,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('assignJobs does not assign if no offices available', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       // No offices
       
       const resident = residentSystem.spawnResident(apartment);
@@ -491,9 +515,12 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('assignJobs fills office capacity correctly', () => {
-      const apartment1 = mockScene.building.addRoom('apartment', 1, 0);
-      const apartment2 = mockScene.building.addRoom('apartment', 1, 5);
-      const office = mockScene.building.addRoom('office', 1, 10);
+      mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 5);
+      mockScene.building.addRoom('office', 1, 10);
+      const apartment1 = mockScene.building.getRoomAt(1, 0)!;
+      const apartment2 = mockScene.building.getRoomAt(1, 5)!;
+      const office = mockScene.building.getRoomAt(1, 10)!;
       // Office has 6 job slots
       
       const resident1 = residentSystem.spawnResident(apartment1);
@@ -512,8 +539,10 @@ describe('ResidentSystem - Core Functionality', () => {
     test('getPopulation returns correct count', () => {
       expect(residentSystem.getPopulation()).toBe(0);
       
-      const apartment1 = mockScene.building.addRoom('apartment', 1, 0);
-      const apartment2 = mockScene.building.addRoom('apartment', 1, 5);
+      mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 5);
+      const apartment1 = mockScene.building.getRoomAt(1, 0)!;
+      const apartment2 = mockScene.building.getRoomAt(1, 5)!;
       
       residentSystem.spawnResident(apartment1);
       expect(residentSystem.getPopulation()).toBe(1);
@@ -523,7 +552,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('getHungryResidents returns residents with low hunger', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       // Set resident to hungry state
@@ -535,7 +565,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('getAverageSatisfaction calculates correctly', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       // Mock satisfaction calculation
@@ -553,7 +584,8 @@ describe('ResidentSystem - Core Functionality', () => {
 
   describe('Resident management', () => {
     test('removeResident removes resident from system', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       expect(residentSystem.getPopulation()).toBe(1);
@@ -565,7 +597,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('addResident adds resident to system', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
       resident.setHome(apartment);
       
@@ -578,7 +611,8 @@ describe('ResidentSystem - Core Functionality', () => {
     });
 
     test('addResident does not add duplicate residents', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       expect(residentSystem.getPopulation()).toBe(1);

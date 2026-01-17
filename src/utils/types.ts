@@ -119,6 +119,7 @@ export interface SettingsSaveData {
   uiVolume: number;          // 0-100
   ambientVolume: number;     // 0-100
   defaultGameSpeed: number;  // Default speed on load
+  muted: boolean;            // Audio mute state
 }
 
 export interface SaveSlotMeta {
@@ -149,6 +150,7 @@ export interface GameSettings {
   uiVolume: number;          // 0-100
   ambientVolume: number;     // 0-100
   defaultGameSpeed: 1 | 2 | 4;
+  muted: boolean;            // Audio mute state
 }
 
 // Elevator System Types

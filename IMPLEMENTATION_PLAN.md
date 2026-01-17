@@ -13,6 +13,12 @@
 - ✅ **Phase 3 (Spec Compliance): COMPLETE** - Restaurant visual state complete ✅, UI component tests complete ✅, Scene tests complete ✅
 
 **Recent Work Completed (2025-01-27):**
+- ✅ Mute toggle UI completed:
+  - ✅ Added muted field to GameSettings and SettingsSaveData interfaces
+  - ✅ Added mute toggle UI to SettingsScene (toggle switch with visual feedback)
+  - ✅ Connected mute toggle to AudioSystem.setMuted()
+  - ✅ Mute state persists to localStorage and loads on AudioSystem initialization
+  - ✅ Updated SettingsScene tests to verify mute toggle functionality
 - ✅ Scene Tests completed:
   - ✅ BootScene.test.ts - Tests for preload progress, asset loading, scene transition
   - ✅ LoadGameScene.test.ts - Tests for UI creation, slot selection, loading behavior
@@ -584,7 +590,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - [x] Alert sounds play for low food and bankruptcy warnings (✅ implemented - AudioSystem.playLowFoodAlert/playBankruptcyAlert)
   - [x] Audio does not cause performance issues (✅ implemented - Web Audio API with proper cleanup)
   - [ ] UI click sounds on all buttons (⚠️ deferred - can be added as polish, placement sounds implemented)
-  - [ ] Mute toggle UI (⚠️ partial - setMuted method exists, UI toggle can be added)
+  - [x] Mute toggle UI ✅ - Toggle added to SettingsScene, connected to AudioSystem, persists to localStorage
   - [ ] At least one ambient sound per room type (deferred to post-MVP per spec)
 - [x] Review TIME_EVENTS.md acceptance criteria
   - [x] Time progresses at 1 game hour per 10 real seconds at 1x speed (✅ implemented - MS_PER_GAME_HOUR = 10000)

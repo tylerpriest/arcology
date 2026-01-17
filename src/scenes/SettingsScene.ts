@@ -7,6 +7,7 @@ const DEFAULT_SETTINGS: GameSettings = {
   uiVolume: 100,
   ambientVolume: 50,
   defaultGameSpeed: 1,
+  muted: false,
 };
 
 export class SettingsScene extends Phaser.Scene {
@@ -28,6 +29,7 @@ export class SettingsScene extends Phaser.Scene {
       audioSystem.setMasterVolume(this.settings.masterVolume / 100);
       audioSystem.setUIVolume(this.settings.uiVolume / 100);
       audioSystem.setAmbientVolume(this.settings.ambientVolume / 100);
+      audioSystem.setMuted(this.settings.muted);
     }
   }
 
@@ -103,6 +105,9 @@ export class SettingsScene extends Phaser.Scene {
     // Ambient Volume
     this.settingsContainer.appendChild(this.createVolumeSlider('Ambient Volume', 'ambientVolume'));
 
+    // Mute Toggle
+    this.settingsContainer.appendChild(this.createMuteToggle());
+
     // Default Game Speed
     this.settingsContainer.appendChild(this.createSpeedSelector());
 
@@ -134,6 +139,7 @@ export class SettingsScene extends Phaser.Scene {
         audioSystem.setMasterVolume(this.settings.masterVolume / 100);
         audioSystem.setUIVolume(this.settings.uiVolume / 100);
         audioSystem.setAmbientVolume(this.settings.ambientVolume / 100);
+        audioSystem.setMuted(this.settings.muted);
       }
       
       this.cleanup();
@@ -244,6 +250,76 @@ export class SettingsScene extends Phaser.Scene {
 
     container.appendChild(labelEl);
     container.appendChild(sliderContainer);
+
+    return container;
+  }
+
+  private createMuteToggle(): HTMLDivElement {
+    const container = document.createElement('div');
+    container.style.cssText = `
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    `;
+
+    const labelEl = document.createElement('label');
+    labelEl.textContent = 'Mute Audio';
+    labelEl.style.cssText = `
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      flex: 1;
+    `;
+
+    const toggleContainer = document.createElement('div');
+    toggleContainer.style.cssText = `
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: ${this.settings.muted ? 'var(--primary)' : 'rgba(30, 40, 38, 0.8)'};
+      border: 2px solid ${this.settings.muted ? 'var(--primary)' : 'var(--border-color)'};
+      border-radius: 13px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+
+    const toggleSwitch = document.createElement('div');
+    toggleSwitch.style.cssText = `
+      position: absolute;
+      top: 2px;
+      left: ${this.settings.muted ? '24px' : '2px'};
+      width: 18px;
+      height: 18px;
+      background: ${this.settings.muted ? '#000' : 'var(--text-primary)'};
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    `;
+
+    const toggleHandler = () => {
+      this.settings.muted = !this.settings.muted;
+      this.saveSettings();
+      
+      // Update toggle visual state
+      toggleContainer.style.background = this.settings.muted ? 'var(--primary)' : 'rgba(30, 40, 38, 0.8)';
+      toggleContainer.style.borderColor = this.settings.muted ? 'var(--primary)' : 'var(--border-color)';
+      toggleSwitch.style.left = this.settings.muted ? '24px' : '2px';
+      toggleSwitch.style.background = this.settings.muted ? '#000' : 'var(--text-primary)';
+      
+      // Update AudioSystem if it exists
+      const gameScene = this.scene.get('GameScene') as any;
+      if (gameScene && gameScene.audioSystem) {
+        gameScene.audioSystem.setMuted(this.settings.muted);
+      }
+    };
+
+    toggleContainer.addEventListener('click', toggleHandler);
+    labelEl.addEventListener('click', toggleHandler);
+
+    toggleContainer.appendChild(toggleSwitch);
+    container.appendChild(labelEl);
+    container.appendChild(toggleContainer);
 
     return container;
   }
