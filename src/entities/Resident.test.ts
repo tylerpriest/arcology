@@ -45,6 +45,10 @@ const createMockGameScene = (): any => {
       graphics: vi.fn(mockGraphics),
       text: vi.fn(mockText),
     },
+    registry: {
+      get: vi.fn(() => 12),
+      set: vi.fn(),
+    },
   } as unknown as Phaser.Scene);
 
   const resourceSystem = {
@@ -128,11 +132,11 @@ describe('Resident Entity', () => {
       const initialHunger = resident.hunger;
 
       // Update for 1 game hour (3600000 ms)
-      // Hunger decays at 4 points per game hour
+      // Hunger decays at: HUNGER_DECAY_RATE (4) * hourDelta (1) * 10 = 40 per hour
       resident.update(3600000, 12);
 
       expect(resident.hunger).toBeLessThan(initialHunger);
-      expect(resident.hunger).toBeCloseTo(initialHunger - 4, 0.5);
+      expect(resident.hunger).toBeCloseTo(initialHunger - 40, 1);
     });
 
     test('hunger does not go below zero', () => {
@@ -307,6 +311,8 @@ describe('Resident Entity', () => {
 
     test('satisfaction increases with food availability', () => {
       const resident = new Resident(mockScene, 'test_1', 0, 0);
+      // Give resident some stress so satisfaction isn't clamped at 100
+      resident.stress = 30;
 
       const satWithFood = resident.calculateSatisfaction(true);
       const satWithoutFood = resident.calculateSatisfaction(false);
@@ -324,10 +330,12 @@ describe('Resident Entity', () => {
       const resident1 = new Resident(mockScene, 'test_1', 0, 0);
       resident1.setHome(apartment);
       resident1.setJob(null);
+      resident1.stress = 30; // Give some stress so satisfaction isn't clamped
 
       const resident2 = new Resident(mockScene, 'test_2', 0, 0);
       resident2.setHome(apartment);
       resident2.setJob(office);
+      resident2.stress = 30; // Same stress as resident1
 
       const sat1 = resident1.calculateSatisfaction(true);
       const sat2 = resident2.calculateSatisfaction(true);
