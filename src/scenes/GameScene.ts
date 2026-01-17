@@ -674,6 +674,17 @@ export class GameScene extends Phaser.Scene {
           }
         }
 
+        // Collect resident traits for display
+        const residentTraits: string[] = [];
+        const roomResidents = room.getResidents();
+        roomResidents.forEach((resident) => {
+          resident.traits.forEach((trait) => {
+            if (!residentTraits.includes(trait)) {
+              residentTraits.push(trait);
+            }
+          });
+        });
+
         // Update registry with room info
         this.registry.set('roomInfo', {
           id: room.id,
@@ -682,6 +693,7 @@ export class GameScene extends Phaser.Scene {
           workers: room.getWorkerCount(),
           income,
           expenses,
+          residentTraits, // Add traits for display
         });
       }
     } else {

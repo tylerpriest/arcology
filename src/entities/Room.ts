@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { ROOM_SPECS, GRID_SIZE, RoomType, UI_COLORS } from '../utils/constants';
 import { RoomData } from '../utils/types';
 import { Resident } from './Resident';
+import { RestaurantSystem } from '../systems/RestaurantSystem';
+import { GameScene } from '../scenes/GameScene';
 
 export class Room {
   public readonly id: string;
@@ -14,6 +16,7 @@ export class Room {
   private glowGraphics: Phaser.GameObjects.Graphics;
   private interiorGraphics: Phaser.GameObjects.Graphics;
   private label: Phaser.GameObjects.Text;
+  private statusLabel: Phaser.GameObjects.Text | null = null;
   private scene: Phaser.Scene;
   private residents: Resident[] = [];
   private workers: Resident[] = [];
@@ -45,6 +48,17 @@ export class Room {
     });
     this.label.setDepth(12);
 
+    // Create status label for restaurants (open/closed)
+    if (this.type === 'fastfood' || this.type === 'restaurant') {
+      this.statusLabel = scene.add.text(0, 0, '', {
+        fontSize: '10px',
+        color: '#4ae4e4',
+        fontFamily: 'Space Grotesk, sans-serif',
+        fontStyle: 'bold',
+      });
+      this.statusLabel.setDepth(13);
+    }
+
     this.draw();
   }
 
@@ -63,7 +77,23 @@ export class Room {
 
     // Calculate occupancy for brightness
     const isOccupied = this.residents.length > 0 || this.workers.length > 0;
-    const brightness = isOccupied ? 1 : 0.6;
+    let brightness = isOccupied ? 1 : 0.6;
+
+    // Check restaurant open/closed state
+    let isRestaurantOpen = true;
+    if (this.type === 'fastfood' || this.type === 'restaurant') {
+      const gameScene = this.scene as unknown as GameScene;
+      if (gameScene && 'restaurantSystem' in gameScene) {
+        const restaurantSystem = (gameScene as GameScene).restaurantSystem;
+        if (restaurantSystem) {
+          isRestaurantOpen = restaurantSystem.isRestaurantOpen(this);
+          // Dim closed restaurants (reduce brightness by 40%)
+          if (!isRestaurantOpen) {
+            brightness *= 0.6;
+          }
+        }
+      }
+    }
 
     // Get current hour from registry for night glow effects
     const hour = (this.scene.registry.get('hour') as number) ?? 12;
@@ -104,6 +134,16 @@ export class Room {
     this.label.setText(displayName);
     this.label.setPosition(x + 6, y + 4);
     this.label.setAlpha(0.9);
+
+    // Restaurant status label (OPEN/CLOSED)
+    if (this.statusLabel && (this.type === 'fastfood' || this.type === 'restaurant')) {
+      const statusText = isRestaurantOpen ? 'OPEN' : 'CLOSED';
+      const statusColor = isRestaurantOpen ? '#4ae4e4' : '#ff4444';
+      this.statusLabel.setText(statusText);
+      this.statusLabel.setColor(statusColor);
+      this.statusLabel.setPosition(x + w - 50, y + 4);
+      this.statusLabel.setAlpha(0.9);
+    }
   }
 
   /**
@@ -258,6 +298,70 @@ export class Room {
         this.interiorGraphics.fillStyle(0x4ae4e4, glowAlpha * 0.4);
         this.interiorGraphics.fillRect(x + w - 34, y + 10, 2, h - 18);
         break;
+
+      case 'fastfood': {
+        // Counter/ordering area
+        this.interiorGraphics.fillStyle(0x3a3a3a, alpha);
+        this.interiorGraphics.fillRect(x + 6, y + h - 28, w - 12, 22);
+        // Counter top
+        this.interiorGraphics.fillStyle(0x4a4a4a, alpha);
+        this.interiorGraphics.fillRect(x + 6, y + h - 28, w - 12, 4);
+        // Order display screens
+        this.interiorGraphics.fillStyle(0x1a1a1a, alpha);
+        this.interiorGraphics.fillRect(x + 12, y + 12, 30, 20);
+        this.interiorGraphics.fillRect(x + w - 42, y + 12, 30, 20);
+        // Screen glow (cyan for fast food)
+        this.interiorGraphics.fillStyle(0x4ae4e4, glowAlpha);
+        this.interiorGraphics.fillRect(x + 14, y + 14, 26, 16);
+        this.interiorGraphics.fillRect(x + w - 40, y + 14, 26, 16);
+        // Menu board
+        this.interiorGraphics.fillStyle(0x2a2a2a, alpha);
+        this.interiorGraphics.fillRect(x + w / 2 - 25, y + 8, 50, 30);
+        // Menu board accent
+        this.interiorGraphics.fillStyle(accent, glowAlpha * 0.6);
+        this.interiorGraphics.fillRect(x + w / 2 - 23, y + 10, 46, 2);
+        // Seating area (small tables)
+        const tableCount = Math.floor((w - 20) / 40);
+        for (let i = 0; i < tableCount; i++) {
+          const tx = x + 10 + i * 40;
+          this.interiorGraphics.fillStyle(0x2a2a2a, alpha * 0.5);
+          this.interiorGraphics.fillRect(tx, y + h - 20, 12, 12);
+        }
+        break;
+      }
+
+      case 'restaurant': {
+        // Fine dining tables
+        const tableCount = Math.floor((w - 20) / 50);
+        for (let i = 0; i < tableCount; i++) {
+          const tx = x + 10 + i * 50;
+          // Table
+          this.interiorGraphics.fillStyle(0x2a1a1a, alpha);
+          this.interiorGraphics.fillRect(tx, y + h - 32, 30, 24);
+          // Tablecloth accent
+          this.interiorGraphics.fillStyle(accent, glowAlpha * 0.3);
+          this.interiorGraphics.fillRect(tx + 2, y + h - 30, 26, 2);
+          // Chairs (2 per table)
+          this.interiorGraphics.fillStyle(0x2a2a2a, alpha);
+          this.interiorGraphics.fillRect(tx - 4, y + h - 28, 8, 12);
+          this.interiorGraphics.fillRect(tx + 26, y + h - 28, 8, 12);
+        }
+        // Ambient lighting (softer, warmer)
+        this.interiorGraphics.fillStyle(accent, glowAlpha * 0.5);
+        for (let i = 0; i < tableCount; i++) {
+          this.interiorGraphics.fillRect(x + 20 + i * 50, y + 6, 20, 2);
+        }
+        // Kitchen/service area (back wall)
+        this.interiorGraphics.fillStyle(0x1a1a1a, alpha);
+        this.interiorGraphics.fillRect(x + 6, y + 8, w - 12, 20);
+        // Service window
+        this.interiorGraphics.fillStyle(0x2a2a2a, alpha);
+        this.interiorGraphics.fillRect(x + w / 2 - 15, y + 10, 30, 16);
+        // Service window glow
+        this.interiorGraphics.fillStyle(accent, glowAlpha * 0.4);
+        this.interiorGraphics.fillRect(x + w / 2 - 13, y + 12, 26, 12);
+        break;
+      }
     }
   }
 
@@ -348,5 +452,8 @@ export class Room {
     this.glowGraphics.destroy();
     this.interiorGraphics.destroy();
     this.label.destroy();
+    if (this.statusLabel) {
+      this.statusLabel.destroy();
+    }
   }
 }
