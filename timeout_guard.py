@@ -39,7 +39,7 @@ def main():
     # bufsize=0 unbuffered to ensure we see data immediately
     proc = subprocess.Popen(
         cmd,
-        stdin=sys.stdin.buffer, # Inherit stdin from guard
+        stdin=None, # Inherit stdin directly
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         bufsize=0

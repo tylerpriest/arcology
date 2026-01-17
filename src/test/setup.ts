@@ -182,6 +182,50 @@ Object.defineProperty(global, 'navigator', {
 
 // Mock Phaser completely to avoid issues with missing methods
 vi.mock('phaser', () => {
+  // Real EventEmitter for proper event handling in tests
+  class EventEmitter {
+    private listeners: { [key: string]: Function[] } = {};
+
+    on(event: string, callback: Function) {
+      if (!this.listeners[event]) {
+        this.listeners[event] = [];
+      }
+      this.listeners[event].push(callback);
+      return this;
+    }
+
+    off(event: string, callback: Function) {
+      if (this.listeners[event]) {
+        this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+      }
+      return this;
+    }
+
+    once(event: string, callback: Function) {
+      const wrappedCallback = (...args: any[]) => {
+        callback(...args);
+        this.off(event, wrappedCallback);
+      };
+      return this.on(event, wrappedCallback);
+    }
+
+    emit(event: string, ...args: any[]) {
+      if (this.listeners[event]) {
+        this.listeners[event].forEach(callback => callback(...args));
+      }
+      return this;
+    }
+
+    removeAllListeners(event?: string) {
+      if (event) {
+        delete this.listeners[event];
+      } else {
+        this.listeners = {};
+      }
+      return this;
+    }
+  }
+
   const mockGraphics = () => {
     const graphics: any = {
       clear: vi.fn(() => graphics),
@@ -223,62 +267,58 @@ vi.mock('phaser', () => {
     return text;
   };
 
+  class MockScene {
+    add = {
+      graphics: mockGraphics,
+      text: mockText,
+    };
+    registry = {
+      get: vi.fn(),
+      set: vi.fn(),
+      events: {
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+      }
+    };
+    events = {
+      on: vi.fn(),
+      off: vi.fn(),
+      emit: vi.fn(),
+    };
+    cameras = {
+      main: {
+        setBounds: vi.fn(),
+        setZoom: vi.fn(),
+        pan: vi.fn(),
+        zoomTo: vi.fn(),
+        scrollX: 0,
+        scrollY: 0,
+        zoom: 1,
+      }
+    };
+    time = {
+      addEvent: vi.fn(),
+    };
+    input = {
+      on: vi.fn(),
+      keyboard: {
+        addKey: vi.fn(() => ({ on: vi.fn() })),
+        on: vi.fn(),
+      }
+    };
+  }
+
   return {
     default: {
       Events: {
-        EventEmitter: class {
-          on = vi.fn();
-          off = vi.fn();
-          once = vi.fn();
-          emit = vi.fn();
-          removeAllListeners = vi.fn();
-        }
+        EventEmitter: EventEmitter
       },
       GameObjects: {
         Graphics: class {},
         Text: class {},
       },
-      Scene: class {
-        add = {
-          graphics: vi.fn(mockGraphics),
-          text: vi.fn(mockText),
-        };
-        registry = {
-          get: vi.fn(),
-          set: vi.fn(),
-          events: {
-            on: vi.fn(),
-            off: vi.fn(),
-            emit: vi.fn(),
-          }
-        };
-        events = {
-          on: vi.fn(),
-          off: vi.fn(),
-          emit: vi.fn(),
-        };
-        cameras = {
-          main: {
-            setBounds: vi.fn(),
-            setZoom: vi.fn(),
-            pan: vi.fn(),
-            zoomTo: vi.fn(),
-            scrollX: 0,
-            scrollY: 0,
-            zoom: 1,
-          }
-        };
-        time = {
-          addEvent: vi.fn(),
-        };
-        input = {
-          on: vi.fn(),
-          keyboard: {
-            addKey: vi.fn(() => ({ on: vi.fn() })),
-            on: vi.fn(),
-          }
-        };
-      },
+      Scene: MockScene,
       BlendModes: {
         ADD: 1,
         MULTIPLY: 2,
@@ -286,38 +326,13 @@ vi.mock('phaser', () => {
       }
     },
     Events: {
-      EventEmitter: class {
-        on = vi.fn();
-        off = vi.fn();
-        once = vi.fn();
-        emit = vi.fn();
-        removeAllListeners = vi.fn();
-      }
+      EventEmitter: EventEmitter
     },
     BlendModes: {
       ADD: 1,
       MULTIPLY: 2,
       SCREEN: 3,
     },
-    Scene: class {
-      add = {
-        graphics: vi.fn(mockGraphics),
-        text: vi.fn(mockText),
-      };
-      registry = {
-        get: vi.fn(),
-        set: vi.fn(),
-        events: {
-          on: vi.fn(),
-          off: vi.fn(),
-          emit: vi.fn(),
-        }
-      };
-      events = {
-        on: vi.fn(),
-        off: vi.fn(),
-        emit: vi.fn(),
-      };
-    }
+    Scene: MockScene
   };
 });

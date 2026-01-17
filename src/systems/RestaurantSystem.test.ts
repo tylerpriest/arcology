@@ -5,6 +5,43 @@ import { ResourceSystem } from './ResourceSystem';
 import { TimeSystem } from './TimeSystem';
 import Phaser from 'phaser';
 
+// Mock Phaser Scene
+const createMockScene = (): Phaser.Scene => {
+  const mockGraphics = {
+    fillStyle: () => mockGraphics,
+    fillRect: () => {},
+    strokeRect: () => {},
+    clear: () => {},
+    lineStyle: () => mockGraphics,
+    lineBetween: () => {},
+    fillCircle: () => mockGraphics,
+    strokeCircle: () => mockGraphics,
+    destroy: () => {},
+    setDepth: () => mockGraphics,
+    setBlendMode: () => mockGraphics,
+  };
+
+  const mockText = {
+    setDepth: () => mockText,
+    setText: () => mockText,
+    setPosition: () => mockText,
+    setStyle: () => mockText,
+    setAlpha: () => mockText,
+    destroy: () => {},
+  };
+
+  return {
+    add: {
+      graphics: () => mockGraphics,
+      text: () => mockText,
+    },
+    registry: {
+      get: () => 12, // Default hour
+      set: () => {},
+    },
+  } as unknown as Phaser.Scene;
+};
+
 describe('RestaurantSystem', () => {
   let building: Building;
   let resourceSystem: ResourceSystem;
@@ -13,7 +50,7 @@ describe('RestaurantSystem', () => {
   let mockScene: Phaser.Scene;
 
   beforeEach(() => {
-    mockScene = {} as Phaser.Scene;
+    mockScene = createMockScene();
     building = new Building(mockScene);
     resourceSystem = new ResourceSystem();
     timeSystem = new TimeSystem();
