@@ -230,24 +230,6 @@ export class Resident {
     return Math.abs(hash);
   }
 
-  /**
-   * Recalculate visual variety based on current name (used when restoring from save)
-   */
-  private recalculateVisualVariety(): void {
-    const nameHash = this.hashName(this.name);
-    this.paletteIndex = nameHash % RESIDENT_PALETTES.length;
-    this.sizeVariation = (nameHash % 9) - 4; // -4 to +4 pixels
-    
-    // Reassign traits based on name hash
-    const numTraits = (nameHash % 2) + 1; // 1 or 2 traits
-    const availableTraits = [...RESIDENT_TRAITS];
-    this.traits = [];
-    for (let i = 0; i < numTraits; i++) {
-      const traitIndex = (nameHash + i * 7) % availableTraits.length;
-      this.traits.push(availableTraits[traitIndex]);
-    }
-  }
-
   private drawSilhouette(): void {
     this.graphics.clear();
     this.glowGraphics.clear();
