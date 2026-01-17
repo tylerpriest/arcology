@@ -65,6 +65,12 @@ for arg in "$@"; do
     esac
 done
 
+# If auto mode is enabled and no specific agent was selected (defaulting to claude),
+# start with the first agent in the auto list.
+if [[ "$AUTO_MODE" == "true" ]] && [[ "$AGENT_TYPE" == "claude" ]]; then
+    AGENT_TYPE="${AUTO_AGENTS[0]}"
+fi
+
 # Select prompt file
 if [[ "$MODE" == "plan" ]]; then
     PROMPT_FILE="PROMPT_plan.md"
@@ -147,6 +153,7 @@ while true; do
     echo "----------------------------------------"
 
     # Run the agent with the prompt
+    set +e
     case $AGENT_TYPE in
         cursor)
             # Cursor Agent CLI
@@ -198,8 +205,8 @@ while true; do
                 --output-format stream-json
             ;;
     esac
-
     EXIT_CODE=$?
+    set -e
 
     if [[ $EXIT_CODE -ne 0 ]]; then
         echo "Agent ($AGENT_TYPE) exited with code $EXIT_CODE"
