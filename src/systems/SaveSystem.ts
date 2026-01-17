@@ -129,6 +129,7 @@ export class SaveSystem {
         homeRoomId: resident.home?.id ?? null,
         state: resident.state,
         position: { x: pos.x, y: pos.y },
+        traits: resident.traits, // Serialize traits
       };
     });
 
@@ -308,6 +309,14 @@ export class SaveSystem {
           resident.hunger = residentData.hunger;
           resident.stress = residentData.stress ?? 0; // Restore stress (default to 0 for old saves)
           resident.state = residentData.state;
+          // Restore traits (default to empty array for old saves, will be recalculated if missing)
+          resident.traits = residentData.traits ?? [];
+          // Recalculate visual variety based on restored name (deterministic)
+          (resident as any).recalculateVisualVariety();
+          // If traits were saved, use them; otherwise they're already set by recalculateVisualVariety
+          if (residentData.traits && residentData.traits.length > 0) {
+            resident.traits = residentData.traits;
+          }
           resident.setHome(homeRoom);
 
           // Restore job

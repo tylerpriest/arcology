@@ -11,12 +11,20 @@ export class RoomInfoPanel {
     parent.appendChild(this.element);
   }
 
-  show(roomId: string, roomType: RoomType, residents: number, workers: number, income: number, expenses: number): void {
+  show(roomId: string, roomType: RoomType, residents: number, workers: number, income: number, expenses: number, residentTraits: string[] = []): void {
     this.roomId = roomId;
     const spec = ROOM_SPECS[roomType];
     
     const displayName = roomType.charAt(0).toUpperCase() + roomType.slice(1);
     const netIncome = income - expenses;
+
+    // Build traits display if there are residents with traits
+    const traitsDisplay = residentTraits.length > 0 ? `
+        <div class="room-info-row">
+          <span class="room-info-label">Traits:</span>
+          <span class="room-info-value">${residentTraits.join(', ')}</span>
+        </div>
+        ` : '';
 
     this.element.innerHTML = `
       <div class="room-info-header">
@@ -42,6 +50,7 @@ export class RoomInfoPanel {
           <span class="room-info-value">${workers} / ${spec.jobs}</span>
         </div>
         ` : ''}
+        ${traitsDisplay}
         <div class="room-info-row">
           <span class="room-info-label">Income:</span>
           <span class="room-info-value" style="color: var(--green);">+${income.toLocaleString()} CR/day</span>
