@@ -6,10 +6,10 @@
 #   ./loop.sh plan           # Plan mode with Claude
 #   ./loop.sh --agent        # Build mode with Cursor Agent
 #   ./loop.sh --amp          # Build mode with Ampcode
+#   ./loop.sh --opencode     # Build mode with Opencode
 #   ./loop.sh --gemini       # Build mode with Gemini
 #   ./loop.sh --codex        # Build mode with Codex
 #   ./loop.sh --copilot      # Build mode with GitHub Copilot
-#   ./loop.sh --opencode     # Build mode with Opencode
 #   ./loop.sh --agent -i     # Build mode with Cursor Agent (interactive)
 #   ./loop.sh plan --agent   # Plan mode with Cursor Agent
 #   ./loop.sh --auto         # Build mode with auto-cycling agents
@@ -177,7 +177,7 @@ while true; do
             ;;
         amp)
             # Ampcode CLI
-            amp "$(cat "$PROMPT_FILE")"
+            cat "$PROMPT_FILE" | amp --execute --dangerously-allow-all --stream-json | python3 stream_helper.py
             ;;
         gemini)
             # Gemini CLI
@@ -185,7 +185,7 @@ while true; do
             ;;
         codex)
             # Codex CLI
-            codex --approval-mode full-auto "$(cat "$PROMPT_FILE")"
+            codex exec --dangerously-bypass-approvals-and-sandbox "$(cat "$PROMPT_FILE")"
             ;;
         copilot)
             # GitHub Copilot CLI
@@ -267,8 +267,11 @@ while true; do
         echo "Running validation..."
         set +e
         # Capture validation output to both stdout and a temp file
-        VALIDATION_OUTPUT=$(npm run validate 2>&1)
-        VALIDATION_EXIT_CODE=$?
+        # use tee to stream output to stdout while capturing
+        npm run validate 2>&1 | tee validation.tmp
+        VALIDATION_OUTPUT=$(cat validation.tmp)
+        VALIDATION_EXIT_CODE=${PIPESTATUS[0]}
+        rm validation.tmp
         set -e
         
         # Always log validation failures to validation.log for agent reference
@@ -372,7 +375,7 @@ while true; do
                 fi
             fi
             # Always display validation output to stdout
-            echo "$VALIDATION_OUTPUT"
+            # Validation output already displayed via tee
         fi
     fi
 
