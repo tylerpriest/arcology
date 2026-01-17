@@ -2,31 +2,39 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis.
 
-**Last Updated:** 2025-01-27 - Building mode: Audio System (Phase 1) completed
+**Last Updated:** 2025-01-27 - Building mode: UI Component Tests completed - TopBar, Sidebar, BuildMenu, and RoomInfoPanel tests added
 
 ## Executive Summary
 
 **Current Status:**
 - ✅ **Phase 0 (Critical Features): COMPLETE** - Sky lobbies, height limits, tenant types, lunch behavior all implemented
 - ✅ **Phase 1 (Audio System): COMPLETE** - AudioSystem implemented with all sound effects, volume controls, and SettingsScene integration
-- ❌ **Phase 2 (Resident Polish): NOT IMPLEMENTED** - No visual variety (color palettes, size variation, traits)
-- ⚠️ **Phase 3 (Spec Compliance): PARTIAL** - Restaurant visual state missing, test coverage gaps
+- ✅ **Phase 2 (Resident Visual Variety): COMPLETE** - Color palettes, size variation, and traits system implemented
+- ⚠️ **Phase 3 (Spec Compliance): PARTIAL** - Restaurant visual state complete ✅, UI component tests complete ✅, Scene tests remain
 
 **Recent Work Completed (2025-01-27):**
-- ✅ AudioSystem.ts created with Phaser Sound integration and Web Audio API fallback
-- ✅ All sound effects implemented (UI, money, alerts, elevator bell)
-- ✅ SettingsScene volume sliders connected to AudioSystem
-- ✅ Money sounds integrated with EconomySystem (daily income/expenses, quarterly revenue)
-- ✅ Alert sounds integrated with notification system (low rations, starvation, bankruptcy)
-- ✅ Elevator bell sound integrated with ElevatorSystem (plays on arrival)
-- ✅ Room placement sounds (success/error) and demolition sound
-- ✅ AudioSystem tests added
-- ✅ Audio asset loading structure added to BootScene (ready for audio files)
+- ✅ UI Component Tests completed:
+  - ✅ TopBar.test.ts - Tests for all update methods, formatting, click handlers, color coding
+  - ✅ Sidebar.test.ts - Tests for collapse, section switching, callbacks
+  - ✅ BuildMenu.test.ts - Tests for room selection, speed controls, visibility
+  - ✅ RoomInfoPanel.test.ts - Tests for display, formatting, traits, close button
+- ✅ Phase 3 (Restaurant Visual State) completed:
+  - ✅ Room.ts displays OPEN/CLOSED status label for restaurants
+  - ✅ Closed restaurants dimmed to 60% brightness
+  - ✅ Status label color coding (cyan for OPEN, red for CLOSED)
+  - ✅ Interior details added for fastfood and restaurant room types
+  - ✅ Tests added for restaurant visual state
+- ✅ Phase 2 (Resident Visual Variety) completed:
+  - ✅ Color palette system (8 palettes based on name hash, blended with hunger colors)
+  - ✅ Size variation (±4px height based on name hash)
+  - ✅ Traits system (1-2 traits per resident, displayed in RoomInfoPanel)
+  - ✅ Save/load support for traits
+  - ✅ Tests updated to verify traits in serialization
 
 **Immediate Next Steps:**
-1. Add test coverage for ResidentSystem, ResourceSystem, and entities
-2. Implement resident visual variety (Phase 2)
-3. Fix restaurant open/closed visual state (Phase 3)
+1. ✅ Fix restaurant open/closed visual state (Phase 3) - COMPLETE
+2. ✅ Add missing test coverage for UI components - COMPLETE
+3. Add missing test coverage for Scenes (integration tests)
 
 **Latest Planning Session (2025-01-27 - Planning Mode):** Comprehensive codebase analysis completed:
 - Reviewed all 11 spec files (BUILDING, RESIDENTS, FOOD_SYSTEM, ELEVATORS, ECONOMY, UI_UX, MENUS, SAVE_LOAD, AUDIO, TIME_EVENTS, GRAPHICS)
@@ -130,21 +138,21 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - Audio asset loading structure added to BootScene (ready for audio files when added)
   - AudioSystem tests added
 
-- ❌ **Phase 2 (Resident Visual Variety): NOT IMPLEMENTED**
-  - No color palette system (Resident.ts drawSilhouette() uses only hunger colors)
-  - No size variation (±4px height)
-  - No traits property or assignment system
+- ✅ **Phase 2 (Resident Visual Variety): COMPLETE**
+  - Color palette system implemented (8 palettes based on name hash, blended with hunger colors)
+  - Size variation implemented (±4px height based on name hash)
+  - Traits system implemented (1-2 traits per resident, displayed in RoomInfoPanel)
 
 - ⚠️ **Phase 3 (Spec Compliance & Testing): PARTIAL**
-  - Restaurant visual state: RestaurantSystem.isRestaurantOpen() tracks state but Room.ts draw() doesn't display it
-  - Missing test coverage: ResidentSystem, ResourceSystem, Room/Resident entities, UI components, Scenes
+  - Restaurant visual state: ✅ COMPLETE - Room.ts displays OPEN/CLOSED label and dims closed restaurants
+  - Missing test coverage: UI components, Scenes
   - LLM review system: Placeholder with TODO (5 skipped tests waiting for implementation)
 
 **Next Actions (Prioritized):**
 1. **IMMEDIATE (Phase 1):** Implement Audio System - Create AudioSystem.ts, connect SettingsScene volume sliders, add sound effects (UI, money, alerts, elevator bell)
 2. **HIGH PRIORITY (Testing):** Add missing test coverage - ResidentSystem, ResourceSystem, Room/Resident entities, UI components
 3. **MEDIUM PRIORITY (Phase 2):** Implement resident visual variety - Color palettes, size variation, traits system
-4. **MEDIUM PRIORITY (Phase 3):** Fix restaurant open/closed visual state - Room.ts needs RestaurantSystem reference to display state
+4. ✅ **MEDIUM PRIORITY (Phase 3):** Fix restaurant open/closed visual state - COMPLETE - Room.ts displays OPEN/CLOSED label and dims closed restaurants
 
 ## Current Implementation Status (2025-01-27)
 
@@ -165,7 +173,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - ❌ No traits system (display only)
 
 **Phase 3 - Spec Compliance & Testing:** ⚠️ **PARTIAL**
-- ⚠️ Restaurant open/closed visual state missing (RestaurantSystem tracks state but Room.ts doesn't display it)
+- ✅ Restaurant open/closed visual state implemented (Room.ts displays OPEN/CLOSED label and dims closed restaurants)
 - ❌ Missing test coverage (ResidentSystem, ResourceSystem, Room/Resident entities, UI components, Scenes)
 - ⚠️ LLM review system placeholder (5 skipped tests waiting for implementation)
 
@@ -193,7 +201,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - No traits property in Resident class
 
 - ⚠️ **Phase 3 - Spec Compliance: PARTIAL:**
-  - Restaurant visual state: RestaurantSystem.isRestaurantOpen() tracks state (RestaurantSystem.ts:36-53) but Room.ts draw() (lines 51-107) doesn't check RestaurantSystem or display open/closed state. Room needs RestaurantSystem reference.
+  - ✅ Restaurant visual state: Room.ts draw() now checks RestaurantSystem and displays OPEN/CLOSED label with dimming when closed
   - LLM review placeholder: src/lib/llm-review.ts has TODO (line 42), 5 tests skipped in llm-review.test.ts
 
 **Test Coverage Gaps:**
@@ -252,15 +260,15 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 7. ✅ Audio asset loading structure in BootScene (ready for audio files)
 8. ✅ AudioSystem tests added
 
-**Phase 2 - Resident Visual Variety:** ❌ **NOT IMPLEMENTED**
-1. Color palette system (4-8 palettes based on name hash)
-2. Size variation (±4px height)
-3. Traits system (1-2 traits per resident, display only)
+**Phase 2 - Resident Visual Variety:** ✅ **COMPLETE**
+1. ✅ Color palette system (8 palettes based on name hash, blended with hunger colors)
+2. ✅ Size variation (±4px height based on name hash)
+3. ✅ Traits system (1-2 traits per resident, displayed in RoomInfoPanel)
 
 **Phase 3 - Spec Compliance & Testing:** ⚠️ **PARTIAL**
-1. Restaurant open/closed visual state (Room.ts needs RestaurantSystem reference)
+1. ✅ Restaurant open/closed visual state (Room.ts displays OPEN/CLOSED label and dims closed restaurants)
 2. Verify all acceptance criteria from specs
-3. Add missing test coverage (ResidentSystem, ResourceSystem, entities, UI, Scenes)
+3. Add missing test coverage (UI components, Scenes)
 4. Fix any remaining spec discrepancies
 
 ## Tasks
@@ -427,31 +435,29 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 ### Phase 2 - Resident Polish
 
 **Visual Variety:**
-- [ ] Color palette system in `src/entities/Resident.ts`
-  - Generate 4-8 color palettes based on resident name hash
-  - Apply palette to resident silhouette
-  - Update `drawSilhouette()` method (Resident.ts:152-192) to use palette colors
-  - **Test:** Residents have varied colors based on name
-  - **Test:** Same name always produces same color
-- [ ] Size variation in `src/entities/Resident.ts`
-  - Random size variation: ±4px height
-  - Store size in resident data
-  - Update `drawSilhouette()` method to use size variation
-  - **Test:** Residents have varied sizes
-  - **Test:** Size is consistent for same resident
+- [x] Color palette system in `src/entities/Resident.ts` ✅
+  - Generate 8 color palettes based on resident name hash ✅
+  - Apply palette to resident silhouette (blended with hunger colors) ✅
+  - Update `drawSilhouette()` method to use palette colors ✅
+  - **Test:** Residents have varied colors based on name ✅
+  - **Test:** Same name always produces same color ✅
+- [x] Size variation in `src/entities/Resident.ts` ✅
+  - Size variation: ±4px height based on name hash ✅
+  - Update `drawSilhouette()` method to use size variation ✅
+  - **Test:** Residents have varied sizes ✅
+  - **Test:** Size is consistent for same resident ✅
 
 **Traits System (Display Only):**
-- [ ] Add traits to Resident entity in `src/entities/Resident.ts`
-  - Property: `traits: string[]`
-  - Possible traits: Workaholic, Foodie, Night Owl, Early Bird, Social, Introvert
-  - Assign 1-2 traits per resident based on name hash
-  - Update `serialize()` method to include traits
-  - **Test:** Residents have 1-2 traits assigned
-  - **Test:** Traits are consistent for same resident
-- [ ] Display traits in UI in `src/ui/components/RoomInfoPanel.ts`
-  - Show traits in RoomInfoPanel when resident selected
-  - Show traits in resident info tooltip (optional)
-  - **Test:** Traits display in resident info panel
+- [x] Add traits to Resident entity in `src/entities/Resident.ts` ✅
+  - Property: `traits: string[]` ✅
+  - Possible traits: Workaholic, Foodie, Night Owl, Early Bird, Social, Introvert ✅
+  - Assign 1-2 traits per resident based on name hash ✅
+  - Update `serialize()` method to include traits ✅
+  - **Test:** Residents have 1-2 traits assigned ✅
+  - **Test:** Traits are consistent for same resident ✅
+- [x] Display traits in UI in `src/ui/components/RoomInfoPanel.ts` ✅
+  - Show traits in RoomInfoPanel when room with residents is selected ✅
+  - **Test:** Traits display in room info panel ✅
 
 ### Phase 3 - Spec Compliance & Testing
 
@@ -480,9 +486,9 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - [x] Adjacency conflicts cause stress (✅ implemented - Resident.ts:579)
   - [x] Stress-based leaving condition (✅ implemented - >80 for 48h, Resident.ts:44)
   - [x] Elevator congestion affects stress (✅ implemented - Resident.ts:98)
-  - [ ] Visual variety (❌ missing - Phase 2, no color palette system in Resident.ts)
-  - [ ] Size variation (❌ missing - Phase 2, no size variation in Resident.ts)
-  - [ ] Traits assigned (❌ missing - Phase 2, no traits property in Resident.ts)
+  - [x] Visual variety (✅ implemented - Phase 2, color palette system in Resident.ts)
+  - [x] Size variation (✅ implemented - Phase 2, size variation in Resident.ts)
+  - [x] Traits assigned (✅ implemented - Phase 2, traits property in Resident.ts)
 - [ ] Review FOOD_SYSTEM.md acceptance criteria
   - [x] Fast Food restaurant can be built (✅ implemented - ROOM_SPECS.fastfood in constants.ts:103-114)
   - [x] Fine Dining restaurant can be built (✅ implemented - ROOM_SPECS.restaurant in constants.ts:115-126)
@@ -492,7 +498,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - [x] Office workers seek Fast Food at lunch time (✅ implemented - Resident.ts handles lunch-seeking behavior)
   - [x] Evaluation system calculates restaurant score (✅ implemented - RestaurantSystem.ts evaluation logic)
   - [x] Restaurant income scales with evaluation score (✅ implemented - RestaurantSystem.ts income calculation)
-  - [ ] Restaurants show open/closed state visually (⚠️ RestaurantSystem.isRestaurantOpen() tracks state but Room.ts:51-107 draw() does not display it - Phase 3, see "Fix Remaining Spec Discrepancies" section)
+  - [x] Restaurants show open/closed state visually (✅ implemented - Room.ts displays OPEN/CLOSED label and dims closed restaurants)
 - [ ] Review ELEVATORS.md acceptance criteria
   - [x] Elevator shaft created when Lobby is built (✅ implemented)
   - [x] Residents can call elevator from any floor (✅ implemented)
@@ -612,37 +618,42 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 **Add Missing Test Coverage:**
 
 **High Priority (Core Systems):**
-- [ ] Test ResidentSystem (`src/systems/ResidentSystem.test.ts`)
-  - Test resident spawning in apartments
-  - Test move-out conditions (starvation, stress)
-  - Test job assignment
-  - Test resident updates
-- [ ] Test ResourceSystem (`src/systems/ResourceSystem.test.ts`)
-  - Test farm food production
-  - Test kitchen food processing
-  - Test food consumption
-  - Test food chain (farm → kitchen → processed)
+- [x] Test ResidentSystem (`src/systems/ResidentSystem.test.ts`) ✅
+  - Test resident spawning in apartments ✅
+  - Test move-out conditions (starvation, stress) ✅
+  - Test job assignment ✅
+  - Test resident updates ✅
+  - Test office worker behavior ✅
+  - Test office worker lunch behavior ✅
+- [x] Test ResourceSystem (`src/systems/ResourceSystem.test.ts`) ✅
+  - Test farm food production ✅
+  - Test kitchen food processing ✅
+  - Test food consumption ✅
+  - Test food chain (farm → kitchen → processed) ✅
 - [x] Test Building entity (`src/entities/Building.test.ts`) ✅
   - Test room placement with overlap detection ✅
   - Test floor constraints ✅
   - Test height limit enforcement ✅
   - Test room removal/demolition (covered in existing tests)
   - Test room queries (getApartments, getOffices, etc.) (covered in existing tests)
-- [ ] Test Resident entity (`src/entities/Resident.test.ts`)
-  - Test state machine transitions
-  - Test hunger decay
-  - Test stress accumulation
-  - Test pathfinding (goToRoom)
-  - Test satisfaction calculation
-  - Test leaving conditions
+- [x] Test Resident entity (`src/entities/Resident.test.ts`) ✅
+  - Test state machine transitions ✅
+  - Test hunger decay ✅
+  - Test stress accumulation ✅
+  - Test pathfinding (goToRoom) ✅
+  - Test satisfaction calculation ✅
+  - Test leaving conditions ✅
 
 **Medium Priority (UI & Scenes):**
-- [ ] Test Room entity (`src/entities/Room.test.ts`)
-  - Test visual rendering
-  - Test capacity management
-  - Test resident/worker tracking
-- [ ] Test UI components (unit tests)
-  - TopBar, Sidebar, BuildMenu, RoomInfoPanel, etc.
+- [x] Test Room entity (`src/entities/Room.test.ts`) ✅
+  - Test visual rendering ✅
+  - Test capacity management ✅
+  - Test resident/worker tracking ✅
+- [x] Test UI components (unit tests) ✅
+  - TopBar tests added (`src/ui/components/TopBar.test.ts`) ✅
+  - Sidebar tests added (`src/ui/components/Sidebar.test.ts`) ✅
+  - BuildMenu tests added (`src/ui/components/BuildMenu.test.ts`) ✅
+  - RoomInfoPanel tests added (`src/ui/components/RoomInfoPanel.test.ts`) ✅
 - [ ] Test Scenes (integration tests)
   - GameScene room placement flow
   - Menu navigation
@@ -753,16 +764,17 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - [ ] Verify no remaining terminology issues (Money vs Credits, Food vs Rations)
   - Codebase uses "Credits" (CR) and "Rations" consistently
   - **Test:** Verify UI text matches spec terminology (programmatic - grep/search for terminology consistency)
-- [ ] Restaurant open/closed visual state
+- [x] Restaurant open/closed visual state ✅
   - RestaurantSystem tracks `isOpen` via `isRestaurantOpen()` method (✅ implemented in RestaurantSystem.ts:36-53)
-  - Room rendering does NOT visually indicate open/closed state (❌ Room.ts:51-107 draw() method does not check RestaurantSystem)
-  - Update Room.ts `draw()` method to check RestaurantSystem for open/closed state
-  - Room needs reference to RestaurantSystem (pass via constructor, scene reference, or registry)
-  - Apply visual styling based on `restaurantSystem.isRestaurantOpen(room)` (e.g., dimmed appearance when closed, "OPEN"/"CLOSED" label, or accent color variation)
-  - **Test (Programmatic):** Restaurant rooms show visual indicator when open vs closed (check Room graphics state)
-  - **Test (Programmatic):** Visual state updates when operating hours change (verify Room.redraw() called on time change)
-  - **Test (Programmatic):** Fast Food shows open during 11-2 PM and 5-7 PM, closed otherwise (verify RestaurantSystem.isRestaurantOpen() logic)
-  - **Test (Programmatic):** Restaurant shows open during 6-11 PM, closed otherwise (verify RestaurantSystem.isRestaurantOpen() logic)
+  - Room rendering now visually indicates open/closed state (✅ Room.ts draw() method checks RestaurantSystem)
+  - Updated Room.ts `draw()` method to check RestaurantSystem for open/closed state ✅
+  - Room accesses RestaurantSystem via scene cast to GameScene ✅
+  - Applied visual styling: dimmed appearance when closed (60% brightness), "OPEN"/"CLOSED" status label with color coding (cyan for open, red for closed) ✅
+  - Added interior details for fastfood and restaurant room types ✅
+  - **Test (Programmatic):** Restaurant rooms show visual indicator when open vs closed ✅ (Room.test.ts: restaurant visual state tests)
+  - **Test (Programmatic):** Visual state updates when operating hours change ✅ (Room.redraw() called every hour quarter via GameScene)
+  - **Test (Programmatic):** Fast Food shows open during 11-2 PM and 5-7 PM, closed otherwise ✅ (RestaurantSystem.isRestaurantOpen() logic verified)
+  - **Test (Programmatic):** Restaurant shows open during 6-11 PM, closed otherwise ✅ (RestaurantSystem.isRestaurantOpen() logic verified)
   - **Test (Visual/Subjective):** Visual indicator is clearly visible and readable (requires LLM review or manual verification)
 
 ## Completed Features
@@ -899,7 +911,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - ✅ Office worker lunch behavior implemented (Phase 0 completed - office workers seek Fast Food at 12 PM, consume food, return to office)
 - Audio system completely missing (Phase 1 priority - no AudioSystem class, no sound files, no audio asset loading)
 - Resident visual variety missing (Phase 2 - no color palette or size variation system, all residents look identical except hunger color)
-- Restaurant open/closed visual state not displayed (RestaurantSystem tracks `isOpen` via `isRestaurantOpen()` but Room.ts rendering does not visually indicate state - Phase 3)
+- ✅ Restaurant open/closed visual state displayed (Room.ts displays OPEN/CLOSED label and dims closed restaurants - Phase 3 COMPLETE)
 - LLM review system placeholder (src/lib/llm-review.ts has TODO for actual LLM integration - Phase 3)
 - Skipped tests in llm-review.test.ts (5 visual/subjective tests skipped - waiting for LLM review implementation)
 
@@ -950,10 +962,11 @@ Phase 3 (Spec Compliance & Testing)
 - LLM review system has placeholder TODO (non-blocking)
 
 **Test Coverage Gaps:**
-- ❌ ResidentSystem - No tests (HIGH priority)
-- ❌ ResourceSystem - No tests (HIGH priority)
-- ❌ Building/Room/Resident entities - No tests (MEDIUM priority)
-- ❌ All UI components - No tests (MEDIUM priority)
+- ✅ ResidentSystem - Tests added (HIGH priority) ✅
+- ✅ ResourceSystem - Tests added (HIGH priority) ✅
+- ✅ Building/Room/Resident entities - Tests added (MEDIUM priority) ✅
+- ✅ UI components - Tests added (MEDIUM priority) ✅
+  - TopBar, Sidebar, BuildMenu, RoomInfoPanel tests complete ✅
 - ❌ All Scenes - No tests (MEDIUM priority)
 - ❌ Visual/UI acceptance criteria - No browser/screenshot tests (HIGH priority per PROMPT_build.md)
 
@@ -969,16 +982,16 @@ Phase 3 (Spec Compliance & Testing)
    - Connect SettingsScene volume sliders to AudioSystem (master, UI, ambient volumes)
    - Load audio assets in BootScene
    - Integrate with EconomySystem (money sounds), Notification system (alerts), ElevatorSystem (bell)
-2. **Testing - High Priority:**
-   - Add tests for ResidentSystem (core gameplay system - spawning, move-outs, job assignment)
-   - Add tests for ResourceSystem (food chain - farm production, kitchen processing, consumption)
-   - Add tests for Room/Resident entities (state machine, pathfinding, satisfaction calculation)
-3. **Phase 2 - Resident Visual Variety** (Medium Priority):
-   - Color palette system based on name hash (4-8 palettes)
-   - Size variation (±4px height)
-   - Traits system (1-2 traits per resident, display only)
+2. **Testing - High Priority:** ✅ **COMPLETED**
+   - ✅ Add tests for ResidentSystem (core gameplay system - spawning, move-outs, job assignment)
+   - ✅ Add tests for ResourceSystem (food chain - farm production, kitchen processing, consumption)
+   - ✅ Add tests for Room/Resident entities (state machine, pathfinding, satisfaction calculation)
+3. **Phase 2 - Resident Visual Variety** (Medium Priority): ✅ **COMPLETE**
+   - ✅ Color palette system based on name hash (8 palettes)
+   - ✅ Size variation (±4px height)
+   - ✅ Traits system (1-2 traits per resident, displayed in RoomInfoPanel)
 4. **Phase 3 - Spec Compliance** (Medium Priority):
-   - Restaurant open/closed visual state (Room.ts needs RestaurantSystem reference)
+   - ✅ Restaurant open/closed visual state (COMPLETE - Room.ts displays OPEN/CLOSED label and dims closed restaurants)
    - Complete acceptance criteria verification across all specs
 
 **Phase 0 - Critical Missing Features:** ✅ **ALL COMPLETED**
@@ -990,7 +1003,7 @@ Phase 3 (Spec Compliance & Testing)
 **After Phase 1:**
 1. Phase 2 - Resident visual variety (color palettes, size variation, traits)
 2. Phase 3 - Spec compliance verification and testing
-   - Restaurant open/closed visual state (Room.ts needs RestaurantSystem reference)
+   - ✅ Restaurant open/closed visual state (COMPLETE - Room.ts displays OPEN/CLOSED label and dims closed restaurants)
    - Complete acceptance criteria verification
    - Add missing test coverage
    - Add visual/browser tests for UI acceptance criteria (per PROMPT_build.md requirement)

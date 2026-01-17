@@ -120,13 +120,28 @@ while true; do
         exit $EXIT_CODE
     fi
 
-    # Push changes after each iteration (build mode only)
+    # Run validation and push changes (build mode only)
     if [[ "$MODE" == "build" ]]; then
-        if git diff --quiet && git diff --staged --quiet; then
-            echo "No changes to push"
+        echo ""
+        echo "Running validation..."
+        # Temporarily disable set -e to handle validation failures gracefully
+        set +e
+        npm run validate
+        VALIDATION_EXIT_CODE=$?
+        set -e
+        
+        if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
+            echo "✓ Validation passed"
+            # Only push if validation passed
+            if git diff --quiet && git diff --staged --quiet; then
+                echo "No changes to push"
+            else
+                echo "Pushing changes..."
+                git push origin arcology 2>/dev/null || echo "Push failed (may need to set upstream)"
+            fi
         else
-            echo "Pushing changes..."
-            git push origin arcology 2>/dev/null || echo "Push failed (may need to set upstream)"
+            echo "✗ Validation failed - skipping push"
+            echo "Agent will fix errors on next iteration"
         fi
     fi
 
