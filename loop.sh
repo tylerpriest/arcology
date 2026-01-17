@@ -20,12 +20,22 @@ MODE="build"
 MAX_ITERATIONS=0
 AGENT_TYPE="claude"
 INTERACTIVE=false
+AUTO_MODE=false
+LOOP_FOREVER=false
+# List of agents for auto mode (excluding claude)
+AUTO_AGENTS=("cursor" "opencode" "gemini" "codex" "amp" "copilot")
 
 
 for arg in "$@"; do
     case $arg in
         plan)
             MODE="plan"
+            ;;
+        --auto)
+            AUTO_MODE=true
+            ;;
+        --loop-forever)
+            LOOP_FOREVER=true
             ;;
         --agent)
             AGENT_TYPE="cursor"
@@ -193,8 +203,53 @@ while true; do
 
     if [[ $EXIT_CODE -ne 0 ]]; then
         echo "Agent ($AGENT_TYPE) exited with code $EXIT_CODE"
-        echo "Stopping loop."
-        exit $EXIT_CODE
+        
+        if [[ "$AUTO_MODE" == "true" ]]; then
+            echo "Auto mode enabled: switching to next agent..."
+            
+            # Find current index
+            CURRENT_IDX=-1
+            for i in "${!AUTO_AGENTS[@]}"; do
+                if [[ "${AUTO_AGENTS[$i]}" == "$AGENT_TYPE" ]]; then
+                    CURRENT_IDX=$i
+                    break
+                fi
+            done
+            
+            # Calculate next index
+            if [[ $CURRENT_IDX -ge 0 ]]; then
+                NEXT_IDX=$(( CURRENT_IDX + 1 ))
+                
+                # Check if we need to wrap around
+                if [[ "$LOOP_FOREVER" == "true" ]]; then
+                     NEXT_IDX=$(( NEXT_IDX % ${#AUTO_AGENTS[@]} ))
+                     AGENT_TYPE="${AUTO_AGENTS[$NEXT_IDX]}"
+                     echo "Switched to agent: $AGENT_TYPE"
+                     echo "Retrying..."
+                     sleep 2
+                     continue
+                else
+                    if [[ $NEXT_IDX -lt ${#AUTO_AGENTS[@]} ]]; then
+                        AGENT_TYPE="${AUTO_AGENTS[$NEXT_IDX]}"
+                        echo "Switched to agent: $AGENT_TYPE"
+                        echo "Retrying..."
+                        sleep 2
+                        continue
+                    else
+                        echo "All auto agents attempted. Stopping (use --loop-forever to cycle indefinitely)."
+                        exit $EXIT_CODE
+                    fi
+                fi
+            else
+                echo "Current agent not in auto list. Switching to first auto agent."
+                AGENT_TYPE="${AUTO_AGENTS[0]}"
+                sleep 2
+                continue
+            fi
+        else
+            echo "Stopping loop."
+            exit $EXIT_CODE
+        fi
     fi
 
     # Run validation and push changes (build mode only)
