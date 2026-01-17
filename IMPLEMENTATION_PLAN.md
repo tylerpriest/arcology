@@ -2,7 +2,7 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis.
 
-**Last Updated:** 2026-01-27 - Building mode: Set up Playwright infrastructure for visual/UI acceptance criteria tests - Added playwright.config.ts, tests/visual/ui-ux.test.ts, tests/visual/graphics.test.ts, and README
+**Last Updated:** 2026-01-27 - Building mode: Committed visual test infrastructure - Fixed test selectors to use #game instead of #game-container, updated implementation plan
 
 ## Executive Summary
 
@@ -678,17 +678,13 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - ✅ MainMenuScene.test.ts - Already existed
   - ✅ PauseMenuScene.test.ts - Already existed
   - ✅ SettingsScene.test.ts - Already existed
-- [ ] Visual/UI acceptance criteria tests (browser/screenshot)
-  - Top bar visual appearance
-  - Sidebar collapsible behavior
-  - Ghost preview (cyan/magenta feedback)
-  - Room selection visual feedback
-  - Scanline overlay visibility
-  - Glass panel styling
-  - Glitch hover effects
-  - Camera controls
-  - Day/night visual transitions
-  - **Note:** Requires browser testing setup (Playwright/Puppeteer) and LLM review pattern implementation
+- [x] Visual/UI acceptance criteria tests (browser/screenshot) ✅
+  - Playwright infrastructure set up (playwright.config.ts) ✅
+  - UI/UX acceptance criteria tests (tests/visual/ui-ux.test.ts) ✅
+  - Graphics acceptance criteria tests (tests/visual/graphics.test.ts) ✅
+  - README documentation (tests/visual/README.md) ✅
+  - Screenshots directory gitignored ✅
+  - **Note:** Tests use screenshots for visual verification. LLM review pattern can be integrated when implemented.
 
 **Research Tasks:**
 - [ ] Research Venus Arcology cyberpunk setting - storyline, world-building, and systemic integration
@@ -1028,4 +1024,4 @@ Phase 3 (Spec Compliance & Testing)
    - ✅ Restaurant open/closed visual state (COMPLETE - Room.ts displays OPEN/CLOSED label and dims closed restaurants)
    - Complete acceptance criteria verification
    - Add missing test coverage
-   - ✅ Add visual/browser tests for UI acceptance criteria (Playwright infrastructure complete - tests/visual/ui-ux.test.ts and tests/visual/graphics.test.ts created)
+   - ✅ Add visual/browser tests for UI acceptance criteria (Playwright infrastructure complete - tests/visual/ui-ux.test.ts and tests/visual/graphics.test.ts committed, selectors fixed to use #game)
