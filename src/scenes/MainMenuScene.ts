@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { VenusAtmosphere } from '../graphics/VenusAtmosphere';
 import { GameState } from '../utils/types';
+import { playUIClick, playMenuOpen } from '../utils/audio';
 
 export class MainMenuScene extends Phaser.Scene {
   private venusAtmosphere!: VenusAtmosphere;
@@ -78,12 +79,14 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Load Game button
     const loadGameBtn = this.createMenuButton('Load Game', () => {
+      playMenuOpen();
       this.scene.start('LoadGameScene');
     });
     buttonsContainer.appendChild(loadGameBtn);
 
     // Settings button
     const settingsBtn = this.createMenuButton('Settings', () => {
+      playMenuOpen();
       this.scene.start('SettingsScene');
     });
     buttonsContainer.appendChild(settingsBtn);
@@ -138,7 +141,10 @@ export class MainMenuScene extends Phaser.Scene {
       button.style.boxShadow = 'none';
     });
 
-    button.addEventListener('click', onClick);
+    button.addEventListener('click', () => {
+      playUIClick();
+      onClick();
+    });
 
     return button;
   }

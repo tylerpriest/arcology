@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 export interface IncomeBreakdown {
   apartmentRent: number;
   officeIncome: number;
@@ -198,6 +200,7 @@ export class EconomyBreakdownPanel {
     // Close button handler
     const closeBtn = this.element.querySelector('.economy-breakdown-close') as HTMLButtonElement;
     closeBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
     });
   }

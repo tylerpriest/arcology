@@ -1,4 +1,5 @@
 import { ROOM_SPECS, RoomType } from '../../utils/constants';
+import { playUIClick } from '../../utils/audio';
 
 export class RoomInfoPanel {
   private element: HTMLDivElement;
@@ -82,6 +83,7 @@ export class RoomInfoPanel {
     // Close button handler
     const closeBtn = this.element.querySelector('.room-info-close') as HTMLButtonElement;
     closeBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
     });
   }

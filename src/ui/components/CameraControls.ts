@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 export class CameraControls {
   private element: HTMLDivElement;
   private isExpanded = false;
@@ -64,15 +66,18 @@ export class CameraControls {
     const controlBtns = this.element.querySelectorAll('.camera-control-btn');
 
     toggleBtn.addEventListener('click', () => {
+      playUIClick();
       this.toggle();
     });
 
     closeBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
     });
 
     controlBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
+        playUIClick();
         const action = (btn as HTMLElement).dataset.action;
         this.handleAction(action || '');
       });

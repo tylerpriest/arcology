@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 export class TopBar {
   private element: HTMLDivElement;
   private moneyValue: HTMLSpanElement;
@@ -84,6 +86,7 @@ export class TopBar {
     moneyStat.style.cursor = 'pointer';
     moneyStat.title = 'Click to view economy breakdown';
     moneyStat.addEventListener('click', () => {
+      playUIClick();
       if (this.onCreditsClick) {
         this.onCreditsClick();
       }

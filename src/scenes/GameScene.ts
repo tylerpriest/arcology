@@ -16,6 +16,7 @@ import { GameState, ElevatorState } from '../utils/types';
 import { SaveSystem } from '../systems/SaveSystem';
 import { ElevatorSystem } from '../systems/ElevatorSystem';
 import { AudioSystem } from '../systems/AudioSystem';
+import { setAudioSystem } from '../utils/audio';
 
 export class GameScene extends Phaser.Scene {
   public building!: Building;
@@ -83,6 +84,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.saveSystem = new SaveSystem(this);
     this.audioSystem = new AudioSystem(this);
+    setAudioSystem(this.audioSystem);
 
     // Check if we need to load a save
     const loadSaveSlot = this.registry.get('loadSaveSlot') as number | undefined;
@@ -1117,6 +1119,7 @@ export class GameScene extends Phaser.Scene {
     // Cleanup AudioSystem
     if (this.audioSystem) {
       this.audioSystem.destroy();
+      setAudioSystem(null);
     }
     
     // Calculate building-wide satisfaction

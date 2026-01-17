@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 /**
  * Notification Component
  * 
@@ -51,6 +53,7 @@ export class Notification {
     // Close button handler
     const closeBtn = notification.querySelector('.notification-close') as HTMLButtonElement;
     closeBtn.addEventListener('click', () => {
+      playUIClick();
       this.dismiss(id);
     });
 

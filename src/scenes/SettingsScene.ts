@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GameSettings, GameState } from '../utils/types';
+import { playUIClick, playMenuOpen, playMenuClose } from '../utils/audio';
 
 const SETTINGS_KEY = 'arcology_settings';
 const DEFAULT_SETTINGS: GameSettings = {
@@ -20,6 +21,9 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Play menu open sound
+    playMenuOpen();
+
     this.createSettingsUI();
     
     // Load current settings into AudioSystem if GameScene is active
@@ -129,6 +133,7 @@ export class SettingsScene extends Phaser.Scene {
       margin-top: 10px;
     `;
       resetBtn.addEventListener('click', () => {
+        playUIClick();
       this.settings = { ...DEFAULT_SETTINGS };
       this.saveSettings();
       
@@ -165,6 +170,7 @@ export class SettingsScene extends Phaser.Scene {
       margin-top: 10px;
     `;
     backBtn.addEventListener('click', () => {
+      playUIClick();
       this.goBack();
     });
     this.settingsContainer.appendChild(backBtn);
@@ -314,8 +320,12 @@ export class SettingsScene extends Phaser.Scene {
       }
     };
 
-    toggleContainer.addEventListener('click', toggleHandler);
-    labelEl.addEventListener('click', toggleHandler);
+    const wrappedToggleHandler = () => {
+      playUIClick();
+      toggleHandler();
+    };
+    toggleContainer.addEventListener('click', wrappedToggleHandler);
+    labelEl.addEventListener('click', wrappedToggleHandler);
 
     toggleContainer.appendChild(toggleSwitch);
     container.appendChild(labelEl);
@@ -364,6 +374,7 @@ export class SettingsScene extends Phaser.Scene {
       `;
 
       btn.addEventListener('click', () => {
+        playUIClick();
         this.settings.defaultGameSpeed = speed;
         this.saveSettings();
         // Update button styles
@@ -391,6 +402,9 @@ export class SettingsScene extends Phaser.Scene {
   }
 
   private goBack(): void {
+    // Play menu close sound
+    playMenuClose();
+
     // Return to previous scene
     const gameState = this.registry.get('gameState');
     if (gameState === GameState.PAUSED) {

@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 export class Sidebar {
   private element: HTMLDivElement;
   private isCollapsed = false;
@@ -62,12 +64,16 @@ export class Sidebar {
 
     // Setup collapse toggle
     const collapseBtn = this.element.querySelector('.collapse-toggle') as HTMLButtonElement;
-    collapseBtn.addEventListener('click', () => this.toggleCollapse());
+    collapseBtn.addEventListener('click', () => {
+      playUIClick();
+      this.toggleCollapse();
+    });
 
     // Setup navigation buttons
     const navButtons = this.element.querySelectorAll('.nav-button');
     navButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
+        playUIClick();
         const section = (btn as HTMLElement).dataset.section;
         if (section) {
           this.setActiveSection(section);

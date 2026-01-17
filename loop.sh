@@ -125,12 +125,17 @@ while true; do
         echo ""
         echo "Running validation..."
         set +e
-        npm run validate
+        # Capture validation output to both stdout and a temp file
+        VALIDATION_OUTPUT=$(npm run validate 2>&1)
         VALIDATION_EXIT_CODE=$?
         set -e
         
         if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
             echo "✓ Validation passed"
+            # Clear validation.log on successful validation
+            if [[ -f validation.log ]]; then
+                rm validation.log
+            fi
             # Check if there are commits to push (commits ahead of origin/arcology)
             set +e
             # Try to get upstream branch name
@@ -161,7 +166,20 @@ while true; do
             fi
         else
             echo "✗ Validation failed - skipping push"
-            echo "Agent will fix errors on next iteration"
+            echo "Validation errors logged to validation.log"
+            # Write validation errors to log file
+            {
+                echo "=== Validation Failed ==="
+                echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+                echo "Iteration: $ITERATION"
+                echo "Exit Code: $VALIDATION_EXIT_CODE"
+                echo ""
+                echo "$VALIDATION_OUTPUT"
+                echo ""
+                echo "=== End Validation Log ==="
+            } > validation.log
+            # Also display output to stdout
+            echo "$VALIDATION_OUTPUT"
         fi
     fi
 

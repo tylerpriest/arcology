@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 export class VictoryOverlay {
   private element: HTMLDivElement;
   private onContinue?: () => void;
@@ -46,11 +48,13 @@ export class VictoryOverlay {
     const mainMenuBtn = this.element.querySelector('[data-action="mainmenu"]') as HTMLButtonElement;
 
     continueBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
       if (this.onContinue) this.onContinue();
     });
 
     mainMenuBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
       if (this.onMainMenu) this.onMainMenu();
     });

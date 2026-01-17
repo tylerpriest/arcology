@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { GameState } from '../utils/types';
+import { playUIClick, playMenuOpen, playMenuClose } from '../utils/audio';
 
 export class PauseMenuScene extends Phaser.Scene {
   private overlayContainer!: HTMLDivElement;
@@ -10,6 +11,9 @@ export class PauseMenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Play menu open sound
+    playMenuOpen();
+
     // Get reference to GameScene
     this.gameScene = this.scene.get('GameScene');
 
@@ -85,12 +89,14 @@ export class PauseMenuScene extends Phaser.Scene {
 
     // Save Game button
     const saveGameBtn = this.createMenuButton('Save Game', () => {
+      playMenuOpen();
       this.scene.start('SaveGameScene');
     });
     buttonsContainer.appendChild(saveGameBtn);
 
     // Settings button
     const settingsBtn = this.createMenuButton('Settings', () => {
+      playMenuOpen();
       this.scene.start('SettingsScene');
     });
     buttonsContainer.appendChild(settingsBtn);
@@ -143,12 +149,18 @@ export class PauseMenuScene extends Phaser.Scene {
       button.style.boxShadow = 'none';
     });
 
-    button.addEventListener('click', onClick);
+    button.addEventListener('click', () => {
+      playUIClick();
+      onClick();
+    });
 
     return button;
   }
 
   private resume(): void {
+    // Play menu close sound
+    playMenuClose();
+
     // Resume game
     if (this.gameScene && this.gameScene.scene.isActive()) {
       const timeSystem = (this.gameScene as any).timeSystem;
@@ -163,6 +175,9 @@ export class PauseMenuScene extends Phaser.Scene {
   }
 
   private quitToMainMenu(): void {
+    // Play menu close sound
+    playMenuClose();
+
     // Stop GameScene
     this.scene.stop('GameScene');
     this.scene.stop('UIScene');

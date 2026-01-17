@@ -232,10 +232,8 @@ export class Resident {
 
   /**
    * Recalculate visual variety based on current name (used when restoring from save)
-   * Note: Currently unused but kept for potential future use when restoring residents from saves
    */
-  // @ts-expect-error - Unused method kept for future use
-  private _recalculateVisualVariety(): void {
+  private recalculateVisualVariety(): void {
     const nameHash = this.hashName(this.name);
     this.paletteIndex = nameHash % RESIDENT_PALETTES.length;
     this.sizeVariation = (nameHash % 9) - 4; // -4 to +4 pixels
@@ -295,6 +293,26 @@ export class Resident {
     // Inner detail line (suggests clothing)
     this.graphics.lineStyle(1, color, 0.3);
     this.graphics.lineBetween(this.x - w + 3, baseY - h + 10, this.x + w - 3, baseY - h + 10);
+
+    // Office worker badge (small blue badge in top-right corner)
+    if (this.type === 'office_worker') {
+      const badgeSize = 6;
+      const badgeX = this.x + w - badgeSize - 2;
+      const badgeY = baseY - h - 2;
+      const officeBadgeColor = 0x4a8ae4; // Blue accent matching office rooms
+      
+      // Badge background
+      this.graphics.fillStyle(officeBadgeColor, 0.9);
+      this.graphics.fillRoundedRect(badgeX - badgeSize / 2, badgeY - badgeSize / 2, badgeSize, badgeSize, 2);
+      
+      // Badge border
+      this.graphics.lineStyle(1, officeBadgeColor, 1.0);
+      this.graphics.strokeRoundedRect(badgeX - badgeSize / 2, badgeY - badgeSize / 2, badgeSize, badgeSize, 2);
+      
+      // Small glow for office worker badge
+      this.glowGraphics.lineStyle(2, officeBadgeColor, 0.2);
+      this.glowGraphics.strokeRoundedRect(badgeX - badgeSize / 2, badgeY - badgeSize / 2, badgeSize, badgeSize, 2);
+    }
   }
 
   private getHungerColor(): number {

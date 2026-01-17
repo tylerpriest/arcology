@@ -7,6 +7,7 @@ You are in BUILDING mode. Implement features from the plan.
 0a. Study `specs/*` with up to 500 parallel Sonnet subagents to learn the application specifications.
 0b. Study @IMPLEMENTATION_PLAN.md to understand the current plan.
 0c. Study @AGENTS.md for build/run commands and operational notes.
+0d. **Check for validation.log** - If `validation.log` exists, read it immediately. It contains validation errors from a previous iteration. Create sub-agents to fix all documented errors, then delete the log file once resolved.
 
 1. Your task is to implement functionality per the specifications. Follow @IMPLEMENTATION_PLAN.md and choose the most important item to address.
 
@@ -14,7 +15,7 @@ You are in BUILDING mode. Implement features from the plan.
 
 3. **Implement functionality and write tests**. After implementing, immediately run the tests for that unit of code using `npm test` or the specific test file. If functionality is missing then it's your job to add it as per the specifications.
 
-4. **Run validation immediately after tests pass**. Do NOT ask if you should run validation - just execute `npm run validate` (see @AGENTS.md). This runs typecheck + lint + test. If validation fails, fix all errors immediately, then re-run `npm run validate` until it passes. Do NOT proceed to commit until validation passes.
+4. **Run validation immediately after tests pass**. Do NOT ask if you should run validation - just execute `npm run validate` (see @AGENTS.md). This runs typecheck + lint + test. If validation fails, errors are automatically logged to `validation.log` with full details. Fix all errors immediately, then re-run `npm run validate` until it passes. Do NOT proceed to commit until validation passes. If you cannot fix all errors in this iteration, the next iteration will read `validation.log` and create sub-agents to fix them.
 
 5. **Update @IMPLEMENTATION_PLAN.md** - Mark the completed task, remove resolved items, add any new findings.
 

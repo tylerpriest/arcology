@@ -1,4 +1,5 @@
 import { ROOM_SPECS, RoomType, MAX_FLOORS_MVP } from '../../utils/constants';
+import { playUIClick } from '../../utils/audio';
 
 export class BuildMenu {
   private element: HTMLDivElement;
@@ -49,6 +50,7 @@ export class BuildMenu {
     const speedButtons = speedControls.querySelectorAll('.speed-btn');
     speedButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
+        playUIClick();
         const speed = parseInt((btn as HTMLElement).dataset.speed || '1', 10);
         this.setSpeed(speed);
       });
@@ -92,6 +94,7 @@ export class BuildMenu {
     `;
 
     button.addEventListener('click', () => {
+      playUIClick();
       this.onSelect(roomType);
     });
 

@@ -2,7 +2,7 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis.
 
-**Last Updated:** 2026-01-27 - Building mode: Committed visual test infrastructure - Fixed test selectors to use #game instead of #game-container, updated implementation plan
+**Last Updated:** 2026-01-27 - Building mode: Committed visual test infrastructure - Fixed test selectors to use #game instead of #game-container, updated implementation plan. Implemented UI click sounds on all buttons - Created audio helper utility, updated all button click handlers across UI components and scenes
 
 ## Executive Summary
 
@@ -346,9 +346,9 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - **Test:** Office workers arrive at 9 AM on weekdays ✅
   - **Test:** Office workers leave at 5 PM on weekdays ✅
   - **Test:** Office workers don't arrive on weekends ✅
-- [ ] Visual differentiation in `src/entities/Resident.ts` and `src/ui/components/RoomInfoPanel.ts`
-  - Office workers: Different color or icon (optional, nice-to-have)
-  - Show type in resident info panel
+- [x] Visual differentiation in `src/entities/Resident.ts` and `src/ui/components/RoomInfoPanel.ts` ✅
+  - Office workers: Blue badge indicator in top-right corner of silhouette ✅
+  - Show type in resident info panel ✅ (already implemented in RoomInfoPanel.ts and GameScene.ts)
 
 **Office Worker Lunch Behavior:**
 - [x] Implement lunch-seeking behavior for office workers in `src/entities/Resident.ts` ✅
@@ -381,9 +381,9 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - [x] Demolition sound ✅
   - Crumble/collapse sound when room demolished ✅
   - Integrate with GameScene demolition logic ✅
-- [ ] Button click sounds (deferred - can be added as polish)
-  - Soft click sound on all button interactions
-  - Integrate with UIManager button handlers
+- [x] Button click sounds ✅
+  - ✅ Soft click sound on all button interactions (playUIClick() helper created)
+  - ✅ Integrated with all UI components and scenes (Sidebar, BuildMenu, RoomInfoPanel, TopBar, CameraControls, Notification, EconomyBreakdownPanel, GameOverOverlay, VictoryOverlay, MainMenuScene, PauseMenuScene, SettingsScene, LoadGameScene, SaveGameScene)
 - [ ] Menu open/close sounds (deferred - can be added as polish)
   - Whoosh/slide sound on menu open
   - Reverse whoosh on menu close
@@ -589,7 +589,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - [x] Elevator bell plays at G4 pitch (✅ implemented - 392 Hz via AudioSystem.playElevatorBell)
   - [x] Alert sounds play for low food and bankruptcy warnings (✅ implemented - AudioSystem.playLowFoodAlert/playBankruptcyAlert)
   - [x] Audio does not cause performance issues (✅ implemented - Web Audio API with proper cleanup)
-  - [ ] UI click sounds on all buttons (⚠️ deferred - can be added as polish, placement sounds implemented)
+  - [x] UI click sounds on all buttons ✅ - All button click handlers updated to play click sounds via playUIClick() helper
   - [x] Mute toggle UI ✅ - Toggle added to SettingsScene, connected to AudioSystem, persists to localStorage
   - [ ] At least one ambient sound per room type (deferred to post-MVP per spec)
 - [x] Review TIME_EVENTS.md acceptance criteria

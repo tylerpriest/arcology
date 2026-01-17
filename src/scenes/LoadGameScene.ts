@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { SaveSlotMeta } from '../utils/types';
+import { playUIClick, playMenuOpen, playMenuClose } from '../utils/audio';
 
 export class LoadGameScene extends Phaser.Scene {
   private overlayContainer!: HTMLDivElement;
@@ -9,6 +10,9 @@ export class LoadGameScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Play menu open sound
+    playMenuOpen();
+
     // Create a temporary GameScene reference to initialize SaveSystem
     // In practice, SaveSystem will be created in GameScene
     this.createLoadGameUI();
@@ -96,6 +100,8 @@ export class LoadGameScene extends Phaser.Scene {
       margin-top: 10px;
     `;
     backBtn.addEventListener('click', () => {
+      playUIClick();
+      playMenuClose();
       this.scene.start('MainMenuScene');
     });
     this.overlayContainer.appendChild(backBtn);
@@ -105,6 +111,7 @@ export class LoadGameScene extends Phaser.Scene {
 
     // ESC key to go back
     this.input.keyboard?.on('keydown-ESC', () => {
+      playMenuClose();
       this.scene.start('MainMenuScene');
     });
   }
@@ -192,7 +199,10 @@ export class LoadGameScene extends Phaser.Scene {
         </div>
       `;
 
-      button.addEventListener('click', onClick);
+      button.addEventListener('click', () => {
+        playUIClick();
+        onClick();
+      });
       button.addEventListener('mouseenter', () => {
         if (!slot.isEmpty) {
           button.style.borderColor = 'var(--primary)';
@@ -211,6 +221,9 @@ export class LoadGameScene extends Phaser.Scene {
   }
 
   private loadSlot(slot: number): void {
+    // Play menu open sound (opening game)
+    playMenuOpen();
+
     // Store the slot to load in registry
     this.registry.set('loadSaveSlot', slot);
     // Start GameScene - it will check for loadSaveSlot and load the save

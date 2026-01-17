@@ -1,3 +1,5 @@
+import { playUIClick } from '../../utils/audio';
+
 export class GameOverOverlay {
   private element: HTMLDivElement;
   private onRestart?: () => void;
@@ -42,11 +44,13 @@ export class GameOverOverlay {
     const mainMenuBtn = this.element.querySelector('[data-action="mainmenu"]') as HTMLButtonElement;
 
     restartBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
       if (this.onRestart) this.onRestart();
     });
 
     mainMenuBtn.addEventListener('click', () => {
+      playUIClick();
       this.hide();
       if (this.onMainMenu) this.onMainMenu();
     });

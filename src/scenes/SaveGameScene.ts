@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SaveSlotMeta } from '../utils/types';
 import type { GameScene } from './GameScene';
+import { playUIClick, playMenuOpen, playMenuClose } from '../utils/audio';
 
 export class SaveGameScene extends Phaser.Scene {
   private overlayContainer!: HTMLDivElement;
@@ -83,6 +84,7 @@ export class SaveGameScene extends Phaser.Scene {
       margin-top: 10px;
     `;
     backBtn.addEventListener('click', () => {
+      playUIClick();
       this.scene.start('PauseMenuScene');
     });
 
@@ -182,6 +184,7 @@ export class SaveGameScene extends Phaser.Scene {
       margin-top: 10px;
     `;
     backBtn.addEventListener('click', () => {
+      playUIClick();
       this.scene.start('PauseMenuScene');
     });
     this.overlayContainer.appendChild(backBtn);
@@ -237,6 +240,7 @@ export class SaveGameScene extends Phaser.Scene {
     }
 
     button.addEventListener('click', () => {
+      playUIClick();
       // Show confirmation if overwriting
       if (!slot.isEmpty) {
         if (confirm(`Overwrite save in ${slotLabel}?`)) {
