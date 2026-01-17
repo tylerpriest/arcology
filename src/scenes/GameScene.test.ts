@@ -20,6 +20,16 @@ const createMockPhaserScene = (): Phaser.Scene => {
     lineStyle: vi.fn(),
     lineBetween: vi.fn(),
     clear: vi.fn(),
+    setBlendMode: vi.fn(),
+    setAlpha: vi.fn(),
+    fillStyle: vi.fn(),
+    fillRect: vi.fn(),
+    strokeCircle: vi.fn(),
+    fillCircle: vi.fn(),
+    strokeRect: vi.fn(),
+    setPosition: vi.fn(),
+    setVisible: vi.fn(),
+    destroy: vi.fn(),
   };
 
   return {

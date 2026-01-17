@@ -1,93 +1,245 @@
 # Implementation Plan - Arcology MVP
 
-> Prioritized task list for Arcology MVP. Updated after comprehensive code analysis and test failure review.
+> Prioritized task list for Arcology MVP. Updated after spec review and test analysis.
 
-**Last Updated:** 2026-01-18 - Specification Mode Complete: Created comprehensive Phase 1 (Specification) framework synthesizing Ralph methodology, Spec Kit, and OpenSpec patterns. Full documentation, guides, and PROMPT_spec.md for automated requirement generation complete. Three-phase workflow now fully documented.
+**Last Updated:** 2026-01-18 - After reviewing comprehensive vision documents (VISION.md, VISION_DEEP_DIVE.md, JTBD_TO_SPECS_MAPPING.md, SPEC_PHASE_DOCUMENTS.md). Vision reveals that MVP is foundation for post-MVP agent-based simulation. Plan: (1) Fix tests, (2) Complete MVP core loops, (3) Prepare architecture for 500+ agents in Phase 2.
 
 ## Executive Summary
 
 **Current Status:**
-- ✅ **Phase 0 (Critical Features): COMPLETE** - Sky lobbies, height limits, tenant types, lunch behavior all implemented
-- ✅ **Phase 1 (Audio System): COMPLETE** - AudioSystem implemented with all sound effects, volume controls, and SettingsScene integration
-- ✅ **Phase 2 (Resident Visual Variety): COMPLETE** - Color palettes, size variation, and traits system implemented
-- ✅ **Phase 3 (Spec Compliance): COMPLETE** - Restaurant visual state complete ✅, UI component tests complete ✅, Scene tests complete ✅
+- ✅ **Phase 0 (Critical Features): COMPLETE** - Sky lobbies, height limits, tenant types, lunch behavior
+- ✅ **Phase 1 (Audio System): COMPLETE** - AudioSystem with all sound effects and settings integration
+- ✅ **Phase 2 (Resident Visual Variety): COMPLETE** - Color palettes, size variation, traits system
+- ✅ **Phase 3 (Spec Compliance): COMPLETE** - Restaurant visual state, UI component tests
 
-**CRITICAL ISSUE:** Test failures detected - 79 failed, 373 passed, 5 skipped. All failures stem from:
-1. **Room.draw() method**: Calls `this.statusLabel.setColor()` but test mocks only have `setText()` and `setPosition()` methods
-2. **Mock setup issues**: Multiple Room and Building test mocks missing required Phaser methods (setAlpha, fillCircle, setBlendMode, etc.)
-3. **GameScene.test.ts**: All 17 tests failing due to missing `glowGraphics.setBlendMode()` mock
-4. **ResourceSystem tests**: Actual food production rates differ from expected (getting 100+ instead of 10-20)
-5. **EconomySystem tests**: Mock scene structure missing `graphics` property
+**BLOCKING ISSUE:** Test validation failing - 34 tests failing (down from 79 as of last check):
+- GameScene.test.ts: 17 failures - glowGraphics.setBlendMode() mock missing
+- ResourceSystem.test.ts: 5 failures - production rate expectations mismatch  
+- EconomySystem.test.ts: 9 failures - mock scene.graphics property missing
+- ResidentSystem.test.ts: 2 failures - mock resourceSystem.addFood() missing
+- Sidebar.test.ts: 1 failure - click handler callback issue
+
+## New Vision Documents & What They Mean for MVP
+
+Five comprehensive vision documents were created that fundamentally reshape post-MVP scope:
+
+### VISION.md
+- One-sentence pitch: Cyberpunk Venus arcology where residents walk (not float), maintenance is gameplay, cascading failures create unique stories
+- 5 core design pillars: Physical realism, economic realism, maintenance as gameplay, 500+ agents, scale & scope
+- 4 core loops: Economic cycle, traffic problem, maintenance crisis, resident stories
+- Thematic anchor: Liminal spaces + cyberpunk aesthetic
+
+**MVP Impact**: MVP establishes foundation for all 5 pillars. The pathfinding system (residents walk) is already in place. Economics loop already exists. Now needs stress/satisfaction to complete.
+
+### VISION_DEEP_DIVE.md
+- Core insight: **Constraints create emergence** (scarcity of money, time, maintenance budget)
+- Why movement matters: Natural congestion emerges from residents walking (lobby extension becomes necessary gameplay)
+- Why maintenance matters: Cascading failures create drama (oxygen → power → elevators)
+- Why 500+ agents matter: Visibility of infrastructure workers makes failures feel real
+- Why map size matters: Enables district stratification, diverse emergent stories
+
+**MVP Impact**: MVP must establish the tension from constraints. Economic loop creates natural scarcity. Movement system creates natural congestion. Satisfaction system creates natural tension about choices.
+
+### JTBD_TO_SPECS_MAPPING.md
+- Maps 13 JTBDs → 30+ specifications needed
+- Prioritizes by phase:
+  - Phase 1: Resident Movement & Congestion (JTBD 2, 5, 10)
+  - Phase 2: Maintenance & Cascading Failures (JTBD 6, 7, 9)
+  - Phase 3: 500+ Agents & Emergence (JTBD 8, 9)
+  - Phase 4: Economy & Large Map (JTBD 1, 3, 4)
+  - Phase 5: Resident Stories & Crisis (JTBD 11, 12, 13)
+
+**MVP Impact**: MVP focuses on Phases 1-2 foundation. Phase 1 (Movement/Congestion) partially done—needs animations + congestion feedback. Phase 2 (Maintenance) is POST-MVP. MVP can prepare architecture for Phase 3+ (agents).
+
+### Key Realization
+The vision documents reveal that **MVP is not the complete game, but the foundation for a much larger vision**. MVP's job is to:
+1. Establish the core loops work (economic, traffic, resident stories, food/time)
+2. Create tension through constraints (money scarcity, maintenance needs)
+3. Show that the core mechanic (residents walk) creates emergent gameplay
+4. Build architecture that scales to 500+ agents in Phase 2+
+
+This reframes what "MVP done" means: not "feature complete game," but "proof of concept that the vision works."
+
+---
+
+## Key Insights from JTBD Analysis
+
+The JTBD reveals that **MVP must support these core loops:**
+
+1. **Economic Loop** (JTBD 1, 3, 6): Build apartments → Earn rent → Maintain systems → Reinvest
+   - Blocking: Satisfaction formula + rent tiers + bankruptcy detection
+   - Victory: Reach 300 population (2 stars) = sustainable income
+
+2. **Traffic Loop** (JTBD 2, 5, 10): More residents → Lobby congestion → Player extends lobby → Repeat
+   - Partially done: Pathfinding implemented, needs animations + congestion feedback
+   - Post-MVP: Lobby extension feature
+
+3. **Resident Stories Loop** (JTBD 11, 12, 13): Residents with traits → Succeed/fail → Player cares
+   - Blocking: Satisfaction system showing visible consequences to player choices
+   - MVP: Display how building decisions affect individual residents
+
+4. **Food & Time Loop** (JTBD 5, 12): Hunger → Eating → Working → Earning → Thriving
+   - Blocking: Restaurant system + time progression + food availability feedback
+   - Partially done: Food production chain exists, needs restaurant hours + evaluation
+
+**JTBD-Driven MVP Definition:**
+- Reach 300 population sustainably (economic loop working)
+- Residents walk, eat, work, sleep (time loop functional)
+- Player sees moral consequences of their building choices (resident stories visible)
+- Satisfaction system creates tension (not all residents can be satisfied)
+
+**Post-MVP (JTBD 6-9):**
+- Maintenance system with cascading failures
+- 500+ agent simulation for emergent gameplay
+- Systems Operator loop (maintain vs. expand trade-offs)
+
+---
 
 ## Prioritized Task List
 
 ### IMMEDIATE (P0 - Validation Critical)
 
-1. **Fix Room.draw() mock - Text object methods missing**
-   - Priority: P0 (blocks 17 RestaurantSystem tests + Building tests)
-   - Status: ❌ Not fixed
-   - Issue: `this.statusLabel.setColor()` called but mock only has basic methods
-   - Solution: Update Room.test.ts mock setup to include all Phaser Text methods
-   - Acceptance: All RestaurantSystem tests passing ✅
-
-2. **Fix Building.test.ts Room mock methods**
-   - Priority: P0 (blocks 13 Building tests)
-   - Status: ❌ Not fixed
-   - Issue: Room constructor calls `this.label.setAlpha()`, `this.interiorGraphics.fillCircle()` but mocks incomplete
-   - Solution: Add setAlpha() to label mock, add fillCircle() to interiorGraphics mock in Room.test.ts
-   - Acceptance: All Building tests passing ✅
-
-3. **Fix GameScene.test.ts glowGraphics mock**
+1. **Fix GameScene.test.ts - 17 failures**
    - Priority: P0 (blocks all 17 GameScene tests)
    - Status: ❌ Not fixed
-   - Issue: GameScene.create() calls `this.glowGraphics.setBlendMode()` but mock incomplete
-   - Solution: Update GameScene.test.ts mock setup
-   - Acceptance: GameScene tests passing ✅
+   - Issue: `this.glowGraphics.setBlendMode is not a function` 
+   - Root cause: Mock glowGraphics in GameScene.test.ts doesn't have all required Phaser methods
+   - Solution: Update GameScene mock setup to include setBlendMode(), setAlpha(), other graphics methods
+   - Acceptance: All 17 GameScene tests passing ✅
+   - File: src/scenes/GameScene.test.ts
 
-4. **Fix Resident.test.ts mock structure**
-   - Priority: P0 (blocks 12 Resident tests)
-   - Status: ❌ Not fixed
-   - Issue: Tests fail with "Cannot read properties of undefined (reading 'get')" - scene.building.rooms missing
-   - Solution: Verify mock scene has complete building.rooms Map structure
-   - Acceptance: Resident tests passing ✅
-
-5. **Fix ResidentSystem.test.ts mock structure**
-   - Priority: P0 (blocks 2 ResidentSystem tests)
-   - Status: ❌ Not fixed
-   - Issue: `mockScene.resourceSystem.addFood is not a function` - mock incomplete
-   - Solution: Add addFood() method to resourceSystem mock in ResidentSystem.test.ts
-   - Acceptance: Office worker lunch behavior test passing ✅
-
-6. **Fix ResourceSystem production rate expectations**
+2. **Fix ResourceSystem.test.ts - 5 failures**
    - Priority: P0 (blocks 5 ResourceSystem tests)
    - Status: ❌ Not fixed
-   - Issue: Tests expect farm to produce ~10/hr, kitchen to process ~20/hr, but getting 100+
-   - Root cause: Constants or system calculation changed - need to verify ROOM_SPECS.farm.production and kitchen values
-   - Solution: Check if ResourceSystem.update() accumulates correctly or if ROOM_SPECS values changed
-   - Acceptance: ResourceSystem tests passing with correct production rates ✅
+   - Issue: Tests expect farm ~10/day, kitchen ~20/day but getting 100+ per update
+   - Root cause: Production rates stored in ROOM_SPECS constants or update() calculation needs verification
+   - Solution: Verify ResourceSystem.ts production rate logic and test expectations are aligned
+   - Acceptance: All 5 ResourceSystem tests passing with correct rates ✅
+   - Files: src/systems/ResourceSystem.ts, src/systems/ResourceSystem.test.ts
 
-7. **Fix EconomySystem.test.ts scene mock - missing graphics property**
+3. **Fix EconomySystem.test.ts - 9 failures**
    - Priority: P0 (blocks 9 EconomySystem tests)
    - Status: ❌ Not fixed
-   - Issue: Tests fail with "Cannot read properties of undefined (reading 'graphics')"
-   - Root cause: Mock scene structure incomplete
-   - Solution: Ensure scene mock has all required properties (graphics, registry, systems, etc.)
-   - Acceptance: EconomySystem tests passing ✅
+   - Issue: `Cannot read properties of undefined (reading 'graphics')`
+   - Root cause: Mock scene missing graphics property required by EconomySystem constructor
+   - Solution: Ensure mockScene in test setup has all required properties (graphics, registry, etc.)
+   - Acceptance: All 9 EconomySystem tests passing ✅
+   - File: src/systems/EconomySystem.test.ts
 
-8. **Fix Sidebar.test.ts callback issue**
+4. **Fix ResidentSystem.test.ts - 2 failures**
+   - Priority: P0 (blocks 2 ResidentSystem tests)
+   - Status: ❌ Not fixed
+   - Issue: `mockScene.resourceSystem.addFood is not a function`
+   - Root cause: Mock resourceSystem incomplete - missing addFood() method
+   - Solution: Add addFood() and other ResourceSystem methods to mock in ResidentSystem.test.ts
+   - Acceptance: Office worker lunch tests passing ✅
+   - File: src/systems/ResidentSystem.test.ts
+
+5. **Fix Sidebar.test.ts - 1 failure**
    - Priority: P0 (blocks 1 Sidebar test)
    - Status: ❌ Not fixed
-   - Issue: setActiveSection callback always receives 'build-zone' instead of clicked section
-   - Root cause: Sidebar click handler not properly wired in test or component
-   - Solution: Debug Sidebar.test.ts click handler logic
+   - Issue: setActiveSection callback receives 'build-zone' for all clicks instead of correct section
+   - Root cause: Event click handler not properly triggering callback with correct section ID
+   - Solution: Debug Sidebar component click handler and test event dispatching
    - Acceptance: Sidebar test passing ✅
+   - File: src/ui/components/Sidebar.test.ts
 
 ### VALIDATION TARGET
 
 After all P0 fixes:
-- ✅ All TypeScript type checking passes
-- ✅ All ESLint linting passes (will also fix @typescript-eslint/no-unsafe-function-type errors in test/setup.ts)
-- ✅ All Vitest tests pass (457 total: 0 failed, 373 passing + fixed failures, 5 skipped)
+- ⏳ All TypeScript type checking passes
+- ⏳ All ESLint linting passes  
+- ⏳ All Vitest tests pass (~415 total)
+
+---
+
+## Phase 4 - Post-MVP Features (Spec-Driven)
+
+After validation passes, implement remaining spec requirements aligned with JTBD:
+
+### P1 - Core Gameplay Loop (JTBD 1-5: Architect & Builder)
+- **Lobby extension system** (JTBD 2) - Allow expanding existing lobby to reduce congestion, costs resources
+- **Movement & pathfinding** (JTBD 5, 10) - Residents walk visibly between locations (already implemented, verify)
+- **Resident walking animations** (Graphics.md) - 2-4 frame subtle animation for residents moving
+- **Congestion feedback** (JTBD 2, 5) - Visible bottlenecks in lobbies when overcrowded
+- **Economic planning UI** (JTBD 3) - Income/expense projection, cash flow visualization
+- **Larger map support** (JTBD 4) - Scalable to 100+ unit width (post-MVP infrastructure)
+
+### P2 - Maintenance & Systems (JTBD 6-9: Systems Operator)
+- **Maintenance system** (JTBD 6, 7) - Rooms degrade over time, require maintenance (POST-MVP, not MVP)
+- **System failure cascades** (JTBD 7, 9) - Oxygen → Power → Elevator failures cascade
+- **Sub-agent simulation** (JTBD 8) - 500+ agents: maintenance workers, oxygen processors, cleaners
+- **Emergent gameplay** (JTBD 9) - Crisis storytelling through cascading failures
+- **Maintenance budget allocation** (JTBD 6, 7) - Compete maintenance vs expansion spending
+
+### P3 - Resident Stories (JTBD 11-13: Observer)
+- **Resident trait system** (JTBD 11) - Names, traits, job history, salary expectations (mostly implemented)
+- **Individual resident tracking** (JTBD 11, 12) - UI for viewing specific resident stories
+- **Crisis response mechanics** (JTBD 13) - Emergency alerts, time-pressure decisions
+- **Moral consequences** (JTBD 12) - Visible impact of player decisions on individual residents
+
+### P4 - Gameplay Features by Priority
+**P4a - Core Systems (Blocking JTBD 1-3):**
+- **Stress system** (Residents.md) - Occupancy stress, adjacency noise, elevator congestion
+- **Satisfaction calculation** (Economy.md) - Formula: 100 - Stress - HungerPenalty + FoodBonus + EmploymentBonus
+- **Rent tiers** (Economy.md) - Scale from $50-200 based on satisfaction
+- **Bankruptcy system** (Economy.md) - Game over at -$10,000 balance
+- **Star rating system** (Economy.md) - Population milestones: 1⭐@100, 2⭐@300 (MVP victory)
+
+**P4b - Time & Food (Blocking JTBD 5-13):**
+- **Time progression** (TIME_EVENTS.md) - 1 game hour = 10 real seconds, speed controls 1x/2x/4x (mostly implemented)
+- **Restaurant evaluation system** (FOOD_SYSTEM.md) - Score 0-100 based on food availability & wait times
+- **Restaurant operating hours** (FOOD_SYSTEM.md) - Fast Food 11-2 & 5-7, Fine Dining 6-11 PM only
+- **Elevator stress impact** (Elevator.md) - Wait times affect resident stress
+
+**P4c - UI/Visibility (Enabling JTBD):**
+- **Top bar elements** (UI_UX.md) - Credits, Rations, Residents, Time, Star rating
+- **Sidebar navigation** (UI_UX.md) - Collapsible, section switching (needs mock fix)
+- **Status alerts** (UI_UX.md) - Low rations, bankruptcy, starving residents
+- **Keyboard shortcuts** (UI_UX.md) - Number keys for rooms, Q/Escape, Home key
+
+**P4d - Graphics Polish (JTBD Aesthetic):**
+- **Volcanic Venus atmosphere** (Graphics.md) - Day/night cycle sky colors (implemented, verify)
+- **Room interior lighting** (Graphics.md) - Distinct accent colors by room type (implemented, verify)
+- **Resident color variation** (Graphics.md) - Hunger-based coloring, name-based palette (implemented)
+- **Ghost preview feedback** (Graphics.md) - Cyan valid / Magenta invalid placement
+- **Day/night transitions** (Graphics.md) - Smooth 1-hour blends between phases
+
+**P4e - Persistence & Polish:**
+- **Save/load persistence** (SAVE_LOAD.md) - Auto-save every 5 days, manual save/load
+- **Performance tuning** - Test with 500+ residents at target FPS
+- **Visual polish** - Scanlines, glass panels, glitch effects (partially done)
+
+---
+
+## JTBD Mapping to Implementation
+
+**JTBD 1-5 (Architect: Building & Strategy):**
+- Place buildings strategically ✅ (Room placement system complete)
+- Extend lobby for traffic flow ⏳ (Requires lobby extension feature)
+- Long-term economic planning ⏳ (Needs economic UI improvements)
+- Larger map/vision scale ⏳ (Post-MVP infrastructure needed)
+- Residents walk naturally ✅ (Pathfinding implemented, needs animations)
+
+**JTBD 6-9 (Systems Operator: Maintenance & Emergence):**
+- Maintain critical systems ⏳ (Maintenance system POST-MVP)
+- Systems fail realistically ⏳ (Failure cascade mechanics POST-MVP)
+- 500+ agent simulation ⏳ (Scale phase, not MVP)
+- Emergent gameplay from interactions ⏳ (Requires all systems mature)
+- Watch residents navigate ✅ (Movement system complete, needs polish)
+
+**JTBD 11-13 (Observer: Resident Stories):**
+- Understand resident stories ✅ (Traits system implemented)
+- Watch success/failure mechanics ⏳ (Needs satisfaction → morale effects)
+- Respond to crises ⏳ (Emergency response system POST-MVP)
+
+**MVP Blocking Features (Must complete for game loop to work):**
+1. Stress system (enables JTBD 12)
+2. Satisfaction formula (enables rent variance, JTBD 1-3)
+3. Bankruptcy detection (enables economic tension, JTBD 3)
+4. Star rating system (enables victory, JTBD 1)
+5. Time progression (enables scheduling, JTBD 5-13)
+6. Restaurant system (enables food variety, JTBD 12)
 
 ---
 
@@ -126,23 +278,34 @@ After all P0 fixes:
 
 ## Test Failure Analysis
 
-| Test File | Failed | Total | Root Cause |
-|-----------|--------|-------|-----------|
-| RestaurantSystem.test.ts | 17 | 17 | Room mock missing statusLabel.setColor() |
-| Building.test.ts | 13 | 18 | Room/Building mocks missing Phaser methods |
-| GameScene.test.ts | 17 | 17 | GameScene mock missing glowGraphics.setBlendMode() |
-| Resident.test.ts | 12 | 38 | Mock scene.building.rooms not properly initialized |
-| ResourceSystem.test.ts | 5 | 29 | Production rate values mismatch (100 vs expected 10-20) |
-| EconomySystem.test.ts | 9 | 17 | Mock scene missing graphics property |
-| ResidentSystem.test.ts | 2 | 31 | Mock resourceSystem missing addFood() method |
-| Sidebar.test.ts | 1 | 1 | Click handler callback issue |
-| **PASSING** | | | |
-| Room.test.ts | 0 | 35 | ✅ Passing |
-| SettingsScene.test.ts | 0 | 23 | ✅ Passing |
-| SaveGameScene.test.ts | 0 | 15 | ✅ Passing |
-| TopBar.test.ts | 0 | 30 | ✅ Passing |
-| RoomInfoPanel.test.ts | 0 | 25 | ✅ Passing |
-| TimeSystem.test.ts | 0 | 26 | ✅ Passing |
+| Test File | Failed | Total | Status | Root Cause |
+|-----------|--------|-------|--------|-----------|
+| GameScene.test.ts | 17 | 17 | ❌ Failing | glowGraphics mock missing setBlendMode() |
+| ResourceSystem.test.ts | 5 | 29 | ❌ Failing | Production rate mismatch (100 vs expected 10-20) |
+| EconomySystem.test.ts | 9 | 17 | ❌ Failing | Mock scene.graphics property missing |
+| ResidentSystem.test.ts | 2 | 31 | ❌ Failing | Mock resourceSystem.addFood() missing |
+| Sidebar.test.ts | 1 | 1 | ❌ Failing | Click callback returns wrong section ID |
+| **PASSING** | | | ✅ | |
+| Room.test.ts | 0 | 35 | ✅ Passing | - |
+| Resident.test.ts | 0 | 38 | ✅ Passing | - |
+| Building.test.ts | 0 | 18 | ✅ Passing | - |
+| RestaurantSystem.test.ts | 0 | 17 | ✅ Passing | - |
+| SettingsScene.test.ts | 0 | 23 | ✅ Passing | - |
+| SaveGameScene.test.ts | 0 | 15 | ✅ Passing | - |
+| TopBar.test.ts | 0 | 30 | ✅ Passing | - |
+| RoomInfoPanel.test.ts | 0 | 25 | ✅ Passing | - |
+| TimeSystem.test.ts | 0 | 26 | ✅ Passing | - |
+| AudioSystem.test.ts | 0 | 9 | ✅ Passing | - |
+| ElevatorSystem.test.ts | 0 | 24 | ✅ Passing | - |
+| SaveSystem.test.ts | 0 | 9 | ✅ Passing | - |
+| BootScene.test.ts | 0 | 4 | ✅ Passing | - |
+| LoadGameScene.test.ts | 0 | 2 | ✅ Passing | - |
+| MainMenuScene.test.ts | 0 | 4 | ✅ Passing | - |
+| PauseMenuScene.test.ts | 0 | 7 | ✅ Passing | - |
+| UIScene.test.ts | 0 | 8 | ✅ Passing | - |
+| BuildMenu.test.ts | 0 | 7 | ✅ Passing | - |
+
+**Summary:** 34 failures across 5 test files, 268+ passing across 18 test files
 
 ---
 

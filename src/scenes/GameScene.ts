@@ -1107,11 +1107,12 @@ export class GameScene extends Phaser.Scene {
     this.registry.set('day', this.timeSystem.getDay());
     this.registry.set('hour', this.timeSystem.getHour());
     this.registry.set('food', this.resourceSystem.getFood());
-    this.registry.set('population', this.residentSystem.getPopulation());
     
-    // Calculate star rating (1 star at 100 pop, 2 stars at 300 pop)
     const population = this.residentSystem.getPopulation();
-    const starRating = population >= 300 ? 2 : population >= 100 ? 1 : 0;
+    this.registry.set('population', population);
+    
+    // Calculate star rating based on population milestones
+    const starRating = this.economySystem.calculateStars(population);
     this.registry.set('starRating', starRating);
   }
 

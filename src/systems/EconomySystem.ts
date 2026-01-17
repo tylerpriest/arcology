@@ -173,6 +173,20 @@ export class EconomySystem {
     return this.money < -10000; // Allow some debt
   }
 
+  /**
+   * Calculate star rating based on population milestones
+   * @param population Current resident population
+   * @returns Number of stars (0-5)
+   */
+  calculateStars(population: number): number {
+    if (population >= 15000) return 5;
+    if (population >= 5000) return 4;
+    if (population >= 1000) return 3;
+    if (population >= 300) return 2;
+    if (population >= 100) return 1;
+    return 0;
+  }
+
   getSnapshot(): EconomySnapshot {
     return {
       money: this.money,
