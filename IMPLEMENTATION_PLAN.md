@@ -2,24 +2,54 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis.
 
-**Last Updated:** 2026-01-27 - Building mode: Office worker lunch behavior implemented
+**Last Updated:** 2025-01-27 - Building mode: Camera controls, sidebar improvements, UI fixes completed
 
-**Latest Planning Session (2026-01-27 - Planning Mode):** Comprehensive planning session completed with full verification:
+## Executive Summary
+
+**Current Status:**
+- ✅ **Phase 0 (Critical Features): COMPLETE** - Sky lobbies, height limits, tenant types, lunch behavior all implemented
+- ❌ **Phase 1 (Audio System): NOT IMPLEMENTED** - Highest priority. No AudioSystem class exists, SettingsScene sliders disconnected
+- ❌ **Phase 2 (Resident Polish): NOT IMPLEMENTED** - No visual variety (color palettes, size variation, traits)
+- ⚠️ **Phase 3 (Spec Compliance): PARTIAL** - Restaurant visual state missing, test coverage gaps
+
+**Recent Work Completed (2025-01-27):**
+- ✅ Camera controls fully implemented (WASD/Arrow keys, UI panel, left-click drag, window blur handler)
+- ✅ Sidebar Build Zone toggle wired to BuildMenu visibility
+- ✅ Sidebar display fixes (240px expanded, 28px collapsed, proper overflow handling)
+- ✅ Initial zoom set to 0.5x (can zoom out to 0.25x)
+- ✅ Zero rations alert fix (only shows when population > 0)
+- ✅ Building frame duplicate outline fix (cleanup on scene restart)
+
+**Immediate Next Steps:**
+1. Create AudioSystem.ts and implement all sound effects (UI, money, alerts, elevator)
+2. Connect SettingsScene volume sliders to AudioSystem
+3. Add test coverage for ResidentSystem, ResourceSystem, and entities
+4. Implement resident visual variety (Phase 2)
+5. Fix restaurant open/closed visual state (Phase 3)
+
+**Latest Planning Session (2025-01-27 - Planning Mode):** Comprehensive codebase analysis completed:
 - Reviewed all 11 spec files (BUILDING, RESIDENTS, FOOD_SYSTEM, ELEVATORS, ECONOMY, UI_UX, MENUS, SAVE_LOAD, AUDIO, TIME_EVENTS, GRAPHICS)
 - Reviewed shared utilities (src/lib/llm-review.ts, llm-review.test.ts)
-- Performed semantic codebase searches for all critical missing features (sky lobbies, height limits, tenant types, lunch behavior, audio system, restaurant visual state)
+- Performed semantic codebase searches for all critical features (sky lobbies, height limits, tenant types, lunch behavior, audio system, restaurant visual state, resident visual variety)
 - Verified key source files through direct reads:
-  - Resident.ts (lines 22-26: no `type` field; lines 206-244: no lunch behavior in updateIdle(); lines 662-672: serialize() missing type)
-  - constants.ts (no `skylobby` in ROOM_SPECS, no MAX_FLOORS_MVP constant)
-  - Room.ts (lines 51-107: draw() method does not check RestaurantSystem for open/closed state)
-  - Building.ts (lines 17-58: no height limit validation in addRoom())
-- Confirmed no AudioSystem.ts exists via glob search
-- Verified demolition refund implementation (GameScene.ts:326-329 - 50% refund confirmed)
-- Verified existing test coverage (EconomySystem, TimeSystem, ElevatorSystem, RestaurantSystem, SaveSystem have tests)
-- Confirmed missing test coverage (ResidentSystem, ResourceSystem, Building/Room/Resident entities, UI components, Scenes)
-- All findings match previous verification - plan remains accurate and up-to-date
+  - Resident.ts (line 27: `type` field EXISTS ✅; lines 104-129: lunch behavior EXISTS ✅ via handleLunchStart(); lines 199-239: drawSilhouette() uses only hunger colors, NO color palette or size variation ❌)
+  - constants.ts (line 92: `skylobby` EXISTS in ROOM_SPECS ✅; line 6: MAX_FLOORS_MVP EXISTS ✅)
+  - Room.ts (lines 51-107: draw() method does NOT check RestaurantSystem for open/closed state ❌; grep confirmed no RestaurantSystem references)
+  - Building.ts (lines 42-44: height limit validation EXISTS ✅ in addRoom())
+  - ResidentSystem.ts (lines 100-143: office worker spawn/remove logic EXISTS ✅)
+  - SettingsScene.ts (lines 88-95: volume sliders exist but no AudioSystem connection ❌)
+- Confirmed no AudioSystem.ts exists via glob search ❌
+- Verified demolition refund implementation (GameScene.ts:326-332 - 50% refund confirmed ✅)
+- Verified existing test coverage (EconomySystem, TimeSystem, ElevatorSystem, RestaurantSystem, SaveSystem, Building have tests ✅)
+- Confirmed missing test coverage (ResidentSystem, ResourceSystem, Room/Resident entities, UI components, Scenes)
+- **Key Finding:** Phase 0 critical features (sky lobbies, height limit, tenant types, lunch behavior) are ALL COMPLETED ✅
+- **Status Summary:**
+  - ✅ Phase 0: ALL COMPLETE (sky lobbies, height limit, tenant types, lunch behavior)
+  - ❌ Phase 1: Audio system completely missing (highest priority - no AudioSystem.ts, SettingsScene has sliders but no connection)
+  - ❌ Phase 2: Resident visual variety and traits missing (no color palette system, no size variation, no traits property)
+  - ⚠️ Phase 3: Restaurant visual state missing (RestaurantSystem.isRestaurantOpen() tracks state but Room.ts draw() doesn't display it)
 
-**Previous Planning Session (2026-01-27 - Final Verification):** Final comprehensive verification completed. All critical gaps confirmed through:
+**Previous Planning Session (2025-01-27 - Final Verification):** Final comprehensive verification completed. All critical gaps confirmed through:
 - Direct file reads of all 11 spec files (BUILDING, RESIDENTS, FOOD_SYSTEM, ELEVATORS, ECONOMY, UI_UX, MENUS, SAVE_LOAD, AUDIO, TIME_EVENTS, GRAPHICS)
 - Direct file reads of shared utilities (src/lib/llm-review.ts, llm-review.test.ts)
 - Semantic codebase searches for sky lobbies, height limits, tenant types, lunch behavior, audio system, restaurant visual state
@@ -58,7 +88,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 
 **Verification Status:** ✅ All codebase findings verified through direct file reads, semantic search, and grep patterns. Plan accurately reflects current implementation state.
 
-**Re-verification (2026-01-27):** All findings confirmed through:
+**Re-verification (2025-01-27):** All findings confirmed through:
 - Direct file reads of Resident.ts (confirmed no `type` field at lines 22-26)
 - Direct file reads of constants.ts (confirmed no `skylobby` in ROOM_SPECS, no MAX_FLOORS_MVP constant)
 - Direct file reads of Building.ts (confirmed no height limit validation in addRoom() at lines 17-58)
@@ -66,7 +96,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - Glob search confirmed no AudioSystem.ts file exists
 - All acceptance criteria status markers verified against spec files
 
-**Verification Method (Latest Session - 2026-01-27):**
+**Verification Method (Latest Session - 2025-01-27):**
 - Reviewed all 11 spec files comprehensively (BUILDING, RESIDENTS, FOOD_SYSTEM, ELEVATORS, ECONOMY, UI_UX, MENUS, SAVE_LOAD, AUDIO, TIME_EVENTS, GRAPHICS)
 - Searched codebase for TODOs, placeholders, skipped tests (found: llm-review.ts TODO, 5 skipped tests in llm-review.test.ts)
 - Verified Resident.ts structure (no `type` field, no lunch behavior in updateIdle())
@@ -80,18 +110,86 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - Confirmed all acceptance criteria status markers are accurate
 - All test requirements properly derived from spec acceptance criteria (programmatic vs visual/subjective tests identified)
 
+## Current Implementation Status (2025-01-27)
+
+**Phase Status:**
+- ✅ **Phase 0 (Critical Features): COMPLETE**
+  - Sky lobby system: ✅ Implemented (room type, elevator zones, pathfinding with transfers)
+  - Building height limit: ✅ Implemented (MAX_FLOORS_MVP = 20, validated in Building.addRoom())
+  - Tenant type system: ✅ Implemented (Resident.type field, office workers spawn/leave on schedule)
+  - Office worker lunch: ✅ Implemented (seek Fast Food at 12 PM, consume food, return to office)
+
+- ❌ **Phase 1 (Audio System): NOT IMPLEMENTED** (HIGHEST PRIORITY)
+  - No AudioSystem.ts file exists
+  - No sound files or audio asset loading
+  - SettingsScene has volume sliders but no AudioSystem connection
+  - All audio acceptance criteria from AUDIO.md spec are missing
+
+- ❌ **Phase 2 (Resident Visual Variety): NOT IMPLEMENTED**
+  - No color palette system (Resident.ts drawSilhouette() uses only hunger colors)
+  - No size variation (±4px height)
+  - No traits property or assignment system
+
+- ⚠️ **Phase 3 (Spec Compliance & Testing): PARTIAL**
+  - Restaurant visual state: RestaurantSystem.isRestaurantOpen() tracks state but Room.ts draw() doesn't display it
+  - Missing test coverage: ResidentSystem, ResourceSystem, Room/Resident entities, UI components, Scenes
+  - LLM review system: Placeholder with TODO (5 skipped tests waiting for implementation)
+
+**Next Actions (Prioritized):**
+1. **IMMEDIATE (Phase 1):** Implement Audio System - Create AudioSystem.ts, connect SettingsScene volume sliders, add sound effects (UI, money, alerts, elevator bell)
+2. **HIGH PRIORITY (Testing):** Add missing test coverage - ResidentSystem, ResourceSystem, Room/Resident entities, UI components
+3. **MEDIUM PRIORITY (Phase 2):** Implement resident visual variety - Color palettes, size variation, traits system
+4. **MEDIUM PRIORITY (Phase 3):** Fix restaurant open/closed visual state - Room.ts needs RestaurantSystem reference to display state
+
+## Current Implementation Status (2025-01-27)
+
+**Phase 0 - Critical Missing Features:** ✅ **ALL COMPLETED**
+- ✅ Sky lobby system (room type, elevator zones, pathfinding with transfers)
+- ✅ Building height limit enforcement (20 floors MVP)
+- ✅ Tenant type system (Office Worker vs Residential Tenant)
+- ✅ Office worker lunch behavior (seek Fast Food at 12 PM)
+
+**Phase 1 - Audio System:** ❌ **NOT IMPLEMENTED** (HIGHEST PRIORITY)
+- ❌ No AudioSystem class exists
+- ❌ No sound files or audio asset loading
+- ❌ SettingsScene has volume sliders but no AudioSystem connection
+- All audio acceptance criteria from AUDIO.md spec are missing
+
+**Phase 2 - Resident Polish:** ❌ **NOT IMPLEMENTED**
+- ❌ No visual variety (color palettes, size variation)
+- ❌ No traits system (display only)
+
+**Phase 3 - Spec Compliance & Testing:** ⚠️ **PARTIAL**
+- ⚠️ Restaurant open/closed visual state missing (RestaurantSystem tracks state but Room.ts doesn't display it)
+- ❌ Missing test coverage (ResidentSystem, ResourceSystem, Room/Resident entities, UI components, Scenes)
+- ⚠️ LLM review system placeholder (5 skipped tests waiting for implementation)
+
 ## Planning Session Findings
 
-**Code Analysis Summary:**
-- ✅ **Demolition system confirmed implemented** - 50% refund working (GameScene.ts:326-332, Building.removeRoom() exists)
-- ✅ **Fast Food and Restaurant rooms confirmed** - Both in ROOM_SPECS (constants.ts:103-126) with correct specs
-- ❌ **Sky lobbies missing** - Not in ROOM_SPECS, no elevator zone system, no pathfinding for zone transfers
-- ✅ **Building height limit enforced** - MAX_FLOORS_MVP constant added, validation in Building.addRoom() and GameScene, UI shows limit info
-- ❌ **Tenant types missing** - Resident class (Resident.ts:22-691) has no `type` field, all residents are residential tenants by default
-- ❌ **Office worker lunch behavior missing** - No code in Resident.ts for office workers seeking Fast Food at 12 PM, no listener for `schedule:lunch-start` event
-- ❌ **Audio system completely absent** - No AudioSystem class, no sound files, no audio asset loading in BootScene, only one comment in ElevatorSystem.ts about bell sound
-- ⚠️ **Restaurant visual state missing** - RestaurantSystem.isRestaurantOpen() tracks state (RestaurantSystem.ts:36-53) but Room.ts draw() method (lines 51-107) does not check RestaurantSystem or display open/closed state visually. Room needs reference to RestaurantSystem to query open/closed state during rendering.
-- ⚠️ **LLM review placeholder** - src/lib/llm-review.ts has TODO comment, 5 tests skipped in llm-review.test.ts
+**Code Analysis Summary (2025-01-27):**
+- ✅ **Phase 0 Features - ALL COMPLETE:**
+  - Sky lobbies: `skylobby` in ROOM_SPECS (constants.ts:92-102), elevator zones in ElevatorSystem.ts, pathfinding with transfers in Resident.ts (lines 477-547)
+  - Building height limit: MAX_FLOORS_MVP = 20 (constants.ts:6), validated in Building.addRoom() (lines 42-44)
+  - Tenant types: Resident.type field exists (Resident.ts:27), office workers spawn at 9 AM, leave at 5 PM (ResidentSystem.ts:100-143)
+  - Office worker lunch: handleLunchStart() method (Resident.ts:104-129) listens to schedule:lunch-start, seeks Fast Food at 12 PM
+  - Demolition system: 50% refund working (GameScene.ts:326-332, Building.removeRoom() exists)
+  - Fast Food and Restaurant: Both in ROOM_SPECS (constants.ts:147-170) with correct specs
+
+- ❌ **Phase 1 - Audio System: COMPLETELY MISSING** (HIGHEST PRIORITY):
+  - No AudioSystem.ts file exists (glob search confirmed)
+  - No sound files or audio asset loading in BootScene
+  - SettingsScene has volume sliders (lines 88-95) but no AudioSystem connection
+  - Only one comment in ElevatorSystem.ts about bell sound (line 83)
+  - All audio acceptance criteria from AUDIO.md spec are missing
+
+- ❌ **Phase 2 - Resident Visual Variety: MISSING:**
+  - Resident.ts drawSilhouette() (lines 199-239) uses only hunger colors, no color palette system
+  - No size variation (±4px height)
+  - No traits property in Resident class
+
+- ⚠️ **Phase 3 - Spec Compliance: PARTIAL:**
+  - Restaurant visual state: RestaurantSystem.isRestaurantOpen() tracks state (RestaurantSystem.ts:36-53) but Room.ts draw() (lines 51-107) doesn't check RestaurantSystem or display open/closed state. Room needs RestaurantSystem reference.
+  - LLM review placeholder: src/lib/llm-review.ts has TODO (line 42), 5 tests skipped in llm-review.test.ts
 
 **Test Coverage Gaps:**
 - Skipped tests in llm-review.test.ts (5 visual/subjective tests waiting for LLM implementation)
@@ -133,26 +231,31 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 
 ## Priority Summary
 
-**Phase 0 - Critical Missing Features (HIGHEST PRIORITY):**
+**Phase 0 - Critical Missing Features:** ✅ **ALL COMPLETED**
 1. ✅ Sky lobby system (required for floors 15+) - COMPLETED
 2. ✅ Building height limit enforcement (20 floors MVP) - COMPLETED
 3. ✅ Tenant type system (Office Worker vs Residential Tenant) - COMPLETED
 4. ✅ Office worker lunch behavior (seek Fast Food at 12 PM) - COMPLETED
 
-**Phase 1 - Audio System:**
-1. UI sound effects
-2. Money sounds
-3. Alert sounds
-4. Volume controls integration
+**Phase 1 - Audio System:** ❌ **NOT IMPLEMENTED** (HIGHEST PRIORITY)
+1. Create AudioSystem class with Phaser Sound integration
+2. UI sound effects (button clicks, placement success/error, menu open/close)
+3. Money sounds (income chime, expense tone, large income jingle)
+4. Alert sounds (low rations, starvation, bankruptcy warning/game over)
+5. Elevator bell sound (G4 pitch - 392 Hz)
+6. Volume controls integration (connect SettingsScene sliders to AudioSystem)
+7. Audio asset loading in BootScene
 
-**Phase 2 - Resident Polish:**
-1. Visual variety (color palettes, size variation)
-2. Traits system (display only)
+**Phase 2 - Resident Visual Variety:** ❌ **NOT IMPLEMENTED**
+1. Color palette system (4-8 palettes based on name hash)
+2. Size variation (±4px height)
+3. Traits system (1-2 traits per resident, display only)
 
-**Phase 3 - Spec Compliance & Testing:**
-1. Verify all acceptance criteria from specs
-2. Add missing test coverage
-3. Fix any remaining spec discrepancies
+**Phase 3 - Spec Compliance & Testing:** ⚠️ **PARTIAL**
+1. Restaurant open/closed visual state (Room.ts needs RestaurantSystem reference)
+2. Verify all acceptance criteria from specs
+3. Add missing test coverage (ResidentSystem, ResourceSystem, entities, UI, Scenes)
+4. Fix any remaining spec discrepancies
 
 ## Tasks
 
@@ -405,8 +508,13 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - [x] Left sidebar with navigation (✅ implemented - Sidebar.ts)
   - [x] Build Zone menu with all room types (✅ implemented - BuildMenu.ts)
   - [x] Camera pan with right-click drag (✅ implemented - GameScene.ts)
-  - [x] Camera pan with WASD/Arrow keys (✅ implemented - GameScene.ts)
-  - [x] Camera zoom with scroll wheel (✅ implemented - GameScene.ts)
+  - [x] Camera pan with WASD/Arrow keys (✅ implemented - GameScene.ts:398-426, window blur handler prevents stuck keys)
+  - [x] Camera pan with left-click drag when no room selected (✅ implemented - GameScene.ts:252-260)
+  - [x] Camera zoom with scroll wheel (✅ implemented - GameScene.ts:276-280)
+  - [x] Camera zoom range: 0.25x to 2.0x (✅ implemented - doubled zoom out distance)
+  - [x] Initial zoom set to 0.5x (✅ implemented - GameScene.ts:113)
+  - [x] Camera controls UI panel (✅ implemented - CameraControls.ts with toggle, all controls accessible)
+  - [x] Keyboard shortcuts: Home, +/-, 0, F (✅ implemented - GameScene.ts:375-396)
   - [x] Ghost preview during placement (✅ implemented - GameScene.ts)
   - [x] Cyan/magenta validity feedback (✅ implemented - UI_COLORS in constants.ts)
   - [x] Room selection with info display (✅ implemented - RoomInfoPanel.ts)
@@ -603,15 +711,17 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 **Infrastructure:**
 - [x] Project setup (Vite + Phaser + TypeScript)
 - [x] Scene structure (BootScene, GameScene, UIScene)
-- [x] Unit tests for core systems (EconomySystem, TimeSystem, ElevatorSystem, RestaurantSystem, SaveSystem)
+- [x] Unit tests for core systems (EconomySystem, TimeSystem, ElevatorSystem, RestaurantSystem, SaveSystem, Building)
+- [x] Building frame duplicate outline fix (cleanup on scene restart)
 
 **Building System:**
 - [x] Building entity with floor/room management
 - [x] Room placement with overlap detection
 - [x] Grid rendering (64px units)
-- [x] Room types: lobby, apartment, office, farm, kitchen, fastfood, restaurant
+- [x] Room types: lobby, apartment, office, farm, kitchen, fastfood, restaurant, skylobby
 - [x] Room demolition with 50% refund
 - [x] Building.removeRoom() method
+- [x] Building frame cleanup on scene restart (prevents duplicate outlines)
 
 **Graphics Foundation:**
 - [x] Venus atmosphere background (`src/graphics/VenusAtmosphere.ts`)
@@ -622,14 +732,24 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 
 **UI System:**
 - [x] Top bar (Credits, Rations, Residents, Time, Star Rating, Satisfaction)
-- [x] Left sidebar navigation (collapsible, VENUS_OS branding)
+- [x] Left sidebar navigation (collapsible, VENUS_OS branding, 240px expanded, 28px collapsed)
+- [x] Sidebar Build Zone button toggles BuildMenu visibility
+- [x] Build Zone selected by default (matches BuildMenu visibility)
 - [x] Build Zone menu with all room types
-  - [x] Camera controls (right-click pan, WASD/Arrow keys, scroll zoom, keyboard shortcuts, UI panel)
+- [x] Camera controls fully implemented:
+  - Right-click drag panning
+  - WASD/Arrow key panning (200px/s, window blur handler prevents stuck keys)
+  - Left-click drag panning when no room selected (5px threshold)
+  - Scroll wheel zoom (0.25x to 2.0x range)
+  - Initial zoom: 0.5x (can zoom out to 0.25x)
+  - Keyboard shortcuts: Home (focus lobby), +/- (zoom), 0 (reset), F (fit building)
+  - Camera controls UI panel (toggle, all controls accessible)
 - [x] Glass panel CSS styling
 - [x] Ghost preview for room placement
 - [x] Room selection & info panel
 - [x] Economy breakdown panel
 - [x] Notification system
+- [x] Zero rations alert fix (only shows when population > 0)
 - [x] Glitch hover effects
 - [x] Typography system (Space Grotesk, Material Symbols)
 
@@ -714,14 +834,14 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 
 **Known Technical Debt:**
 - GAME_SPEED constant exists but TimeSystem.speed is mutable (minor inconsistency)
-- Sky lobby system not implemented (pathfinding works for floors 0-14, sky lobbies needed for floors 15+)
-- Building height limit not enforced (no MAX_FLOORS_MVP constant, no validation in Building.addRoom or GameScene)
+- ✅ Sky lobby system implemented (Phase 0 completed - pathfinding with zone transfers working)
+- ✅ Building height limit enforced (Phase 0 completed - MAX_FLOORS_MVP constant and validation in Building.addRoom())
+- ✅ Tenant type differentiation implemented (Phase 0 completed - Resident class has `type` field, office workers spawn/leave on schedule)
+- ✅ Office worker lunch behavior implemented (Phase 0 completed - office workers seek Fast Food at 12 PM, consume food, return to office)
 - Audio system completely missing (Phase 1 priority - no AudioSystem class, no sound files, no audio asset loading)
-- Tenant type differentiation missing (Phase 0 priority - Resident class has no `type` field, all residents are residential tenants)
-- ✅ Office worker lunch behavior implemented (Phase 0 - office workers seek Fast Food at 12 PM, consume food, return to office)
 - Resident visual variety missing (Phase 2 - no color palette or size variation system, all residents look identical except hunger color)
-- Restaurant open/closed visual state may not be displayed (RestaurantSystem tracks `isOpen` via `isRestaurantOpen()` but Room.ts rendering may not visually indicate state)
-- LLM review system placeholder (src/lib/llm-review.ts has TODO for actual LLM integration)
+- Restaurant open/closed visual state not displayed (RestaurantSystem tracks `isOpen` via `isRestaurantOpen()` but Room.ts rendering does not visually indicate state - Phase 3)
+- LLM review system placeholder (src/lib/llm-review.ts has TODO for actual LLM integration - Phase 3)
 - Skipped tests in llm-review.test.ts (5 visual/subjective tests skipped - waiting for LLM review implementation)
 
 ## Dependency Graph
@@ -755,10 +875,10 @@ Phase 3 (Spec Compliance & Testing)
 |------|--------|----------------|
 | Victory | 300 population (2 stars) | ✅ Implemented |
 | Game Over | -10,000 CR bankruptcy | ✅ Implemented |
-| Building Height | 20 floors max | ❌ Not enforced (Phase 0) |
+| Building Height | 20 floors max | ✅ Implemented (Phase 0) |
 | Playable | Menu → Game → Save | ✅ Implemented |
 | Visual Polish | Graphics & UI complete | ✅ Mostly complete |
-| Sky Lobbies | Required every 15 floors | ❌ Not implemented (Phase 0) |
+| Sky Lobbies | Required every 15 floors | ✅ Implemented (Phase 0) |
 | Audio | Sound effects and alerts | ❌ Not implemented (Phase 1) |
 
 ## Validation Status
@@ -781,19 +901,37 @@ Phase 3 (Spec Compliance & Testing)
 ## Next Actions
 
 **Immediate Priority (High Value):**
-1. Add tests for ResidentSystem (core gameplay system)
-2. Add tests for ResourceSystem (food chain)
-3. Add tests for Building/Room (placement logic)
-4. Implement Phase 0 critical features (sky lobbies, height limit, tenant types, lunch behavior)
+1. **Phase 1 - Audio System** (HIGHEST PRIORITY - All Phase 0 features completed ✅)
+   - Create AudioSystem class in `src/systems/AudioSystem.ts` with Phaser Sound integration
+   - Implement UI sound effects (button clicks, placement success/error, menu open/close)
+   - Implement money sounds (income chime, expense tone, large income jingle)
+   - Implement alert sounds (low rations, starvation, bankruptcy warning/game over)
+   - Implement elevator bell sound (G4 pitch - 392 Hz) on arrival
+   - Connect SettingsScene volume sliders to AudioSystem (master, UI, ambient volumes)
+   - Load audio assets in BootScene
+   - Integrate with EconomySystem (money sounds), Notification system (alerts), ElevatorSystem (bell)
+2. **Testing - High Priority:**
+   - Add tests for ResidentSystem (core gameplay system - spawning, move-outs, job assignment)
+   - Add tests for ResourceSystem (food chain - farm production, kitchen processing, consumption)
+   - Add tests for Room/Resident entities (state machine, pathfinding, satisfaction calculation)
+3. **Phase 2 - Resident Visual Variety** (Medium Priority):
+   - Color palette system based on name hash (4-8 palettes)
+   - Size variation (±4px height)
+   - Traits system (1-2 traits per resident, display only)
+4. **Phase 3 - Spec Compliance** (Medium Priority):
+   - Restaurant open/closed visual state (Room.ts needs RestaurantSystem reference)
+   - Complete acceptance criteria verification across all specs
 
-**Phase 0 - Critical Missing Features (HIGHEST PRIORITY):**
-1. Implement sky lobby system (room type, elevator zones, pathfinding updates)
-2. Enforce building height limit (20 floors MVP)
-3. Implement tenant type system (Office Worker vs Residential Tenant)
-4. ✅ Implement office worker lunch behavior (seek Fast Food at 12 PM) - COMPLETED
+**Phase 0 - Critical Missing Features:** ✅ **ALL COMPLETED**
+- ✅ Sky lobby system (room type, elevator zones, pathfinding updates)
+- ✅ Building height limit enforcement (20 floors MVP)
+- ✅ Tenant type system (Office Worker vs Residential Tenant)
+- ✅ Office worker lunch behavior (seek Fast Food at 12 PM)
 
-**After Phase 0:**
-1. Implement audio system (Phase 1)
-2. Add resident visual variety (Phase 2)
-3. Complete spec compliance verification and testing (Phase 3)
-4. Add visual/browser tests for UI acceptance criteria (per PROMPT_build.md requirement)
+**After Phase 1:**
+1. Phase 2 - Resident visual variety (color palettes, size variation, traits)
+2. Phase 3 - Spec compliance verification and testing
+   - Restaurant open/closed visual state (Room.ts needs RestaurantSystem reference)
+   - Complete acceptance criteria verification
+   - Add missing test coverage
+   - Add visual/browser tests for UI acceptance criteria (per PROMPT_build.md requirement)
