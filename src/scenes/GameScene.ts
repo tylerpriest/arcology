@@ -864,40 +864,47 @@ export class GameScene extends Phaser.Scene {
       this.hasShownBankruptcyWarning = false;
     }
 
-    // Low rations warning: Show when processed food is below 1 day's consumption
-    // Estimate: ~3 meals per resident per day, plus restaurant consumption
-    const mealsPerResidentPerDay = 3;
-    const estimatedDailyConsumption = population * mealsPerResidentPerDay;
-    // Also account for restaurant consumption (rough estimate: 30 per fast food, 20 per restaurant)
-    const fastFoods = this.building.getFastFoods();
-    const restaurants = this.building.getRestaurants();
-    const restaurantConsumption = (fastFoods.length * 30) + (restaurants.length * 20);
-    const totalDailyConsumption = estimatedDailyConsumption + restaurantConsumption;
-    
-    // Warn when rations are below 1 day's consumption
-    if (rations === 0) {
-      // Show critical warning if rations hit zero
-      if (!this.hasShownZeroRationsAlert) {
-        this.uiManager.showError(
-          'Critical: No rations remaining! Residents will starve!',
-          10000 // Show for 10 seconds
-        );
-        this.hasShownZeroRationsAlert = true;
-        // Reset low warning flag so it can show again if rations recover then drop
+    // Only show rations warnings if there are residents who could be affected
+    if (population > 0) {
+      // Low rations warning: Show when processed food is below 1 day's consumption
+      // Estimate: ~3 meals per resident per day, plus restaurant consumption
+      const mealsPerResidentPerDay = 3;
+      const estimatedDailyConsumption = population * mealsPerResidentPerDay;
+      // Also account for restaurant consumption (rough estimate: 30 per fast food, 20 per restaurant)
+      const fastFoods = this.building.getFastFoods();
+      const restaurants = this.building.getRestaurants();
+      const restaurantConsumption = (fastFoods.length * 30) + (restaurants.length * 20);
+      const totalDailyConsumption = estimatedDailyConsumption + restaurantConsumption;
+      
+      // Warn when rations are below 1 day's consumption
+      if (rations === 0) {
+        // Show critical warning if rations hit zero
+        if (!this.hasShownZeroRationsAlert) {
+          this.uiManager.showError(
+            'Critical: No rations remaining! Residents will starve!',
+            10000 // Show for 10 seconds
+          );
+          this.hasShownZeroRationsAlert = true;
+          // Reset low warning flag so it can show again if rations recover then drop
+          this.hasShownLowRationsWarning = false;
+        }
+      } else if (rations < totalDailyConsumption) {
+        if (!this.hasShownLowRationsWarning) {
+          this.uiManager.showWarning(
+            `Low Rations: ${Math.floor(rations)} remaining. Build more farms and kitchens!`,
+            7000 // Show for 7 seconds
+          );
+          this.hasShownLowRationsWarning = true;
+        }
+        // Reset zero alert flag if rations recover above zero
+        this.hasShownZeroRationsAlert = false;
+      } else if (rations >= totalDailyConsumption) {
+        // Reset warning flags if rations recover to safe levels
         this.hasShownLowRationsWarning = false;
+        this.hasShownZeroRationsAlert = false;
       }
-    } else if (rations < totalDailyConsumption) {
-      if (!this.hasShownLowRationsWarning) {
-        this.uiManager.showWarning(
-          `Low Rations: ${Math.floor(rations)} remaining. Build more farms and kitchens!`,
-          7000 // Show for 7 seconds
-        );
-        this.hasShownLowRationsWarning = true;
-      }
-      // Reset zero alert flag if rations recover above zero
-      this.hasShownZeroRationsAlert = false;
-    } else if (rations >= totalDailyConsumption) {
-      // Reset warning flags if rations recover to safe levels
+    } else {
+      // No residents yet - reset warning flags
       this.hasShownLowRationsWarning = false;
       this.hasShownZeroRationsAlert = false;
     }
