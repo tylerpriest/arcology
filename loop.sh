@@ -160,55 +160,8 @@ while true; do
                 git push origin arcology 2>/dev/null || git push -u origin arcology 2>/dev/null || echo "Push failed"
             fi
         else
-            echo "✗ Validation failed - agent must fix errors"
-            echo "Re-running agent to fix validation errors..."
-            
-            # Re-run agent with explicit fix instruction
-            FIX_PROMPT="Validation failed. Run 'npm run validate', fix ALL errors, then re-run validation until it passes. Do NOT commit until validation passes."
-            
-            if [[ "$USE_AGENT" == "true" ]]; then
-                # Re-run agent with fix instruction
-                if [[ "$INTERACTIVE" == "true" ]]; then
-                    # Interactive mode - allows typing input
-                    if [[ "$MODE" == "plan" ]]; then
-                        agent --plan "$FIX_PROMPT"
-                    else
-                        agent "$FIX_PROMPT"
-                    fi
-                else
-                    # Auto-run mode - non-interactive
-                    if [[ "$MODE" == "plan" ]]; then
-                        agent --print --plan --output-format text "$FIX_PROMPT"
-                    else
-                        agent --print --output-format text "$FIX_PROMPT"
-                    fi
-                fi
-            else
-                # Re-run Claude with fix instruction
-                echo "$FIX_PROMPT" | claude \
-                    --dangerously-skip-permissions \
-                    --model opus \
-                    --verbose \
-                    --output-format stream-json
-            fi
-            
-            FIX_EXIT_CODE=$?
-            
-            if [[ $FIX_EXIT_CODE -ne 0 ]]; then
-                if [[ "$USE_AGENT" == "true" ]]; then
-                    echo "Cursor exited with code $FIX_EXIT_CODE"
-                else
-                    echo "Claude exited with code $FIX_EXIT_CODE"
-                fi
-                echo "Stopping loop."
-                exit $FIX_EXIT_CODE
-            fi
-            
-            # After agent finishes, validation will be checked again at top of loop
-            # Decrement iteration counter to stay in current iteration until validation passes
-            # This ensures fixes happen in the current iteration, not deferred to next
-            ITERATION=$((ITERATION - 1))
-            continue
+            echo "✗ Validation failed - skipping push"
+            echo "Agent will fix errors on next iteration"
         fi
     fi
 
