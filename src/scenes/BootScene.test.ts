@@ -60,7 +60,9 @@ describe('BootScene', () => {
     test('creates progress bar and loading text', () => {
       scene.preload();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.add as any).graphics).toHaveBeenCalledTimes(2);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.add as any).text).toHaveBeenCalledWith(
         640, // width / 2
         670, // height / 2 - 50
@@ -75,7 +77,9 @@ describe('BootScene', () => {
     test('sets up progress event handler', () => {
       scene.preload();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const onCall = (mockScene.load as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'progress'
       );
       expect(onCall).toBeTruthy();
@@ -85,7 +89,9 @@ describe('BootScene', () => {
     test('sets up complete event handler', () => {
       scene.preload();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const onCall = (mockScene.load as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'complete'
       );
       expect(onCall).toBeTruthy();
@@ -95,10 +101,13 @@ describe('BootScene', () => {
     test('progress handler updates progress bar', () => {
       scene.preload();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const progressHandler = (mockScene.load as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'progress'
       )?.[1];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const progressBar = (mockScene.add as any).graphics.mock.results[0].value;
       
       progressHandler(0.5);
@@ -111,12 +120,17 @@ describe('BootScene', () => {
     test('complete handler destroys progress elements', () => {
       scene.preload();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const completeHandler = (mockScene.load as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'complete'
       )?.[1];
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const progressBar = (mockScene.add as any).graphics.mock.results[0].value;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const progressBox = (mockScene.add as any).graphics.mock.results[1].value;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const loadingText = (mockScene.add as any).text.mock.results[0].value;
 
       completeHandler();
@@ -131,6 +145,7 @@ describe('BootScene', () => {
     test('starts MainMenuScene', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).start).toHaveBeenCalledWith('MainMenuScene');
     });
   });

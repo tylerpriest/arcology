@@ -6,6 +6,7 @@ import { HUNGER_MAX, MS_PER_GAME_HOUR } from '../utils/constants';
 import Phaser from 'phaser';
 
 // Mock GameScene for Resident
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
   const building = new Building({
     add: {
@@ -81,6 +82,7 @@ const createMockGameScene = (): any => {
 };
 
 describe('Resident Entity', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockScene: any;
   let building: Building;
 

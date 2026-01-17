@@ -99,13 +99,16 @@ describe('LoadGameScene', () => {
     test('sets up ESC key handler', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const escHandler = (mockScene.input.keyboard as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'keydown-ESC'
       )?.[1];
       
       expect(escHandler).toBeTruthy();
       
       escHandler();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).start).toHaveBeenCalledWith('MainMenuScene');
     });
   });

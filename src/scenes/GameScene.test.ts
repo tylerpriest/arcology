@@ -207,11 +207,15 @@ describe('GameScene', () => {
       const initialMoney = scene.economySystem.getMoney();
       const roomCost = ROOM_SPECS.apartment.cost;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue('apartment' as RoomType);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.cameras.main as any).getWorldPoint = vi.fn().mockReturnValue({ x: 64, y: 436 });
 
       // Simulate click
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clickHandler = (mockScene.input as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointerup'
       )?.[1];
 
@@ -235,11 +239,15 @@ describe('GameScene', () => {
     test('does not place room when invalid location clicked', () => {
       const initialRoomCount = scene.building.getAllRooms().length;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue('apartment' as RoomType);
       // Invalid position (e.g., overlapping or wrong floor)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.cameras.main as any).getWorldPoint = vi.fn().mockReturnValue({ x: -100, y: -100 });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clickHandler = (mockScene.input as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointerup'
       )?.[1];
 
@@ -264,6 +272,7 @@ describe('GameScene', () => {
       const room = scene.building.getRoomAt(0, 1);
       if (room) {
         // Access private property via type assertion for testing
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (scene as any).selectedRoomId = room.id;
       }
     });
@@ -273,24 +282,36 @@ describe('GameScene', () => {
       const roomCost = ROOM_SPECS.apartment.cost;
       const expectedRefund = Math.floor(roomCost * 0.5);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const deleteHandler = (mockScene.input.keyboard as any).addKey.mock.results.find(
-        (result: any) => result.value.on.mock.calls.some((call: any[]) => call[0] === 'down')
-      )?.value.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (result: any) => result.value.on.mock.calls.some(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (call: any[]) => call[0] === 'down'
+        )
+      )?.value.on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (call: any[]) => call[0] === 'down'
+      )?.[1];
 
       if (deleteHandler) {
         deleteHandler();
       } else {
         // Alternative: trigger via keyboard event
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const deleteKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (result: any) => result.value
         )?.value;
         if (deleteKey && deleteKey.on.mock.calls.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const handler = deleteKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
           if (handler) handler();
         }
       }
 
       // Room should be removed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const selectedRoomId = (scene as any).selectedRoomId;
       const room = scene.building.getRoomById(selectedRoomId);
       expect(room).toBeFalsy();
@@ -306,25 +327,32 @@ describe('GameScene', () => {
     });
 
     test('ESC opens pause menu when playing', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue(GameState.PLAYING);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const escKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result: any) => result.value
       )?.value;
       
       if (escKey && escKey.on.mock.calls.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = escKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
         if (handler) handler();
       }
 
       // Should launch pause menu
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).launch).toHaveBeenCalledWith('PauseMenuScene');
     });
 
     test('Space toggles pause', () => {
       const setSpeedSpy = vi.spyOn(scene.timeSystem, 'setSpeed');
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const spaceHandler = (mockScene.input.keyboard as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'keydown-SPACE'
       )?.[1];
 
@@ -335,18 +363,23 @@ describe('GameScene', () => {
     });
 
     test('Q cancels room selection', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue('apartment' as RoomType);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const qKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result: any) => result.value
       )?.value;
       
       if (qKey && qKey.on.mock.calls.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = qKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
         if (handler) handler();
       }
 
       // Should clear selected room
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.registry as any).set).toHaveBeenCalledWith('selectedRoom', undefined);
     });
   });
@@ -359,11 +392,14 @@ describe('GameScene', () => {
     test('Home key focuses lobby', () => {
       const panSpy = vi.spyOn(mockScene.cameras.main, 'pan');
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const homeKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result: any) => result.value
       )?.value;
       
       if (homeKey && homeKey.on.mock.calls.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = homeKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
         if (handler) handler();
       }
@@ -376,11 +412,14 @@ describe('GameScene', () => {
       const zoomToSpy = vi.spyOn(mockScene.cameras.main, 'zoomTo');
 
       // Test zoom in
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const plusKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (result: any) => result.value
       )?.value;
       
       if (plusKey && plusKey.on.mock.calls.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = plusKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
         if (handler) handler();
       }

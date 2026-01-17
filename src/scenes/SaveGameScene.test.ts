@@ -21,6 +21,7 @@ const createMockPhaserScene = (): Phaser.Scene => {
 };
 
 // Mock GameScene with SaveSystem
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (saveSystem?: SaveSystem): any => {
   return {
     building: {},
@@ -44,6 +45,7 @@ const createMockSaveSystem = (): SaveSystem => {
 describe('SaveGameScene', () => {
   let scene: SaveGameScene;
   let mockScene: Phaser.Scene;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockGameScene: any;
   let mockSaveSystem: SaveSystem;
 
@@ -52,6 +54,7 @@ describe('SaveGameScene', () => {
     mockScene = createMockPhaserScene();
     mockSaveSystem = createMockSaveSystem();
     mockGameScene = createMockGameScene(mockSaveSystem);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mockScene.scene as any).manager.getScene = vi.fn().mockReturnValue(mockGameScene);
     
     scene = new SaveGameScene();
@@ -122,16 +125,19 @@ describe('SaveGameScene', () => {
       scene.create();
 
       const escHandler = (mockScene.input.keyboard as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'keydown-ESC'
       )?.[1];
       
       expect(escHandler).toBeTruthy();
       
       escHandler();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).start).toHaveBeenCalledWith('PauseMenuScene');
     });
 
     test('shows error UI when GameScene is not available', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.scene as any).manager.getScene = vi.fn().mockReturnValue(null);
       
       scene.create();
@@ -147,6 +153,7 @@ describe('SaveGameScene', () => {
       const gameSceneWithoutSave = {
         building: {},
       };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.scene as any).manager.getScene = vi.fn().mockReturnValue(gameSceneWithoutSave);
       
       scene.create();

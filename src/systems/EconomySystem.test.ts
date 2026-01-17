@@ -7,6 +7,7 @@ import { Resident } from '../entities/Resident';
 import Phaser from 'phaser';
 
 // Mock GameScene for ResidentSystem
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
   const mockPhaserScene = {
     add: {

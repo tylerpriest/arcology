@@ -34,6 +34,7 @@ const createMockAudioSystem = () => {
 };
 
 // Mock GameScene with AudioSystem
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (audioSystem?: any): any => {
   return {
     audioSystem: audioSystem || createMockAudioSystem(),
@@ -43,7 +44,9 @@ const createMockGameScene = (audioSystem?: any): any => {
 describe('SettingsScene', () => {
   let scene: SettingsScene;
   let mockScene: Phaser.Scene;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockGameScene: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockAudioSystem: any;
 
   beforeEach(() => {
@@ -51,7 +54,9 @@ describe('SettingsScene', () => {
     mockScene = createMockPhaserScene();
     mockAudioSystem = createMockAudioSystem();
     mockGameScene = createMockGameScene(mockAudioSystem);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mockScene.scene as any).get = vi.fn().mockReturnValue(mockGameScene);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mockScene.registry as any).get = vi.fn().mockReturnValue(GameState.PLAYING);
     
     scene = new SettingsScene();
@@ -296,6 +301,7 @@ describe('SettingsScene', () => {
       scene.create();
 
       const escHandler = (mockScene.input.keyboard as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'keydown-ESC'
       )?.[1];
       

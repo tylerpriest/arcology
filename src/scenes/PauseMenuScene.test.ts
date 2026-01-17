@@ -24,6 +24,7 @@ const createMockPhaserScene = (): Phaser.Scene => {
 };
 
 // Mock GameScene with TimeSystem
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
   return {
     scene: {
@@ -38,11 +39,13 @@ const createMockGameScene = (): any => {
 describe('PauseMenuScene', () => {
   let scene: PauseMenuScene;
   let mockScene: Phaser.Scene;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockGameScene: any;
 
   beforeEach(() => {
     mockScene = createMockPhaserScene();
     mockGameScene = createMockGameScene();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mockScene.scene as any).get = vi.fn().mockReturnValue(mockGameScene);
     
     scene = new PauseMenuScene();
@@ -88,10 +91,12 @@ describe('PauseMenuScene', () => {
     test('sets game state to PAUSED', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.registry as any).set).toHaveBeenCalledWith('gameState', GameState.PAUSED);
     });
 
     test('handles missing GameScene gracefully', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.scene as any).get = vi.fn().mockReturnValue(null);
       
       expect(() => scene.create()).not.toThrow();
@@ -110,6 +115,7 @@ describe('PauseMenuScene', () => {
 
       expect(mockGameScene.timeSystem.setSpeed).toHaveBeenCalledWith(1);
       expect((mockScene.registry as any).set).toHaveBeenCalledWith('gameState', GameState.PLAYING);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).stop).toHaveBeenCalled();
     });
 
@@ -122,6 +128,7 @@ describe('PauseMenuScene', () => {
       
       saveGameButton.click();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).start).toHaveBeenCalledWith('SaveGameScene');
     });
 
@@ -134,6 +141,7 @@ describe('PauseMenuScene', () => {
       
       settingsButton.click();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).start).toHaveBeenCalledWith('SettingsScene');
     });
 
@@ -146,8 +154,11 @@ describe('PauseMenuScene', () => {
       
       quitButton.click();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).stop).toHaveBeenCalledWith('GameScene');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).stop).toHaveBeenCalledWith('UIScene');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).start).toHaveBeenCalledWith('MainMenuScene');
     });
   });
@@ -157,6 +168,7 @@ describe('PauseMenuScene', () => {
       scene.create();
 
       const escHandler = (mockScene.input.keyboard as any).on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'keydown-ESC'
       )?.[1];
       
@@ -166,6 +178,7 @@ describe('PauseMenuScene', () => {
       
       expect(mockGameScene.timeSystem.setSpeed).toHaveBeenCalledWith(1);
       expect((mockScene.registry as any).set).toHaveBeenCalledWith('gameState', GameState.PLAYING);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.scene as any).stop).toHaveBeenCalled();
     });
   });

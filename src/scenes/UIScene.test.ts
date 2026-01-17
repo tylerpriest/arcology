@@ -32,6 +32,7 @@ const createMockPhaserScene = (): Phaser.Scene => {
 };
 
 // Mock GameScene
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
 
   return {
@@ -51,11 +52,13 @@ const createMockGameScene = (): any => {
 describe('UIScene', () => {
   let scene: UIScene;
   let mockScene: Phaser.Scene;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockGameScene: any;
 
   beforeEach(() => {
     mockScene = createMockPhaserScene();
     mockGameScene = createMockGameScene();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (mockScene.scene as any).get = vi.fn().mockReturnValue(mockGameScene);
     
     scene = new UIScene();
@@ -70,12 +73,14 @@ describe('UIScene', () => {
     test('creates ghost preview graphics', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.add as any).graphics).toHaveBeenCalledTimes(2);
     });
 
     test('sets ghost preview depth', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const graphics = (mockScene.add as any).graphics.mock.results[0].value;
       expect(graphics.setDepth).toHaveBeenCalledWith(100);
     });
@@ -83,6 +88,7 @@ describe('UIScene', () => {
     test('sets ghost glow blend mode', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const glowGraphics = (mockScene.add as any).graphics.mock.results[1].value;
       expect(glowGraphics.setBlendMode).toHaveBeenCalledWith(Phaser.BlendModes.ADD);
       expect(glowGraphics.setDepth).toHaveBeenCalledWith(99);
@@ -97,6 +103,7 @@ describe('UIScene', () => {
     test('listens for selectedRoom registry changes', () => {
       scene.create();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.registry as any).events.on).toHaveBeenCalledWith(
         'changedata-selectedRoom',
         expect.any(Function)
@@ -106,27 +113,32 @@ describe('UIScene', () => {
 
   describe('updateGhostPreview', () => {
     test('clears preview when no room is selected', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue(undefined);
       
       scene.create();
 
       const pointerHandler = mockGameScene.input.on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointermove'
       )?.[1];
 
       const pointer = { x: 640, y: 360 };
       pointerHandler(pointer);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ghostPreview = (mockScene.add as any).graphics.mock.results[0].value;
       expect(ghostPreview.clear).toHaveBeenCalled();
     });
 
     test('draws ghost preview for valid placement', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue('apartment' as RoomType);
       
       scene.create();
 
       const pointerHandler = mockGameScene.input.on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointermove'
       )?.[1];
 
@@ -134,6 +146,7 @@ describe('UIScene', () => {
       pointerHandler(pointer);
 
       const ghostPreview = (mockScene.add as any).graphics.mock.results[0].value;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ghostGlow = (mockScene.add as any).graphics.mock.results[1].value;
 
       // Should draw glow
@@ -158,12 +171,14 @@ describe('UIScene', () => {
       scene.create();
 
       const pointerHandler = mockGameScene.input.on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointermove'
       )?.[1];
 
       const pointer = { x: 640, y: 360 };
       pointerHandler(pointer);
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ghostGlow = (mockScene.add as any).graphics.mock.results[1].value;
 
       // Should use invalid placement color
@@ -182,6 +197,7 @@ describe('UIScene', () => {
       scene.create();
 
       const pointerHandler = mockGameScene.input.on.mock.calls.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointermove'
       )?.[1];
 
@@ -197,6 +213,7 @@ describe('UIScene', () => {
       const w = spec.width * GRID_SIZE;
       const h = GRID_SIZE;
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ghostGlow = (mockScene.add as any).graphics.mock.results[1].value;
       expect(ghostGlow.fillRect).toHaveBeenCalledWith(x, y, w, h);
     });

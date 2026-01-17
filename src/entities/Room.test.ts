@@ -6,6 +6,7 @@ import { ROOM_SPECS, GRID_SIZE } from '../utils/constants';
 import Phaser from 'phaser';
 
 // Mock Phaser Scene for Room
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockPhaserScene = (restaurantSystem?: any): Phaser.Scene => {
   return {
     add: {
@@ -41,6 +42,7 @@ const createMockPhaserScene = (restaurantSystem?: any): Phaser.Scene => {
 };
 
 // Mock GameScene for Resident
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
   const mockPhaserScene = createMockPhaserScene();
   const building = new Building(mockPhaserScene);
@@ -76,6 +78,7 @@ const createMockGameScene = (): any => {
 
 describe('Room Entity', () => {
   let mockScene: Phaser.Scene;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockGameScene: any;
 
   beforeEach(() => {
