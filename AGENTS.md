@@ -10,9 +10,18 @@ npm install && npm run dev  # localhost:5173
 
 ## Validation
 
+**IMPORTANT**: Always run validation after implementing code. Do not ask if you should - just execute it.
+
 ```bash
-npm run validate  # typecheck + lint + test
+npm run validate  # Runs: typecheck + lint + test (all in one command)
 ```
+
+This command:
+- Runs TypeScript type checking (`npm run typecheck`)
+- Runs ESLint (`npm run lint`)
+- Runs all tests (`npm test`)
+
+**Workflow**: Implement → Run tests → Run `npm run validate` → Fix any errors → Re-run validation until it passes → Commit → Push
 
 ## How to Work (Fresh Context)
 

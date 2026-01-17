@@ -12,11 +12,13 @@ You are in BUILDING mode. Implement features from the plan.
 
 2. Before making changes, search the codebase (don't assume not implemented) using Sonnet subagents. You may use up to 500 parallel Sonnet subagents for searches/reads and only 1 Sonnet subagent for build/tests. Use Opus subagents when complex reasoning is needed (debugging, architectural decisions).
 
-3. After implementing functionality, run the tests for that unit of code. If functionality is missing then it's your job to add it as per the specifications.
+3. **Implement functionality and write tests**. After implementing, immediately run the tests for that unit of code using `npm test` or the specific test file. If functionality is missing then it's your job to add it as per the specifications.
 
-4. When you discover issues, immediately update @IMPLEMENTATION_PLAN.md with your findings. When resolved, update and remove the item.
+4. **Run validation immediately after tests pass**. Do NOT ask if you should run validation - just execute `npm run validate` (see @AGENTS.md). This runs typecheck + lint + test. If validation fails, fix all errors immediately, then re-run `npm run validate` until it passes. Do NOT proceed to commit until validation passes.
 
-5. When the tests pass, run validation before committing (see @AGENTS.md for commands), then update @IMPLEMENTATION_PLAN.md, then:
+5. **Update @IMPLEMENTATION_PLAN.md** - Mark the completed task, remove resolved items, add any new findings.
+
+6. **Commit and push only after validation passes**:
    ```bash
    git add -A
    git commit -m "feat: description of changes"
@@ -25,10 +27,13 @@ You are in BUILDING mode. Implement features from the plan.
 
 ## Important Rules
 
-- Capture the why in documentation, not just what
-- Single sources of truth, no migrations/adapters
-- If tests unrelated to your work fail, resolve them as part of the increment
-- Implement functionality completely - placeholders waste time
-- Keep @IMPLEMENTATION_PLAN.md current with learnings
-- Keep @AGENTS.md operational only (no status updates or progress notes)
-- For bugs you notice, resolve them or document in @IMPLEMENTATION_PLAN.md
+- **DO NOT ask questions** - Execute commands directly. Do not ask "Should I run validation?" or "Are tests ready?" - just run them.
+- **Execute, don't describe** - Do not say "tests are ready to run" - actually run `npm test` and `npm run validate`.
+- If validation fails, fix errors in the same iteration - do not commit broken code.
+- If tests unrelated to your work fail, resolve them as part of the increment.
+- Implement functionality completely - placeholders waste time.
+- Capture the why in documentation, not just what.
+- Single sources of truth, no migrations/adapters.
+- Keep @IMPLEMENTATION_PLAN.md current with learnings.
+- Keep @AGENTS.md operational only (no status updates or progress notes).
+- For bugs you notice, resolve them or document in @IMPLEMENTATION_PLAN.md.

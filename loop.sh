@@ -132,12 +132,33 @@ while true; do
         
         if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
             echo "✓ Validation passed"
-            # Only push if validation passed
-            if git diff --quiet && git diff --staged --quiet; then
-                echo "No changes to push"
+            # Check if there are commits to push (commits ahead of origin/arcology)
+            set +e
+            # Try to get upstream branch name
+            UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+            if [[ -n "$UPSTREAM" ]]; then
+                UNPUSHED_COMMITS=$(git rev-list --count "$UPSTREAM"..HEAD 2>/dev/null)
             else
-                echo "Pushing changes..."
-                git push origin arcology 2>/dev/null || echo "Push failed (may need to set upstream)"
+                # No upstream set, check if origin/arcology exists
+                if git show-ref --verify --quiet refs/remotes/origin/arcology; then
+                    UNPUSHED_COMMITS=$(git rev-list --count origin/arcology..HEAD 2>/dev/null)
+                else
+                    UNPUSHED_COMMITS="0"
+                fi
+            fi
+            set -e
+            
+            if [[ -z "$UNPUSHED_COMMITS" ]] || [[ "$UNPUSHED_COMMITS" == "0" ]]; then
+                # No unpushed commits - check if there are uncommitted changes
+                if git diff --quiet && git diff --staged --quiet; then
+                    echo "No changes to push"
+                else
+                    echo "Validation passed but no commit found - agent should have committed"
+                    echo "Skipping push (agent needs to commit changes)"
+                fi
+            else
+                echo "Pushing $UNPUSHED_COMMITS commit(s)..."
+                git push origin arcology 2>/dev/null || git push -u origin arcology 2>/dev/null || echo "Push failed"
             fi
         else
             echo "✗ Validation failed - skipping push"
