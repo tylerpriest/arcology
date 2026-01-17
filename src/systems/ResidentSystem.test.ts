@@ -67,6 +67,12 @@ const createMockGameScene = () => {
   // Cast to Phaser.Scene for Building constructor, but keep the mock structure
   const building = new Building(mockScene as unknown as Phaser.Scene);
   const resourceSystem = new ResourceSystem();
+  
+  // Add mock addFood method to resourceSystem if not already present
+  if (!resourceSystem.addFood) {
+    (resourceSystem as any).addFood = vi.fn();
+  }
+  
   const restaurantSystem = new RestaurantSystem(building, resourceSystem, timeSystem);
   
   // Update mock scene with actual instances

@@ -65,6 +65,15 @@ const createMockPhaserScene = (): Phaser.Scene => {
     },
     add: {
       graphics: vi.fn().mockReturnValue(graphics),
+      text: vi.fn().mockReturnValue({
+        setText: vi.fn().mockReturnThis(),
+        setColor: vi.fn().mockReturnThis(),
+        setPosition: vi.fn().mockReturnThis(),
+        setAlpha: vi.fn().mockReturnThis(),
+        setFontSize: vi.fn().mockReturnThis(),
+        setOrigin: vi.fn().mockReturnThis(),
+        destroy: vi.fn(),
+      }),
     },
     input: {
       on: vi.fn(),

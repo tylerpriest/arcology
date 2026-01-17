@@ -26,6 +26,10 @@ const createMockGameScene = (): any => {
     setText: () => mockText,
     setPosition: () => mockText,
     setStyle: () => mockText,
+    setColor: () => mockText,
+    setAlpha: () => mockText,
+    setFontSize: () => mockText,
+    setOrigin: () => mockText,
     destroy: () => {},
   };
 
@@ -34,6 +38,7 @@ const createMockGameScene = (): any => {
       graphics: () => mockGraphics,
       text: () => mockText,
     },
+    graphics: mockGraphics,
     registry: {
       get: () => 12,
       set: () => {},

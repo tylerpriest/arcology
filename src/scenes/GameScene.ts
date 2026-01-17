@@ -17,6 +17,7 @@ import { SaveSystem } from '../systems/SaveSystem';
 import { ElevatorSystem } from '../systems/ElevatorSystem';
 import { AudioSystem } from '../systems/AudioSystem';
 import { CongestionSystem } from '../systems/CongestionSystem';
+import { LobbyExtensionSystem } from '../systems/LobbyExtensionSystem';
 import { setAudioSystem } from '../utils/audio';
 
 export class GameScene extends Phaser.Scene {
@@ -30,6 +31,7 @@ export class GameScene extends Phaser.Scene {
   public elevatorSystem!: ElevatorSystem;
   public audioSystem!: AudioSystem;
   public congestionSystem!: CongestionSystem;
+  public lobbyExtensionSystem!: LobbyExtensionSystem;
 
   private venusAtmosphere!: VenusAtmosphere;
   private dayNightOverlay!: DayNightOverlay;
@@ -87,6 +89,11 @@ export class GameScene extends Phaser.Scene {
     this.saveSystem = new SaveSystem(this);
     this.audioSystem = new AudioSystem(this);
     this.congestionSystem = new CongestionSystem(this.building);
+    this.lobbyExtensionSystem = new LobbyExtensionSystem(
+      this.building,
+      this.economySystem,
+      this.congestionSystem
+    );
     setAudioSystem(this.audioSystem);
 
     // Check if we need to load a save

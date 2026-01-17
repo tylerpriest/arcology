@@ -27,6 +27,9 @@ const createMockScene = (): Phaser.Scene => {
     setPosition: () => mockText,
     setStyle: () => mockText,
     setAlpha: () => mockText,
+    setColor: () => mockText,
+    setFontSize: () => mockText,
+    setOrigin: () => mockText,
     destroy: () => {},
   };
 
