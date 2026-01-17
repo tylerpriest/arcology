@@ -59,7 +59,7 @@ describe('SettingsScene', () => {
   afterEach(() => {
     localStorage.clear();
     // Clean up DOM
-    const overlay = document.querySelector('.settings-menu')?.parentNode;
+    const overlay = document.querySelector('.settings-menu')?.parentElement;
     if (overlay) {
       overlay.remove();
     }
@@ -266,7 +266,7 @@ describe('SettingsScene', () => {
     });
 
     test('back button returns to MainMenuScene when game is not paused', () => {
-      (mockScene.registry as any).get = vi.fn().mockReturnValue(GameState.MENU);
+      (mockScene.registry as any).get = vi.fn().mockReturnValue(GameState.MAIN_MENU);
       
       scene.create();
 

@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 import { Resident } from './Resident';
-import { Room } from './Room';
 import { Building } from './Building';
-import { ResidentState, HUNGER_MAX, HUNGER_CRITICAL, MS_PER_GAME_HOUR } from '../utils/constants';
+import { ResidentState } from '../utils/types';
+import { HUNGER_MAX, MS_PER_GAME_HOUR } from '../utils/constants';
 import Phaser from 'phaser';
 
 // Mock GameScene for Resident
@@ -295,8 +295,10 @@ describe('Resident Entity', () => {
     });
 
     test('satisfaction increases with employment', () => {
-      const apartment = building.addRoom('apartment', 1, 0);
-      const office = building.addRoom('office', 1, 5);
+      building.addRoom('apartment', 1, 0);
+      building.addRoom('office', 1, 5);
+      const apartment = building.getRoomAt(1, 0)!;
+      const office = building.getRoomAt(1, 5)!;
 
       const resident1 = new Resident(mockScene, 'test_1', 0, 0);
       resident1.setHome(apartment);
@@ -326,7 +328,8 @@ describe('Resident Entity', () => {
 
   describe('Home and job assignment', () => {
     test('setHome assigns home and adds resident to room', () => {
-      const apartment = building.addRoom('apartment', 1, 0);
+      building.addRoom('apartment', 1, 0);
+      const apartment = building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
 
       resident.setHome(apartment);
@@ -336,8 +339,10 @@ describe('Resident Entity', () => {
     });
 
     test('setHome removes resident from previous home', () => {
-      const apartment1 = building.addRoom('apartment', 1, 0);
-      const apartment2 = building.addRoom('apartment', 1, 5);
+      building.addRoom('apartment', 1, 0);
+      building.addRoom('apartment', 1, 5);
+      const apartment1 = building.getRoomAt(1, 0)!;
+      const apartment2 = building.getRoomAt(1, 5)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
 
       resident.setHome(apartment1);
@@ -349,7 +354,8 @@ describe('Resident Entity', () => {
     });
 
     test('setJob assigns job and adds worker to room', () => {
-      const office = building.addRoom('office', 1, 0);
+      building.addRoom('office', 1, 0);
+      const office = building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
 
       resident.setJob(office);
@@ -359,8 +365,10 @@ describe('Resident Entity', () => {
     });
 
     test('setJob removes worker from previous job', () => {
-      const office1 = building.addRoom('office', 1, 0);
-      const office2 = building.addRoom('office', 1, 5);
+      building.addRoom('office', 1, 0);
+      building.addRoom('office', 1, 5);
+      const office1 = building.getRoomAt(1, 0)!;
+      const office2 = building.getRoomAt(1, 5)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
 
       resident.setJob(office1);
@@ -372,7 +380,8 @@ describe('Resident Entity', () => {
     });
 
     test('setJob with null removes job', () => {
-      const office = building.addRoom('office', 1, 0);
+      building.addRoom('office', 1, 0);
+      const office = building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
 
       resident.setJob(office);
@@ -391,8 +400,10 @@ describe('Resident Entity', () => {
     });
 
     test('can transition to WORKING state', () => {
-      const apartment = building.addRoom('apartment', 1, 0);
-      const office = building.addRoom('office', 1, 5);
+      building.addRoom('apartment', 1, 0);
+      building.addRoom('office', 1, 5);
+      const apartment = building.getRoomAt(1, 0)!;
+      const office = building.getRoomAt(1, 5)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
       resident.setHome(apartment);
       resident.setJob(office);
@@ -407,8 +418,9 @@ describe('Resident Entity', () => {
     });
 
     test('can transition to EATING state when food available', () => {
-      const apartment = building.addRoom('apartment', 1, 0);
-      const kitchen = building.addRoom('kitchen', 1, 5);
+      building.addRoom('apartment', 1, 0);
+      building.addRoom('kitchen', 1, 5);
+      const apartment = building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
       resident.setHome(apartment);
       resident.hunger = 30; // Below 50, should seek food
@@ -425,7 +437,8 @@ describe('Resident Entity', () => {
     });
 
     test('can transition to SLEEPING state during sleep hours', () => {
-      const apartment = building.addRoom('apartment', 1, 0);
+      building.addRoom('apartment', 1, 0);
+      const apartment = building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
       resident.setHome(apartment);
 
@@ -460,8 +473,10 @@ describe('Resident Entity', () => {
 
   describe('Serialization', () => {
     test('serialize includes all resident data', () => {
-      const apartment = building.addRoom('apartment', 1, 0);
-      const office = building.addRoom('office', 1, 5);
+      building.addRoom('apartment', 1, 0);
+      building.addRoom('office', 1, 5);
+      const apartment = building.getRoomAt(1, 0)!;
+      const office = building.getRoomAt(1, 5)!;
       const resident = new Resident(mockScene, 'test_1', 0, 0);
       resident.setHome(apartment);
       resident.setJob(office);

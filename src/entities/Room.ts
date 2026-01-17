@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { ROOM_SPECS, GRID_SIZE, RoomType, UI_COLORS } from '../utils/constants';
 import { RoomData } from '../utils/types';
 import { Resident } from './Resident';
-import { RestaurantSystem } from '../systems/RestaurantSystem';
 import { GameScene } from '../scenes/GameScene';
 
 export class Room {

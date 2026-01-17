@@ -51,7 +51,7 @@ describe('PauseMenuScene', () => {
 
   afterEach(() => {
     // Clean up DOM
-    const overlay = document.querySelector('.pause-menu')?.parentNode;
+    const overlay = document.querySelector('.pause-menu')?.parentElement;
     if (overlay) {
       overlay.remove();
     }

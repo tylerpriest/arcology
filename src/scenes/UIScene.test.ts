@@ -33,10 +33,6 @@ const createMockPhaserScene = (): Phaser.Scene => {
 
 // Mock GameScene
 const createMockGameScene = (): any => {
-  const pointer = {
-    x: 640,
-    y: 360,
-  };
 
   return {
     input: {

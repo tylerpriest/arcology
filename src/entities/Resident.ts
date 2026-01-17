@@ -232,8 +232,10 @@ export class Resident {
 
   /**
    * Recalculate visual variety based on current name (used when restoring from save)
+   * Note: Currently unused but kept for potential future use when restoring residents from saves
    */
-  private recalculateVisualVariety(): void {
+  // @ts-expect-error - Unused method kept for future use
+  private _recalculateVisualVariety(): void {
     const nameHash = this.hashName(this.name);
     this.paletteIndex = nameHash % RESIDENT_PALETTES.length;
     this.sizeVariation = (nameHash % 9) - 4; // -4 to +4 pixels

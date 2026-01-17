@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { RoomInfoPanel } from './RoomInfoPanel';
-import { ROOM_SPECS } from '../../utils/constants';
 
 describe('RoomInfoPanel', () => {
   let parent: HTMLElement;

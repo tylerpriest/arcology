@@ -34,7 +34,7 @@ describe('LoadGameScene', () => {
   afterEach(() => {
     localStorage.clear();
     // Clean up DOM
-    const overlay = document.querySelector('.load-game-menu')?.parentNode;
+    const overlay = document.querySelector('.load-game-menu')?.parentElement;
     if (overlay) {
       overlay.remove();
     }
@@ -60,7 +60,7 @@ describe('LoadGameScene', () => {
       scene.create();
 
       const slotButtons = Array.from(document.querySelectorAll('.save-slot-button'));
-      const emptySlot = slotButtons.find((btn) => btn.textContent?.includes('Empty'));
+      const emptySlot = slotButtons.find((btn) => btn.textContent?.includes('Empty')) as HTMLElement;
       
       expect(emptySlot).toBeTruthy();
       expect(emptySlot?.style.opacity).toBe('0.5');
@@ -78,7 +78,7 @@ describe('LoadGameScene', () => {
       scene.create();
 
       const slotButtons = Array.from(document.querySelectorAll('.save-slot-button'));
-      const filledSlot = slotButtons[0];
+      const filledSlot = slotButtons[0] as HTMLElement;
       
       expect(filledSlot?.textContent).toContain('Auto-Save');
       expect(filledSlot?.textContent).toContain('Cycle: 5');

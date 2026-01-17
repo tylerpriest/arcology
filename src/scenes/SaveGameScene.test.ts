@@ -61,13 +61,13 @@ describe('SaveGameScene', () => {
   afterEach(() => {
     localStorage.clear();
     // Clean up DOM
-    const overlay = document.querySelector('.save-game-menu')?.parentNode;
+    const overlay = document.querySelector('.save-game-menu')?.parentElement;
     if (overlay) {
       overlay.remove();
     }
     // Clean up any success messages
     const messages = document.querySelectorAll('[style*="position: fixed"]');
-    messages.forEach((msg) => msg.remove());
+    messages.forEach((msg) => (msg as HTMLElement).remove());
     vi.clearAllMocks();
   });
 
