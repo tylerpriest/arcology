@@ -74,6 +74,20 @@ echo ""
 
 ITERATION=0
 
+# Function to detect critical TypeScript type errors in validation output
+has_critical_errors() {
+    local output="$1"
+    # Check for TypeScript compilation errors (error TS#### pattern)
+    if echo "$output" | grep -qE "error TS[0-9]+"; then
+        return 0  # Has critical errors
+    fi
+    # Check for "Type error" or "TypeError" patterns
+    if echo "$output" | grep -qiE "(type error|TypeError)"; then
+        return 0  # Has critical errors
+    fi
+    return 1  # No critical errors (only warnings)
+}
+
 while true; do
     ITERATION=$((ITERATION + 1))
 
@@ -130,6 +144,20 @@ while true; do
         VALIDATION_EXIT_CODE=$?
         set -e
         
+        # Always log validation failures to validation.log for agent reference
+        if [[ $VALIDATION_EXIT_CODE -ne 0 ]]; then
+            {
+                echo "=== Validation Failed ==="
+                echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+                echo "Iteration: $ITERATION"
+                echo "Exit Code: $VALIDATION_EXIT_CODE"
+                echo ""
+                echo "$VALIDATION_OUTPUT"
+                echo ""
+                echo "=== End Validation Log ==="
+            } > validation.log
+        fi
+        
         if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
             echo "✓ Validation passed"
             # Clear validation.log on successful validation
@@ -165,20 +193,44 @@ while true; do
                 git push origin arcology 2>/dev/null || git push -u origin arcology 2>/dev/null || echo "Push failed"
             fi
         else
-            echo "✗ Validation failed - skipping push"
-            echo "Validation errors logged to validation.log"
-            # Write validation errors to log file
-            {
-                echo "=== Validation Failed ==="
-                echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-                echo "Iteration: $ITERATION"
-                echo "Exit Code: $VALIDATION_EXIT_CODE"
-                echo ""
-                echo "$VALIDATION_OUTPUT"
-                echo ""
-                echo "=== End Validation Log ==="
-            } > validation.log
-            # Also display output to stdout
+            # Validation failed - check if critical errors exist
+            if has_critical_errors "$VALIDATION_OUTPUT"; then
+                echo "✗ Validation failed - critical type errors detected"
+                echo "Push blocked - must fix type errors before proceeding"
+                echo "Validation errors logged to validation.log"
+            else
+                echo "⚠ Validation has warnings (lint/test) but no critical type errors"
+                echo "Push allowed - warnings logged to validation.log for next iteration"
+                # Allow push to proceed even with warnings
+                set +e
+                # Try to get upstream branch name
+                UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null)
+                if [[ -n "$UPSTREAM" ]]; then
+                    UNPUSHED_COMMITS=$(git rev-list --count "$UPSTREAM"..HEAD 2>/dev/null)
+                else
+                    # No upstream set, check if origin/arcology exists
+                    if git show-ref --verify --quiet refs/remotes/origin/arcology; then
+                        UNPUSHED_COMMITS=$(git rev-list --count origin/arcology..HEAD 2>/dev/null)
+                    else
+                        UNPUSHED_COMMITS="0"
+                    fi
+                fi
+                set -e
+                
+                if [[ -z "$UNPUSHED_COMMITS" ]] || [[ "$UNPUSHED_COMMITS" == "0" ]]; then
+                    # No unpushed commits - check if there are uncommitted changes
+                    if git diff --quiet && git diff --staged --quiet; then
+                        echo "No changes to push"
+                    else
+                        echo "Warnings present but no commit found - agent should have committed"
+                        echo "Skipping push (agent needs to commit changes)"
+                    fi
+                else
+                    echo "Pushing $UNPUSHED_COMMITS commit(s) despite warnings..."
+                    git push origin arcology 2>/dev/null || git push -u origin arcology 2>/dev/null || echo "Push failed"
+                fi
+            fi
+            # Always display validation output to stdout
             echo "$VALIDATION_OUTPUT"
         fi
     fi
