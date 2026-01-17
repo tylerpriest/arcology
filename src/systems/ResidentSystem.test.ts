@@ -14,20 +14,25 @@ const createMockGameScene = () => {
   const resourceSystem = new ResourceSystem();
   const restaurantSystem = new RestaurantSystem(building, resourceSystem, timeSystem);
   
+  const elevatorSystem = {
+    getAllShafts: () => [],
+    getShaftForZone: () => null,
+    callElevator: () => {},
+  };
+
   const mockScene = {
     building,
     timeSystem,
     resourceSystem,
     restaurantSystem,
-    elevatorSystem: {
-      getAllShafts: () => [],
-    },
+    elevatorSystem,
     add: {
       graphics: () => ({
         setDepth: () => {},
         setBlendMode: () => {},
         clear: () => {},
         fillStyle: () => {},
+        fillRect: () => {},
         fillRoundedRect: () => {},
         fillCircle: () => {},
         lineStyle: () => {},
@@ -44,6 +49,11 @@ const createMockGameScene = () => {
         destroy: () => {},
       }),
     },
+    registry: {
+      get: () => 12,
+      set: () => {},
+    },
+    on: () => {},
   } as any;
   
   return mockScene;
@@ -60,7 +70,8 @@ describe('ResidentSystem - Tenant Type System', () => {
 
   describe('Resident type field', () => {
     test('new residents default to resident type', () => {
-      const apartment = mockScene.building.addRoom('apartment', 1, 0);
+      mockScene.building.addRoom('apartment', 1, 0);
+      const apartment = mockScene.building.getRoomAt(1, 0)!;
       const resident = residentSystem.spawnResident(apartment);
       
       expect(resident.type).toBe('resident');

@@ -7,6 +7,41 @@ import Phaser from 'phaser';
 
 // Mock GameScene for Resident
 const createMockGameScene = (): any => {
+  const building = new Building({
+    add: {
+      graphics: () => ({
+        fillStyle: () => {},
+        fillRect: () => {},
+        clear: () => {},
+        lineStyle: () => {},
+        strokeRoundedRect: () => {},
+        strokeCircle: () => {},
+        lineBetween: () => {},
+        setDepth: () => {},
+        setBlendMode: () => {},
+        destroy: () => {},
+      }),
+    },
+  } as unknown as Phaser.Scene);
+
+  const resourceSystem = {
+    consumeFood: vi.fn(() => true),
+  };
+  const restaurantSystem = {
+    isRestaurantOpen: vi.fn(() => true),
+  };
+  const elevatorSystem = {
+    getAllShafts: () => [],
+    getShaftForZone: () => null,
+    callElevator: () => {},
+  };
+  const timeSystem = {
+    on: () => {},
+    getHour: () => 12,
+    getMinute: () => 0,
+    isWeekend: () => false,
+  };
+
   const mockPhaserScene = {
     add: {
       graphics: () => ({
@@ -35,34 +70,14 @@ const createMockGameScene = (): any => {
       set: () => {},
     },
     on: () => {},
-  } as unknown as Phaser.Scene;
-
-  const building = new Building(mockPhaserScene);
-  const resourceSystem = {
-    consumeFood: vi.fn(() => true),
-  };
-  const restaurantSystem = {
-    isRestaurantOpen: vi.fn(() => true),
-  };
-  const elevatorSystem = {
-    getAllShafts: () => [],
-    getShaftForZone: () => null,
-    callElevator: () => {},
-  };
-  const timeSystem = {
-    on: () => {},
-    getHour: () => 12,
-    getMinute: () => 0,
-    isWeekend: () => false,
-  };
-
-  return {
     building,
     resourceSystem,
     restaurantSystem,
     elevatorSystem,
     timeSystem,
-  };
+  } as unknown as Phaser.Scene;
+
+  return mockPhaserScene;
 };
 
 describe('Resident Entity', () => {

@@ -12,6 +12,7 @@ const createMockPhaserScene = (restaurantSystem?: any): Phaser.Scene => {
       graphics: () => ({
         fillStyle: () => {},
         fillRect: () => {},
+        fillCircle: () => {},
         clear: () => {},
         lineStyle: () => {},
         strokeRect: () => {},
@@ -44,26 +45,33 @@ const createMockGameScene = (): any => {
   const mockPhaserScene = createMockPhaserScene();
   const building = new Building(mockPhaserScene);
   
-  return {
-    building,
-    timeSystem: {
-      on: () => {},
-      getHour: () => 12,
-      getMinute: () => 0,
-      isWeekend: () => false,
-    },
-    resourceSystem: {
-      consumeFood: () => true,
-    },
-    restaurantSystem: {
-      isRestaurantOpen: () => true,
-    },
-    elevatorSystem: {
-      getAllShafts: () => [],
-      getShaftForZone: () => null,
-      callElevator: () => {},
-    },
+  const timeSystem = {
+    on: () => {},
+    getHour: () => 12,
+    getMinute: () => 0,
+    isWeekend: () => false,
   };
+  const resourceSystem = {
+    consumeFood: () => true,
+  };
+  const restaurantSystem = {
+    isRestaurantOpen: () => true,
+  };
+  const elevatorSystem = {
+    getAllShafts: () => [],
+    getShaftForZone: () => null,
+    callElevator: () => {},
+  };
+
+  // Return a Phaser.Scene-like object with all properties
+  return {
+    ...mockPhaserScene,
+    building,
+    timeSystem,
+    resourceSystem,
+    restaurantSystem,
+    elevatorSystem,
+  } as unknown as Phaser.Scene;
 };
 
 describe('Room Entity', () => {
