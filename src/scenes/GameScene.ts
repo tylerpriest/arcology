@@ -110,8 +110,8 @@ export class GameScene extends Phaser.Scene {
     // So: scrollY = lobbyY - topBarHeight - visibleHeight/2
     this.cameras.main.scrollY = lobbyY - topBarHeight - visibleHeight / 2;
     
-    // Set initial zoom to maximum zoom out (0.25x)
-    this.cameras.main.setZoom(0.25);
+    // Set initial zoom to 0.5x (can still zoom out to 0.25x if needed)
+    this.cameras.main.setZoom(0.5);
 
     // Create Venus atmosphere background (behind everything)
     this.venusAtmosphere = new VenusAtmosphere(this);
@@ -123,6 +123,11 @@ export class GameScene extends Phaser.Scene {
     this.drawGrid();
 
     // Create building structural frame
+    // Clean up any existing frame first (in case scene was restarted)
+    // This prevents orphaned graphics from previous scene instance
+    if (this.buildingFrame) {
+      this.buildingFrame.destroy();
+    }
     this.buildingFrame = new BuildingFrame(this);
     this.buildingFrame.draw(0); // Initial draw with lobby only
 
@@ -487,7 +492,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private zoomReset(): void {
-    this.cameras.main.zoomTo(0.25, 300);
+    this.cameras.main.zoomTo(0.5, 300);
   }
 
   private zoomFit(): void {
