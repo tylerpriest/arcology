@@ -2,7 +2,7 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis and test failure review.
 
-**Last Updated:** 2026-01-18 - Planning mode: Identified critical test failures in mock setup and Room.draw() method. All MVP features implemented but tests broken due to recent Room.ts changes.
+**Last Updated:** 2026-01-18 - Building mode: Fixed Vitest setup, test expectations, and test mocks. TypeScript/Lint passing. 398/452 tests passing (88%), 54 failures in system integration tests requiring mock scene setup.
 
 ## Executive Summary
 

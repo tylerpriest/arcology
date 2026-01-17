@@ -54,9 +54,16 @@ This project uses the **Ralph methodology** with **Spec-Driven Development**.
 
 ### Methodology Docs
 
-- `docs/SPECIFICATION_GUIDE.md` - How to use spec mode (examples, patterns, common mistakes)
-- `docs/RALPH_PLAYBOOK.md` - Deep methodology for spec-driven development
+- `docs/SPECIFICATION_GUIDE.md` - How to use spec mode (examples, patterns, tips)
+- `docs/SPECIFICATION_METHODOLOGY.md` - Synthesis of Ralph, Spec Kit, and OpenSpec methodologies
 - `docs/PRINCIPLES.md` - Coding standards
+
+### External References
+
+- Ralph Playbook: https://ghuntley.com/ralph-playbook
+- GitHub Spec Kit: https://github.com/github/spec-kit
+- OpenSpec: https://github.com/Fission-AI/OpenSpec
+- Ralph Orchestrator: https://github.com/mikeyobrien/ralph-orchestrator
 
 ## Project Structure
 
