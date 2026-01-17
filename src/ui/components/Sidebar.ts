@@ -2,6 +2,7 @@ export class Sidebar {
   private element: HTMLDivElement;
   private isCollapsed = false;
   private activeSection: string = 'sector-view';
+  private onSectionToggle?: (section: string, isActive: boolean) => void;
 
   constructor(parent: HTMLElement) {
     this.element = document.createElement('div');
@@ -86,19 +87,50 @@ export class Sidebar {
   }
 
   private setActiveSection(section: string): void {
-    this.activeSection = section;
     const navButtons = this.element.querySelectorAll('.nav-button');
-    navButtons.forEach((btn) => {
-      if ((btn as HTMLElement).dataset.section === section) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
+    
+    // Handle toggle behavior for build-zone
+    if (section === 'build-zone' && this.activeSection === 'build-zone') {
+      // Toggle off: remove active class and set activeSection to previous/default
+      this.activeSection = 'sector-view';
+      navButtons.forEach((btn) => {
+        if ((btn as HTMLElement).dataset.section === 'sector-view') {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      // Notify callback that build-zone is now inactive
+      if (this.onSectionToggle) {
+        this.onSectionToggle('build-zone', false);
       }
-    });
+    } else {
+      // Normal activation: set new active section
+      this.activeSection = section;
+      navButtons.forEach((btn) => {
+        if ((btn as HTMLElement).dataset.section === section) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      // Notify callback
+      if (this.onSectionToggle) {
+        this.onSectionToggle(section, true);
+        // Also notify that build-zone is inactive if switching to another section
+        if (section !== 'build-zone') {
+          this.onSectionToggle('build-zone', false);
+        }
+      }
+    }
   }
 
   getActiveSection(): string {
     return this.activeSection;
+  }
+
+  setSectionToggleCallback(callback: (section: string, isActive: boolean) => void): void {
+    this.onSectionToggle = callback;
   }
 
   destroy(): void {

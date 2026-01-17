@@ -50,6 +50,17 @@ export class UIManager {
       this.registry.set('selectedRoom', roomType);
     });
     
+    // Wire up sidebar section toggle to control BuildMenu visibility
+    this.sidebar.setSectionToggleCallback((section, isActive) => {
+      if (section === 'build-zone') {
+        if (isActive) {
+          this.buildMenu.show();
+        } else {
+          this.buildMenu.hide();
+        }
+      }
+    });
+    
     // Set up Credits click handler (will be called from GameScene)
     this.topBar.setOnCreditsClick(() => {
       // Emit event that GameScene can listen to

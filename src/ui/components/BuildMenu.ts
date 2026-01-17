@@ -4,6 +4,7 @@ export class BuildMenu {
   private element: HTMLDivElement;
   private buttons: Map<string, HTMLButtonElement> = new Map();
   private onSelect: (roomType: string) => void;
+  private isVisible = true;
 
   constructor(parent: HTMLElement, onSelect: (roomType: string) => void) {
     this.onSelect = onSelect;
@@ -112,6 +113,20 @@ export class BuildMenu {
         button.classList.remove('selected');
       }
     });
+  }
+
+  show(): void {
+    this.element.classList.remove('hidden');
+    this.isVisible = true;
+  }
+
+  hide(): void {
+    this.element.classList.add('hidden');
+    this.isVisible = false;
+  }
+
+  getIsVisible(): boolean {
+    return this.isVisible;
   }
 
   destroy(): void {
