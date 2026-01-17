@@ -6,53 +6,111 @@ import { ROOM_SPECS, GRID_SIZE } from '../utils/constants';
 import Phaser from 'phaser';
 
 // Mock Phaser Scene for Room
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 const createMockPhaserScene = (restaurantSystem?: any): Phaser.Scene => {
-  const mockGraphics = {
-    fillStyle: () => mockGraphics,
-    fillRect: () => {},
-    fillCircle: () => {},
-    clear: () => {},
-    lineStyle: () => mockGraphics,
-    strokeRect: () => {},
-    setDepth: () => mockGraphics,
-    setBlendMode: () => mockGraphics,
-    destroy: () => {},
+
+  const mockGraphics = () => {
+
+    const graphics: any = {
+
+      fillStyle: vi.fn(() => graphics),
+
+      fillRect: vi.fn(() => graphics),
+
+      fillCircle: vi.fn(() => graphics),
+
+      clear: vi.fn(() => graphics),
+
+      lineStyle: vi.fn(() => graphics),
+
+      strokeRect: vi.fn(() => graphics),
+
+      strokeCircle: vi.fn(() => graphics),
+
+      strokeRoundedRect: vi.fn(() => graphics),
+
+      lineBetween: vi.fn(() => graphics),
+
+      setDepth: vi.fn(() => graphics),
+
+      setBlendMode: vi.fn(() => graphics),
+
+      destroy: vi.fn(),
+
+    };
+
+    return graphics;
+
   };
 
-  const mockText = {
-    setDepth: () => mockText,
-    setText: () => mockText,
-    setPosition: () => mockText,
-    setOrigin: () => mockText,
-    setAlpha: () => mockText,
-    setColor: () => mockText,
-    destroy: () => {},
+
+
+  const mockText = () => {
+
+    const text: any = {
+
+      setDepth: vi.fn(() => text),
+
+      setText: vi.fn(() => text),
+
+      setPosition: vi.fn(() => text),
+
+      setOrigin: vi.fn(() => text),
+
+      setAlpha: vi.fn(() => text),
+
+      setColor: vi.fn(() => text),
+
+      destroy: vi.fn(),
+
+    };
+
+    return text;
+
   };
+
+
 
   return {
+
     add: {
-      graphics: () => mockGraphics,
-      text: () => mockText,
+
+      graphics: vi.fn(mockGraphics),
+
+      text: vi.fn(mockText),
+
     },
+
     registry: {
-      get: () => 12,
-      set: () => {},
+
+      get: vi.fn(() => 12),
+
+      set: vi.fn(),
+
     },
+
     restaurantSystem: restaurantSystem || {
-      isRestaurantOpen: () => true,
+
+      isRestaurantOpen: vi.fn(() => true),
+
     },
+
   } as unknown as Phaser.Scene;
+
 };
+
+
 
 // Mock GameScene for Resident
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
   const mockPhaserScene = createMockPhaserScene();
   const building = new Building(mockPhaserScene);
-  
+
   const timeSystem = {
-    on: () => {},
+    on: () => { },
     getHour: () => 12,
     getMinute: () => 0,
     isWeekend: () => false,
@@ -66,7 +124,7 @@ const createMockGameScene = (): any => {
   const elevatorSystem = {
     getAllShafts: () => [],
     getShaftForZone: () => null,
-    callElevator: () => {},
+    callElevator: () => { },
   };
 
   // Return a Phaser.Scene-like object with all properties
@@ -646,7 +704,7 @@ describe('Room Entity', () => {
         isRestaurantOpen: () => isOpen,
       };
       const sceneWithRestaurant = createMockPhaserScene(restaurantSystem);
-      
+
       const room = new Room(sceneWithRestaurant, {
         id: 'room_1',
         type: 'fastfood',
@@ -658,7 +716,7 @@ describe('Room Entity', () => {
       // Room should check restaurantSystem when drawing
       // We can't easily test the visual dimming, but we can verify it doesn't throw
       expect(() => room.redraw()).not.toThrow();
-      
+
       // Change state and redraw
       isOpen = false;
       expect(() => room.redraw()).not.toThrow();
@@ -670,7 +728,7 @@ describe('Room Entity', () => {
         isRestaurantOpen: () => isOpen,
       };
       const sceneWithRestaurant = createMockPhaserScene(restaurantSystem);
-      
+
       const room = new Room(sceneWithRestaurant, {
         id: 'room_1',
         type: 'restaurant',
@@ -681,7 +739,7 @@ describe('Room Entity', () => {
 
       // Room should check restaurantSystem when drawing
       expect(() => room.redraw()).not.toThrow();
-      
+
       // Change state and redraw
       isOpen = false;
       expect(() => room.redraw()).not.toThrow();
@@ -694,7 +752,7 @@ describe('Room Entity', () => {
         },
       };
       const sceneWithRestaurant = createMockPhaserScene(restaurantSystem);
-      
+
       const room = new Room(sceneWithRestaurant, {
         id: 'room_1',
         type: 'apartment',

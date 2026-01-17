@@ -87,13 +87,13 @@ describe('TimeSystem', () => {
     time.setTime(1, 6);
     time.setSpeed(2);
     time.update(MS_PER_GAME_HOUR);
-    expect(time.getHour()).toBeCloseTo(7, 1); // Should advance 2 hours
+    expect(time.getHour()).toBeCloseTo(8, 1); // Should advance 2 hours
     
     // Very fast speed (4x)
     time.setTime(1, 6);
     time.setSpeed(4);
     time.update(MS_PER_GAME_HOUR);
-    expect(time.getHour()).toBeCloseTo(8, 1); // Should advance 4 hours
+    expect(time.getHour()).toBeCloseTo(10, 1); // Should advance 4 hours
   });
 
   test('setSpeed to 0 pauses time', () => {

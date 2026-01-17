@@ -322,7 +322,7 @@ describe('SettingsScene', () => {
 
       (scene as any).cleanup();
 
-      expect(document.querySelector('.settings-menu')?.parentNode).toBeNull();
+      expect(document.querySelector('.settings-menu')).toBeNull();
     });
   });
 
@@ -335,7 +335,7 @@ describe('SettingsScene', () => {
 
       scene.shutdown();
 
-      expect(document.querySelector('.settings-menu')?.parentNode).toBeNull();
+      expect(document.querySelector('.settings-menu')).toBeNull();
     });
   });
 

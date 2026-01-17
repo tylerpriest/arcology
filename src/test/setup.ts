@@ -16,6 +16,8 @@ try {
   // Module mocking not available, will try other approach
 }
 
+import { vi } from 'vitest';
+
 // Mock browser APIs that Phaser needs
 class MockCanvas {
   getContext() {
@@ -83,6 +85,48 @@ const mockWindow = {
   innerWidth: 1280,
   innerHeight: 720,
   ontouchstart: null,
+  AudioContext: class {
+    createOscillator() { 
+      return { 
+        connect: vi.fn(), 
+        start: vi.fn(), 
+        stop: vi.fn(), 
+        frequency: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn() },
+        onended: null
+      }; 
+    }
+    createGain() { 
+      return { 
+        connect: vi.fn(), 
+        gain: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() } 
+      }; 
+    }
+    destination = {};
+    currentTime = 0;
+    close() { return Promise.resolve(); }
+    decodeAudioData() { return Promise.resolve({}); }
+  },
+  webkitAudioContext: class {
+    createOscillator() { 
+      return { 
+        connect: vi.fn(), 
+        start: vi.fn(), 
+        stop: vi.fn(), 
+        frequency: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn() },
+        onended: null
+      }; 
+    }
+    createGain() { 
+      return { 
+        connect: vi.fn(), 
+        gain: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() } 
+      }; 
+    }
+    destination = {};
+    currentTime = 0;
+    close() { return Promise.resolve(); }
+    decodeAudioData() { return Promise.resolve({}); }
+  }
 };
 
 Object.defineProperty(global, 'window', {
@@ -95,10 +139,7 @@ Object.defineProperty(global, 'window', {
 (global as any).window = mockWindow;
 
 // Mock document with documentElement (required by Phaser)
-// Note: We preserve jsdom's document but ensure Phaser-specific properties exist
-// jsdom should already be available from vitest's jsdom environment
 if (global.document) {
-  // jsdom is available, just ensure Phaser-specific properties exist
   if (!global.document.documentElement.ontouchstart) {
     Object.defineProperty(global.document.documentElement, 'ontouchstart', {
       value: null,
@@ -111,8 +152,6 @@ if (global.document) {
       writable: true,
     });
   }
-  // onmousewheel is deprecated but Phaser may check for it
-  // Use type assertion to avoid TypeScript error
   if (!(global.document.documentElement as any).onmousewheel) {
     Object.defineProperty(global.document.documentElement, 'onmousewheel', {
       value: null,
@@ -120,7 +159,6 @@ if (global.document) {
     });
   }
   
-  // Override createElement for canvas to return our mock (Phaser needs specific canvas behavior)
   const originalCreateElement = global.document.createElement.bind(global.document);
   global.document.createElement = function(tagName: string, options?: ElementCreationOptions) {
     if (tagName.toLowerCase() === 'canvas') {
@@ -128,100 +166,158 @@ if (global.document) {
     }
     return originalCreateElement(tagName, options);
   };
-} else {
-  // Fallback if jsdom is not available (shouldn't happen with vitest jsdom environment)
-  const mockDocumentElement = {
-    ontouchstart: null,
-    onwheel: null,
-    onmousewheel: null,
-  };
-
-  // Type for elements with children property
-  interface ElementWithChildren {
-    children?: Node[];
-    style: Record<string, unknown>;
-    setAttribute: () => void;
-    addEventListener: () => void;
-    removeEventListener: () => void;
-    appendChild: (child: Node) => Node;
-    removeChild: (child: Node) => Node;
-    querySelector: (selector: string) => Node | null;
-    querySelectorAll: () => Node[];
-    classList: {
-      contains: () => boolean;
-      add: () => void;
-      remove: () => void;
-    };
-  }
-
-  Object.defineProperty(global, 'document', {
-    value: {
-      createElement: (tag: string): HTMLElement => {
-        if (tag === 'canvas') {
-          return new MockCanvas() as unknown as HTMLCanvasElement;
-        }
-        const element: ElementWithChildren = {
-          style: {},
-          setAttribute: () => {},
-          addEventListener: () => {},
-          removeEventListener: () => {},
-          appendChild: function(child: Node) {
-            if (!this.children) this.children = [];
-            this.children.push(child);
-            return child;
-          },
-          removeChild: function(child: Node) {
-            if (this.children) {
-              const index = this.children.indexOf(child);
-              if (index > -1) this.children.splice(index, 1);
-            }
-            return child;
-          },
-          querySelector: function(_selector: string) {
-            if (!this.children) return null;
-            // Simple mock - just return first child if it matches
-            return this.children[0] || null;
-          },
-          querySelectorAll: function() {
-            return this.children || [];
-          },
-          classList: {
-            contains: () => false,
-            add: () => {},
-            remove: () => {},
-          },
-        };
-        return element as unknown as HTMLElement;
-      },
-      body: {
-        appendChild: function(child: Node) {
-          if (!this.children) this.children = [];
-          this.children.push(child);
-          return child;
-        },
-        removeChild: function(child: Node) {
-          if (this.children) {
-            const index = this.children.indexOf(child);
-            if (index > -1) this.children.splice(index, 1);
-          }
-          return child;
-        },
-        children: [] as Node[],
-      },
-      getElementById: () => null,
-      documentElement: mockDocumentElement,
-    },
-  });
 }
 
-// Mock navigator (required by Phaser for touch detection)
+// Mock navigator
 Object.defineProperty(global, 'navigator', {
   value: {
     maxTouchPoints: 0,
     msPointerEnabled: false,
     pointerEnabled: false,
-    getGamepads: null,
+    getGamepads: () => [],
   },
   writable: true,
   configurable: true,
+});
+
+// Mock Phaser completely to avoid issues with missing methods
+vi.mock('phaser', () => {
+  const mockGraphics = () => {
+    const graphics: any = {
+      clear: vi.fn(() => graphics),
+      fillStyle: vi.fn(() => graphics),
+      lineStyle: vi.fn(() => graphics),
+      fillRect: vi.fn(() => graphics),
+      strokeRect: vi.fn(() => graphics),
+      fillCircle: vi.fn(() => graphics),
+      strokeCircle: vi.fn(() => graphics),
+      fillRoundedRect: vi.fn(() => graphics),
+      strokeRoundedRect: vi.fn(() => graphics),
+      lineBetween: vi.fn(() => graphics),
+      setDepth: vi.fn(() => graphics),
+      setBlendMode: vi.fn(() => graphics),
+      setAlpha: vi.fn(() => graphics),
+      setPosition: vi.fn(() => graphics),
+      setVisible: vi.fn(() => graphics),
+      destroy: vi.fn(),
+    };
+    return graphics;
+  };
+
+  const mockText = () => {
+    const text: any = {
+      setText: vi.fn(() => text),
+      setPosition: vi.fn(() => text),
+      setOrigin: vi.fn(() => text),
+      setAlpha: vi.fn(() => text),
+      setDepth: vi.fn(() => text),
+      setColor: vi.fn(() => text),
+      setFontSize: vi.fn(() => text),
+      setFontStyle: vi.fn(() => text),
+      setVisible: vi.fn(() => text),
+      destroy: vi.fn(),
+      x: 0,
+      y: 0,
+      text: '',
+    };
+    return text;
+  };
+
+  return {
+    default: {
+      Events: {
+        EventEmitter: class {
+          on = vi.fn();
+          off = vi.fn();
+          once = vi.fn();
+          emit = vi.fn();
+          removeAllListeners = vi.fn();
+        }
+      },
+      GameObjects: {
+        Graphics: class {},
+        Text: class {},
+      },
+      Scene: class {
+        add = {
+          graphics: vi.fn(mockGraphics),
+          text: vi.fn(mockText),
+        };
+        registry = {
+          get: vi.fn(),
+          set: vi.fn(),
+          events: {
+            on: vi.fn(),
+            off: vi.fn(),
+            emit: vi.fn(),
+          }
+        };
+        events = {
+          on: vi.fn(),
+          off: vi.fn(),
+          emit: vi.fn(),
+        };
+        cameras = {
+          main: {
+            setBounds: vi.fn(),
+            setZoom: vi.fn(),
+            pan: vi.fn(),
+            zoomTo: vi.fn(),
+            scrollX: 0,
+            scrollY: 0,
+            zoom: 1,
+          }
+        };
+        time = {
+          addEvent: vi.fn(),
+        };
+        input = {
+          on: vi.fn(),
+          keyboard: {
+            addKey: vi.fn(() => ({ on: vi.fn() })),
+            on: vi.fn(),
+          }
+        };
+      },
+      BlendModes: {
+        ADD: 1,
+        MULTIPLY: 2,
+        SCREEN: 3,
+      }
+    },
+    Events: {
+      EventEmitter: class {
+        on = vi.fn();
+        off = vi.fn();
+        once = vi.fn();
+        emit = vi.fn();
+        removeAllListeners = vi.fn();
+      }
+    },
+    BlendModes: {
+      ADD: 1,
+      MULTIPLY: 2,
+      SCREEN: 3,
+    },
+    Scene: class {
+      add = {
+        graphics: vi.fn(mockGraphics),
+        text: vi.fn(mockText),
+      };
+      registry = {
+        get: vi.fn(),
+        set: vi.fn(),
+        events: {
+          on: vi.fn(),
+          off: vi.fn(),
+          emit: vi.fn(),
+        }
+      };
+      events = {
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+      };
+    }
+  };
 });

@@ -192,7 +192,7 @@ describe('PauseMenuScene', () => {
 
       (scene as any).cleanup();
 
-      expect(document.querySelector('.pause-menu')?.parentNode).toBeNull();
+      expect(document.querySelector('.pause-menu')).toBeNull();
     });
   });
 
@@ -205,7 +205,7 @@ describe('PauseMenuScene', () => {
 
       scene.shutdown();
 
-      expect(document.querySelector('.pause-menu')?.parentNode).toBeNull();
+      expect(document.querySelector('.pause-menu')).toBeNull();
     });
   });
 });

@@ -219,7 +219,7 @@ describe('ResidentSystem - Tenant Type System', () => {
       mockScene.building.addRoom('fastfood', 1, 10);
       
       // Add some food to resource system
-      mockScene.resourceSystem.addFood(100);
+      mockScene.resourceSystem.addProcessedFood(100);
       
       // Spawn office workers
       mockScene.timeSystem.setTime(1, 8.99, DayOfWeek.Monday);
@@ -253,7 +253,7 @@ describe('ResidentSystem - Tenant Type System', () => {
       
       // Add food to resource system
       const initialFood = 100;
-      mockScene.resourceSystem.addFood(initialFood);
+      mockScene.resourceSystem.addProcessedFood(initialFood);
       
       // Spawn office workers
       mockScene.timeSystem.setTime(1, 8.99, DayOfWeek.Monday);

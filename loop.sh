@@ -26,6 +26,8 @@ AUTO_MODE=false
 LOOP_FOREVER=false
 # List of agents for auto mode (excluding claude)
 AUTO_AGENTS=("cursor" "opencode" "gemini" "codex" "amp" "copilot")
+IDLE_TIMEOUT=300 # Seconds to wait for output before killing agent
+TIMEOUT_CMD="python3 timeout_guard.py $IDLE_TIMEOUT"
 
 
 for arg in "$@"; do
@@ -164,39 +166,39 @@ while true; do
                 if [[ "$MODE" == "plan" ]]; then
                     agent --plan "$(cat "$PROMPT_FILE")"
                 else
-                    agent "$(cat "$PROMPT_FILE")"
+                    $TIMEOUT_CMD agent "$(cat "$PROMPT_FILE")"
                 fi
             else
                 # Auto-run mode
                 if [[ "$MODE" == "plan" ]]; then
                     agent --print --plan --output-format text "$(cat "$PROMPT_FILE")"
                 else
-                    agent --print --output-format text "$(cat "$PROMPT_FILE")"
+                    $TIMEOUT_CMD agent --print --output-format text "$(cat "$PROMPT_FILE")"
                 fi
             fi
             ;;
         amp)
             # Ampcode CLI
-            cat "$PROMPT_FILE" | amp --execute --dangerously-allow-all --stream-json | python3 stream_helper.py
+            cat "$PROMPT_FILE" | $TIMEOUT_CMD amp --execute --dangerously-allow-all --stream-json | python3 stream_helper.py
             ;;
         gemini)
             # Gemini CLI
-            gemini chat --yolo "$(cat "$PROMPT_FILE")"
+            $TIMEOUT_CMD gemini chat --yolo "$(cat "$PROMPT_FILE")"
             ;;
         codex)
             # Codex CLI
-            codex exec --dangerously-bypass-approvals-and-sandbox "$(cat "$PROMPT_FILE")"
+            $TIMEOUT_CMD codex exec --dangerously-bypass-approvals-and-sandbox "$(cat "$PROMPT_FILE")"
             ;;
         copilot)
             # GitHub Copilot CLI
             # Assumes 'copilot' binary (npm: @githubnext/github-copilot-cli)
             # Using -p for programmatic mode. No standard 'yolo' flag found for full file-edit auto-approve in CLI, 
             # but -s/--shell-out exists for suggestions. We'll use basic programmatic mode.
-            copilot -p "$(cat "$PROMPT_FILE")"
+            $TIMEOUT_CMD copilot -p "$(cat "$PROMPT_FILE")"
             ;;
         opencode)
             # Opencode CLI
-            opencode "$(cat "$PROMPT_FILE")"
+            $TIMEOUT_CMD opencode "$(cat "$PROMPT_FILE")"
             ;;
         claude)
             # Claude CLI (default)
@@ -267,11 +269,8 @@ while true; do
         echo "Running validation..."
         set +e
         # Capture validation output to both stdout and a temp file
-        # use tee to stream output to stdout while capturing
-        npm run validate 2>&1 | tee validation.tmp
-        VALIDATION_OUTPUT=$(cat validation.tmp)
-        VALIDATION_EXIT_CODE=${PIPESTATUS[0]}
-        rm validation.tmp
+        VALIDATION_OUTPUT=$(npm run validate 2>&1)
+        VALIDATION_EXIT_CODE=$?
         set -e
         
         # Always log validation failures to validation.log for agent reference
@@ -375,7 +374,7 @@ while true; do
                 fi
             fi
             # Always display validation output to stdout
-            # Validation output already displayed via tee
+            echo "$VALIDATION_OUTPUT"
         fi
     fi
 

@@ -8,23 +8,42 @@ import Phaser from 'phaser';
 // Mock GameScene for Resident
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
-  // Create shared mock graphics objects that can be reused
-  const buildingMockGraphics = {
-    fillStyle: () => buildingMockGraphics,
-    fillRect: () => {},
-    clear: () => {},
-    lineStyle: () => buildingMockGraphics,
-    strokeRoundedRect: () => {},
-    strokeCircle: () => {},
-    lineBetween: () => {},
-    setDepth: () => buildingMockGraphics,
-    setBlendMode: () => buildingMockGraphics,
-    destroy: () => {},
+  const mockGraphics = () => {
+    const graphics: any = {
+      fillStyle: vi.fn(() => graphics),
+      fillRect: vi.fn(() => graphics),
+      fillCircle: vi.fn(() => graphics),
+      fillRoundedRect: vi.fn(() => graphics),
+      clear: vi.fn(() => graphics),
+      lineStyle: vi.fn(() => graphics),
+      strokeRect: vi.fn(() => graphics),
+      strokeRoundedRect: vi.fn(() => graphics),
+      strokeCircle: vi.fn(() => graphics),
+      lineBetween: vi.fn(() => graphics),
+      setDepth: vi.fn(() => graphics),
+      setBlendMode: vi.fn(() => graphics),
+      destroy: vi.fn(),
+    };
+    return graphics;
+  };
+
+  const mockText = () => {
+    const text: any = {
+      setDepth: vi.fn(() => text),
+      setText: vi.fn(() => text),
+      setPosition: vi.fn(() => text),
+      setOrigin: vi.fn(() => text),
+      setAlpha: vi.fn(() => text),
+      setColor: vi.fn(() => text),
+      destroy: vi.fn(),
+    };
+    return text;
   };
 
   const building = new Building({
     add: {
-      graphics: () => buildingMockGraphics,
+      graphics: vi.fn(mockGraphics),
+      text: vi.fn(mockText),
     },
   } as unknown as Phaser.Scene);
 
@@ -40,45 +59,22 @@ const createMockGameScene = (): any => {
     callElevator: () => {},
   };
   const timeSystem = {
-    on: () => {},
+    on: vi.fn(),
     getHour: () => 12,
     getMinute: () => 0,
     isWeekend: () => false,
   };
 
-  // Create mock graphics and text objects that return themselves for chaining
-  const mockGraphics = {
-    fillStyle: () => mockGraphics,
-    fillRect: () => {},
-    clear: () => {},
-    lineStyle: () => mockGraphics,
-    strokeRoundedRect: () => {},
-    strokeCircle: () => {},
-    lineBetween: () => {},
-    setDepth: () => mockGraphics,
-    setBlendMode: () => mockGraphics,
-    destroy: () => {},
-  };
-
-  const mockText = {
-    setDepth: () => mockText,
-    setText: () => mockText,
-    setPosition: () => mockText,
-    setOrigin: () => mockText,
-    setAlpha: () => mockText,
-    destroy: () => {},
-  };
-
   const mockPhaserScene = {
     add: {
-      graphics: () => mockGraphics,
-      text: () => mockText,
+      graphics: vi.fn(mockGraphics),
+      text: vi.fn(mockText),
     },
     registry: {
-      get: () => 12,
-      set: () => {},
+      get: vi.fn(() => 12),
+      set: vi.fn(),
     },
-    on: () => {},
+    on: vi.fn(),
     building,
     resourceSystem,
     restaurantSystem,

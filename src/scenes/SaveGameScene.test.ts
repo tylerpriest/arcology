@@ -270,7 +270,7 @@ describe('SaveGameScene', () => {
 
       scene.shutdown();
 
-      expect(document.querySelector('.save-game-menu')?.parentNode).toBeNull();
+      expect(document.querySelector('.save-game-menu')).toBeNull();
     });
   });
 });

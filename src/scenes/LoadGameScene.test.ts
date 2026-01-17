@@ -203,7 +203,7 @@ describe('LoadGameScene', () => {
 
       scene.shutdown();
 
-      expect(document.querySelector('.load-game-menu')?.parentNode).toBeNull();
+      expect(document.querySelector('.load-game-menu')).toBeNull();
     });
   });
 });

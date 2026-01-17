@@ -193,9 +193,9 @@ describe('TopBar', () => {
     });
 
     test('pads minutes with zero', () => {
-      topBar.updateTime(9.05); // 9:05 AM
+      topBar.updateTime(9.05); // 9:03 AM
       const timeValue = parent.querySelector('[data-stat="time"]');
-      expect(timeValue?.textContent).toBe('9:05 AM');
+      expect(timeValue?.textContent).toBe('9:03 AM');
     });
   });
 

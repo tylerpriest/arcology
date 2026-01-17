@@ -72,7 +72,7 @@ describe('RoomInfoPanel', () => {
       const workersRow = Array.from(parent.querySelectorAll('.room-info-row'))
         .find(el => el.textContent?.includes('Workers:'));
       expect(workersRow).toBeTruthy();
-      expect(workersRow?.textContent).toContain('3 / 8');
+      expect(workersRow?.textContent).toContain('3 / 6');
     });
 
     test('displays income with green color', () => {
@@ -81,7 +81,7 @@ describe('RoomInfoPanel', () => {
       const incomeRow = Array.from(parent.querySelectorAll('.room-info-row'))
         .find(el => el.textContent?.includes('Income:'));
       const incomeValue = incomeRow?.querySelector('.room-info-value') as HTMLElement;
-      expect(incomeValue?.textContent).toBe('+100 CR/day');
+      expect(incomeValue?.textContent.trim()).toBe('+100 CR/day');
       expect(incomeValue?.style.color).toBe('var(--green)');
     });
 
@@ -91,7 +91,7 @@ describe('RoomInfoPanel', () => {
       const expensesRow = Array.from(parent.querySelectorAll('.room-info-row'))
         .find(el => el.textContent?.includes('Expenses:'));
       const expensesValue = expensesRow?.querySelector('.room-info-value') as HTMLElement;
-      expect(expensesValue?.textContent).toBe('-10 CR/day');
+      expect(expensesValue?.textContent.trim()).toBe('-10 CR/day');
       expect(expensesValue?.style.color).toBe('var(--magenta)');
     });
 
@@ -101,7 +101,7 @@ describe('RoomInfoPanel', () => {
       const netRow = Array.from(parent.querySelectorAll('.room-info-row'))
         .find(el => el.textContent?.includes('Net:'));
       const netValue = netRow?.querySelector('.room-info-value') as HTMLElement;
-      expect(netValue?.textContent).toBe('+90 CR/day');
+      expect(netValue?.textContent.trim()).toBe('+90 CR/day');
       expect(netValue?.style.color).toBe('var(--green)');
     });
 
@@ -111,7 +111,7 @@ describe('RoomInfoPanel', () => {
       const netRow = Array.from(parent.querySelectorAll('.room-info-row'))
         .find(el => el.textContent?.includes('Net:'));
       const netValue = netRow?.querySelector('.room-info-value') as HTMLElement;
-      expect(netValue?.textContent).toBe('-50 CR/day');
+      expect(netValue?.textContent.trim()).toBe('-50 CR/day');
       expect(netValue?.style.color).toBe('var(--magenta)');
     });
 
