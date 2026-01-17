@@ -63,6 +63,10 @@ export class Resident {
   private elevatorWaitStartTime = 0; // Timestamp when waiting for elevator started
   private skyLobbyTransferFloor: number | null = null; // Sky lobby floor for zone transfer
   private pathfindingLeg: 'first' | 'transfer' | 'final' | null = null; // Which leg of multi-zone journey
+  
+  // Movement time tracking
+  private movementStartTime: number | null = null; // When did current movement start (game ms)
+  private lastMovementDuration: number = 0; // Duration of last completed movement (game ms)
 
   private x: number;
   private y: number;
@@ -462,6 +466,12 @@ export class Resident {
       this.targetY = null;
       this.walkBob = 0;
 
+      // Track movement time completion
+      if (this.movementStartTime !== null) {
+        this.lastMovementDuration = Date.now() - this.movementStartTime;
+        this.movementStartTime = null;
+      }
+
       if (this.onArrival) {
         this.onArrival();
         this.onArrival = null;
@@ -497,6 +507,10 @@ export class Resident {
       this.targetX = null;
       this.targetY = null;
       this.walkBob = 0;
+      
+      // Track elevator arrival time (movement to elevator complete)
+      // Total movement time will be calculated when reaching final destination
+      
       this.state = ResidentState.WAITING_FOR_ELEVATOR;
       this.elevatorWaitStartTime = Date.now(); // Track when waiting started
     } else {
@@ -673,6 +687,7 @@ export class Resident {
     this.onArrival = onArrival ?? null;
     this.skyLobbyTransferFloor = null;
     this.pathfindingLeg = null;
+    this.movementStartTime = Date.now(); // Start tracking movement time
 
     const currentFloor = this.getCurrentFloor();
     const targetFloor = room.floor;
@@ -960,6 +975,23 @@ export class Resident {
     this.y = y;
     this.nameLabel.setPosition(x, y - 40);
     this.drawSilhouette();
+  }
+
+  /**
+   * Get the duration of the last completed movement (in game milliseconds)
+   */
+  getLastMovementDuration(): number {
+    return this.lastMovementDuration;
+  }
+
+  /**
+   * Check if resident is currently moving
+   */
+  isMoving(): boolean {
+    return this.state === ResidentState.WALKING ||
+           this.state === ResidentState.WALKING_TO_ELEVATOR ||
+           this.state === ResidentState.WAITING_FOR_ELEVATOR ||
+           this.state === ResidentState.RIDING_ELEVATOR;
   }
 
   serialize(): ResidentData {

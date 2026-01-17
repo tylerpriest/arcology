@@ -232,36 +232,77 @@ Two major new specs added:
 
 ---
 
-## New: RESIDENT_MOVEMENT.md Specification
+## New: Phase 1 Specs - Movement & Traffic System
 
-A comprehensive Phase 1 spec has been created for resident movement system. This spec is critical for JTBD 2, 5, 10 (physical reality + congestion).
+Three comprehensive Phase 1 specifications have been created forming the "Traffic Loop" (JTBD 2, 5, 10):
 
-**What the spec defines:**
-- Movement system: Residents walk (not teleport) taking time proportional to distance
-- Congestion mechanics: Multiple residents in same corridor = slower movement (visibility of traffic jam)
-- Integration: Movement time affects schedules, congestion affects satisfaction
-- Performance: Must support 100+ residents moving simultaneously at 60 FPS
-- Edge cases: Elevator failures, construction zones, capacity limits
+### 1. RESIDENT_MOVEMENT.md - Foundation
+**What it defines:**
+- Residents walk (not teleport) taking time proportional to distance
+- Movement includes pathfinding (A*), speed variation by resident type
+- Movement time affects schedule adherence (late arrivals matter)
+- Variable speeds: office workers faster, children slower
+- Elevator/stair queue integration, capacity limits
 
-**Key acceptance criteria:**
-- Movement time consistent and predictable
-- Congestion measurable (20+ residents = 50% speed reduction)
-- Pathfinding avoids walls/obstacles
-- Variable speeds by resident type (workers faster, children slower)
-- Elevator/stair queue integration
-- Dynamic updates when lobby extended
+**Key criteria:**
+- Movement time consistent (±0.2 second variance)
+- Congestion creates slowdown (20+ residents = 50% speed reduction)
+- Pathfinding <50ms even with 500+ agents
+- All movement animated, no teleportation
+- Integration points: Schedules, Elevators, Congestion system
 
-**Scenarios covered:**
-1. Simple commute (one resident, 7 seconds total)
-2. Rush hour (20 workers creating queue)
-3. Multi-floor commute (distance matters - 11 seconds vs 3)
-4. Lobby extension (dynamic update reduces congestion)
-5. Stairs vs elevator (elevator down creates fallback)
-6. Cascading jam (elevator breaks → stair overflow)
+**6 Scenarios:** Simple commute (7s), rush hour (queue visible), multi-floor (distance compounds), lobby extension (dynamic improvement), elevator failure (fallback), cascading jam (overflow).
 
-**Status**: Specification complete. Ready for planning phase (algorithm selection, constants definition, integration planning).
+### 2. CONGESTION_MECHANICS.md - Problem Emerges
+**What it defines:**
+- Congestion emerges naturally when residents use same spaces
+- Density = residents ÷ space area → congestion %
+- Speed penalty function: 0% congestion = 1.0x speed, 100% = 0.2x speed
+- Different space capacities: elevator < stairwell < corridor < lobby
+- Congestion cycle: 8 AM rush → peak congestion → drops by noon
 
-**MVP Impact**: This spec confirms that movement system is core to JTBD 2 (lobby extension). Without visible congestion, players won't see need to extend lobby. With movement spec, the entire feedback loop (congestion → expansion → feedback) becomes possible.
+**Key criteria:**
+- Congestion forms without scripting (natural emergence)
+- Congestion visible (residents bunching together)
+- Impact measurable (>30 second arrival time difference)
+- Satisfies affected by congestion (−5 per level)
+- Queue behavior: FIFO, respects capacity, overflows wait
+
+**5 Scenarios:** Morning rush (8 residents form congestion), overflow (elevator capacity 4), lobby extension effect (congestion drops 30%), stairwell bottleneck (elevator broken), layout creates natural jam.
+
+**Congestion Scale:** 0-20% (empty), 20-40% (moderate), 40-60% (high), 60-80% (very high), 80-100% (critical), 100%+ (severe).
+
+### 3. LOBBY_EXTENSION.md - Solution Available
+**What it defines:**
+- Player can extend lobby width in increments (1, 5, 10 units)
+- Cost: $100 per unit width added ($500-5000 depending on size)
+- Effect: 25% wider lobby = ~25% less congestion
+- Max width: 60 units (hard cap from 20-unit start)
+- Undo supported: 50% refund like other buildings
+
+**Key criteria:**
+- Extension affordable but significant (cost vs. apartment choice)
+- Congestion reduction measurable (30% width increase → ~30% congestion drop)
+- Effect immediate (residents experience reduced congestion next movement)
+- Player understands purpose (diagnose & solve)
+- Extension is visible change (wider lobby on screen)
+- Strategic choice (sometimes worth it, sometimes not)
+
+**5 Scenarios:** First congestion problem (extends to solve), strategic before crisis (prevents problem), cascading extensions (late game limits), extension doesn't solve everything (diagnose bottleneck), economic pressure (choose between priorities).
+
+---
+
+### How They Create The Traffic Loop (JTBD 2):
+1. **Residents walk** (RESIDENT_MOVEMENT) → Takes time, affects schedules
+2. **Multiple residents same corridor** (CONGESTION_MECHANICS) → Density increases → Movement slows
+3. **Player sees congestion** → Residents bunching, arriving late
+4. **Player extends lobby** (LOBBY_EXTENSION) → Wider space → Congestion drops → Residents arrive on time
+5. **Building gets bigger** → More residents → Congestion returns at larger scale
+6. **Loop repeats** → Cycle creates natural expansion mechanic
+
+This is **emergence without scripting**: No developer event saying "you must extend lobby," but the mechanical system creates the need naturally.
+
+**MVP Impact**: These three specs complete Phase 1. Together they explain why congestion matters and how player solves it. This is JTBD 2 fully specified. Without these specs, lobby extension would be arbitrary feature. With them, it's natural consequence of physical movement.
 
 ---
 
