@@ -8,28 +8,32 @@ import Phaser from 'phaser';
 // Mock Phaser Scene for Room
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockPhaserScene = (restaurantSystem?: any): Phaser.Scene => {
+  const mockGraphics = {
+    fillStyle: () => mockGraphics,
+    fillRect: () => {},
+    fillCircle: () => {},
+    clear: () => {},
+    lineStyle: () => mockGraphics,
+    strokeRect: () => {},
+    setDepth: () => mockGraphics,
+    setBlendMode: () => mockGraphics,
+    destroy: () => {},
+  };
+
+  const mockText = {
+    setDepth: () => mockText,
+    setText: () => mockText,
+    setPosition: () => mockText,
+    setOrigin: () => mockText,
+    setAlpha: () => mockText,
+    setColor: () => mockText,
+    destroy: () => {},
+  };
+
   return {
     add: {
-      graphics: () => ({
-        fillStyle: () => {},
-        fillRect: () => {},
-        fillCircle: () => {},
-        clear: () => {},
-        lineStyle: () => {},
-        strokeRect: () => {},
-        setDepth: () => {},
-        setBlendMode: () => {},
-        destroy: () => {},
-      }),
-      text: () => ({
-        setDepth: () => {},
-        setText: () => {},
-        setPosition: () => {},
-        setOrigin: () => {},
-        setAlpha: () => {},
-        setColor: () => {},
-        destroy: () => {},
-      }),
+      graphics: () => mockGraphics,
+      text: () => mockText,
     },
     registry: {
       get: () => 12,

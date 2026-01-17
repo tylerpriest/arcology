@@ -9,25 +9,30 @@ import Phaser from 'phaser';
 // Mock GameScene for ResidentSystem
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
+  // Create mock graphics and text objects that return themselves for chaining
+  const mockGraphics = {
+    fillStyle: () => mockGraphics,
+    fillRect: () => {},
+    clear: () => {},
+    lineStyle: () => mockGraphics,
+    lineBetween: () => {},
+    destroy: () => {},
+    setDepth: () => mockGraphics,
+    setBlendMode: () => mockGraphics,
+  };
+
+  const mockText = {
+    setDepth: () => mockText,
+    setText: () => mockText,
+    setPosition: () => mockText,
+    setStyle: () => mockText,
+    destroy: () => {},
+  };
+
   const mockPhaserScene = {
     add: {
-      graphics: () => ({
-        fillStyle: () => {},
-        fillRect: () => {},
-        clear: () => {},
-        lineStyle: () => {},
-        lineBetween: () => {},
-        destroy: () => {},
-        setDepth: () => {},
-        setBlendMode: () => {},
-      }),
-      text: () => ({
-        setDepth: () => {},
-        setText: () => {},
-        setPosition: () => {},
-        setStyle: () => {},
-        destroy: () => {},
-      }),
+      graphics: () => mockGraphics,
+      text: () => mockText,
     },
     registry: {
       get: () => 12,

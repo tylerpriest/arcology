@@ -145,7 +145,7 @@ while true; do
         set -e
         
         # Always log validation failures to validation.log for agent reference
-        # Note: Agents should append their attempted fixes to this file to prevent retrying failed fixes
+        # Note: Agents should append their attempted fixes to this file to prevent retrying failed fixes or repeatedly trying to fix something that is just a warning
         if [[ $VALIDATION_EXIT_CODE -ne 0 ]]; then
             # Preserve previous fix attempts if they exist
             PREVIOUS_ATTEMPTS=""

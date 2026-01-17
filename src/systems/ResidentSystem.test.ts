@@ -17,34 +17,39 @@ const createMockGameScene = () => {
     callElevator: () => {},
   };
 
+  // Create mock graphics and text objects that return themselves for chaining
+  const mockGraphics = {
+    setDepth: () => mockGraphics,
+    setBlendMode: () => mockGraphics,
+    clear: () => {},
+    fillStyle: () => mockGraphics,
+    fillRect: () => {},
+    fillRoundedRect: () => {},
+    fillCircle: () => {},
+    lineStyle: () => mockGraphics,
+    strokeRect: () => {},
+    strokeRoundedRect: () => {},
+    strokeCircle: () => {},
+    lineBetween: () => {},
+    destroy: () => {},
+  };
+
+  const mockText = {
+    setOrigin: () => mockText,
+    setDepth: () => mockText,
+    setPosition: () => mockText,
+    setText: () => mockText,
+    setAlpha: () => mockText,
+    setColor: () => mockText,
+    setStyle: () => mockText,
+    destroy: () => {},
+  };
+
   // Create mock scene with all properties from the start
   const mockScene = {
     add: {
-      graphics: () => ({
-        setDepth: () => {},
-        setBlendMode: () => {},
-        clear: () => {},
-        fillStyle: () => {},
-        fillRect: () => {},
-        fillRoundedRect: () => {},
-        fillCircle: () => {},
-        lineStyle: () => {},
-        strokeRect: () => {},
-        strokeRoundedRect: () => {},
-        strokeCircle: () => {},
-        lineBetween: () => {},
-        destroy: () => {},
-      }),
-      text: () => ({
-        setOrigin: () => {},
-        setDepth: () => {},
-        setPosition: () => {},
-        setText: () => {},
-        setAlpha: () => {},
-        setColor: () => {},
-        setStyle: () => {},
-        destroy: () => {},
-      }),
+      graphics: () => mockGraphics,
+      text: () => mockText,
     },
     registry: {
       get: () => 12,

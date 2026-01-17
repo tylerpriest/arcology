@@ -2,7 +2,7 @@
 
 > Prioritized task list for Arcology MVP. Updated after comprehensive code analysis.
 
-**Last Updated:** 2026-01-27 - Building mode: Fixed TypeScript errors in test setup (onmousewheel type assertion, ElementWithChildren interface for proper typing). All validation errors resolved.
+**Last Updated:** 2026-01-27 - Building mode: Fixed test mock issues (setDepth returning undefined - now returns mock object for chaining). Fixed mocks in Room.test.ts, Resident.test.ts, ResidentSystem.test.ts, EconomySystem.test.ts, ResourceSystem.test.ts.
 
 ## Executive Summary
 

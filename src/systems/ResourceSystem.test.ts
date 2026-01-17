@@ -6,25 +6,31 @@ import Phaser from 'phaser';
 
 // Mock Phaser Scene for Building
 const createMockPhaserScene = (): Phaser.Scene => {
+  // Create mock graphics and text objects that return themselves for chaining
+  const mockGraphics = {
+    fillStyle: () => mockGraphics,
+    fillRect: () => {},
+    clear: () => {},
+    lineStyle: () => mockGraphics,
+    strokeRect: () => {},
+    setDepth: () => mockGraphics,
+    setBlendMode: () => mockGraphics,
+    destroy: () => {},
+  };
+
+  const mockText = {
+    setDepth: () => mockText,
+    setText: () => mockText,
+    setPosition: () => mockText,
+    setOrigin: () => mockText,
+    setAlpha: () => mockText,
+    destroy: () => {},
+  };
+
   return {
     add: {
-      graphics: () => ({
-        fillStyle: () => {},
-        fillRect: () => {},
-        clear: () => {},
-        lineStyle: () => {},
-        strokeRect: () => {},
-        setDepth: () => {},
-        setBlendMode: () => {},
-      }),
-      text: () => ({
-        setDepth: () => {},
-        setText: () => {},
-        setPosition: () => {},
-        setOrigin: () => {},
-        setAlpha: () => {},
-        destroy: () => {},
-      }),
+      graphics: () => mockGraphics,
+      text: () => mockText,
     },
     registry: {
       get: () => 12,

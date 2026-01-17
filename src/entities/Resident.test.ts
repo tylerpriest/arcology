@@ -8,20 +8,23 @@ import Phaser from 'phaser';
 // Mock GameScene for Resident
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockGameScene = (): any => {
+  // Create shared mock graphics objects that can be reused
+  const buildingMockGraphics = {
+    fillStyle: () => buildingMockGraphics,
+    fillRect: () => {},
+    clear: () => {},
+    lineStyle: () => buildingMockGraphics,
+    strokeRoundedRect: () => {},
+    strokeCircle: () => {},
+    lineBetween: () => {},
+    setDepth: () => buildingMockGraphics,
+    setBlendMode: () => buildingMockGraphics,
+    destroy: () => {},
+  };
+
   const building = new Building({
     add: {
-      graphics: () => ({
-        fillStyle: () => {},
-        fillRect: () => {},
-        clear: () => {},
-        lineStyle: () => {},
-        strokeRoundedRect: () => {},
-        strokeCircle: () => {},
-        lineBetween: () => {},
-        setDepth: () => {},
-        setBlendMode: () => {},
-        destroy: () => {},
-      }),
+      graphics: () => buildingMockGraphics,
     },
   } as unknown as Phaser.Scene);
 
@@ -43,28 +46,33 @@ const createMockGameScene = (): any => {
     isWeekend: () => false,
   };
 
+  // Create mock graphics and text objects that return themselves for chaining
+  const mockGraphics = {
+    fillStyle: () => mockGraphics,
+    fillRect: () => {},
+    clear: () => {},
+    lineStyle: () => mockGraphics,
+    strokeRoundedRect: () => {},
+    strokeCircle: () => {},
+    lineBetween: () => {},
+    setDepth: () => mockGraphics,
+    setBlendMode: () => mockGraphics,
+    destroy: () => {},
+  };
+
+  const mockText = {
+    setDepth: () => mockText,
+    setText: () => mockText,
+    setPosition: () => mockText,
+    setOrigin: () => mockText,
+    setAlpha: () => mockText,
+    destroy: () => {},
+  };
+
   const mockPhaserScene = {
     add: {
-      graphics: () => ({
-        fillStyle: () => {},
-        fillRect: () => {},
-        clear: () => {},
-        lineStyle: () => {},
-        strokeRoundedRect: () => {},
-        strokeCircle: () => {},
-        lineBetween: () => {},
-        setDepth: () => {},
-        setBlendMode: () => {},
-        destroy: () => {},
-      }),
-      text: () => ({
-        setDepth: () => {},
-        setText: () => {},
-        setPosition: () => {},
-        setOrigin: () => {},
-        setAlpha: () => {},
-        destroy: () => {},
-      }),
+      graphics: () => mockGraphics,
+      text: () => mockText,
     },
     registry: {
       get: () => 12,
