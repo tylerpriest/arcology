@@ -1,22 +1,22 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { AudioSystem, SoundCategory } from './AudioSystem';
+import { AudioSystem } from './AudioSystem';
 import Phaser from 'phaser';
 
 // Mock Phaser Scene
 class MockScene extends Phaser.Scene {
   sound = {
     add: vi.fn(() => ({
-      setVolume: vi.fn(),
+      volume: 1.0,
       play: vi.fn(),
       stop: vi.fn(),
       isPlaying: false,
     })),
-  };
+  } as any;
   load = {
     audio: vi.fn(),
     once: vi.fn(),
     on: vi.fn(),
-  };
+  } as any;
 }
 
 describe('AudioSystem', () => {

@@ -24,12 +24,9 @@ export class AudioSystem {
   private masterVolume = 0.8; // 0.0 - 1.0
   private uiVolume = 1.0;
   private ambientVolume = 0.7;
-  private residentVolume = 0.6;
   private muted = false;
   private categoryVolumes: Map<SoundCategory, number> = new Map();
   private activeAmbientSounds: Set<string> = new Set();
-  private maxAmbientInstances = 8;
-  private maxFootstepInstances = 4;
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene;
@@ -146,7 +143,7 @@ export class AudioSystem {
   /**
    * Update volumes for a specific category
    */
-  private updateCategoryVolumes(category: SoundCategory): void {
+  private updateCategoryVolumes(_category: SoundCategory): void {
     // This would need sound metadata to track categories
     // For now, we update all sounds
     this.updateAllSoundVolumes();
@@ -160,54 +157,9 @@ export class AudioSystem {
     
     const categoryVol = this.categoryVolumes.get(category) || 1.0;
     const finalVolume = this.muted ? 0 : this.masterVolume * categoryVol;
-    sound.setVolume(finalVolume);
+    (sound as any).volume = finalVolume;
   }
 
-  /**
-   * Generate a simple tone using Web Audio API
-   * Used for MVP when audio files are not available
-   */
-  private generateTone(frequency: number, duration: number, type: OscillatorType = 'sine'): Phaser.Sound.BaseSound | null {
-    if (!this.audioContext) {
-      return null;
-    }
-
-    try {
-      // Create a temporary audio buffer
-      const sampleRate = this.audioContext.sampleRate;
-      const length = sampleRate * duration;
-      const buffer = this.audioContext.createBuffer(1, length, sampleRate);
-      const data = buffer.getChannelData(0);
-
-      for (let i = 0; i < length; i++) {
-        const t = i / sampleRate;
-        let value = 0;
-        
-        switch (type) {
-          case 'sine':
-            value = Math.sin(2 * Math.PI * frequency * t);
-            break;
-          case 'square':
-            value = Math.sign(Math.sin(2 * Math.PI * frequency * t));
-            break;
-          case 'triangle':
-            value = 2 * Math.abs(2 * ((t * frequency) % 1) - 1) - 1;
-            break;
-        }
-        
-        // Apply envelope (fade in/out)
-        const envelope = Math.min(1, Math.min(t * 10, (duration - t) * 10));
-        data[i] = value * envelope * 0.3; // Reduce volume
-      }
-
-      // Convert to Phaser sound (simplified - Phaser doesn't directly support AudioBuffer)
-      // For MVP, we'll use Phaser's built-in sound generation or placeholder
-      return null;
-    } catch (error) {
-      console.warn('Failed to generate tone:', error);
-      return null;
-    }
-  }
 
   /**
    * Play a sound by ID
@@ -219,7 +171,7 @@ export class AudioSystem {
     if (sound) {
       const categoryVol = this.categoryVolumes.get(category) || 1.0;
       const finalVolume = this.masterVolume * categoryVol * volume;
-      sound.setVolume(finalVolume);
+      (sound as any).volume = finalVolume;
       sound.play();
     } else {
       // For MVP: Generate a simple tone if sound file doesn't exist
