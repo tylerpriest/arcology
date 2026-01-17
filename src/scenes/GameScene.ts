@@ -46,6 +46,8 @@ export class GameScene extends Phaser.Scene {
   private hasShownGameOver = false;
   private lastRoomRedrawHour = -1;
   private lastAutoSaveDay = 0;
+  private panKeys: Set<string> = new Set();
+  private panSpeed = 200; // pixels per second
   
   // Notification tracking (to avoid spamming)
   private hasShownLowRationsWarning = false;
@@ -168,6 +170,15 @@ export class GameScene extends Phaser.Scene {
         // Main menu - reload the scene for now (menu system not yet implemented)
         this.scene.restart();
       }
+    );
+
+    // Wire up camera control callbacks
+    this.uiManager.setCameraCallbacks(
+      () => this.focusLobby(),
+      () => this.zoomIn(),
+      () => this.zoomOut(),
+      () => this.zoomReset(),
+      () => this.zoomFit()
     );
 
     // Set up input handlers
@@ -369,9 +380,11 @@ export class GameScene extends Phaser.Scene {
 
       // Plus/Minus for zoom
       const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS);
-      const equalsKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EQUALS);
       plusKey.on('down', () => this.zoomIn());
-      equalsKey.on('down', () => this.zoomIn());
+      
+      // Also handle = key (which is SHIFT+PLUS on most keyboards, but we'll use the key code directly)
+      // Phaser doesn't have EQUALS, so we'll use the numeric keypad equals or handle it differently
+      // For now, just use PLUS which works for both + and = keys in most cases
 
       const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS);
       minusKey.on('down', () => this.zoomOut());
@@ -383,6 +396,34 @@ export class GameScene extends Phaser.Scene {
       // F key to fit building
       const fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
       fKey.on('down', () => this.zoomFit());
+
+      // WASD/Arrow key panning
+      const wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+      const aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+      const sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+      const dKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+      const upKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+      const leftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+      const downKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+      const rightKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+
+      // Track key down events
+      [wKey, upKey].forEach(key => {
+        key.on('down', () => this.panKeys.add('up'));
+        key.on('up', () => this.panKeys.delete('up'));
+      });
+      [aKey, leftKey].forEach(key => {
+        key.on('down', () => this.panKeys.add('left'));
+        key.on('up', () => this.panKeys.delete('left'));
+      });
+      [sKey, downKey].forEach(key => {
+        key.on('down', () => this.panKeys.add('down'));
+        key.on('up', () => this.panKeys.delete('down'));
+      });
+      [dKey, rightKey].forEach(key => {
+        key.on('down', () => this.panKeys.add('right'));
+        key.on('up', () => this.panKeys.delete('right'));
+      });
     }
   }
 
@@ -607,6 +648,26 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time: number, delta: number): void {
+    // Handle WASD/Arrow key panning
+    if (this.panKeys.size > 0) {
+      const deltaSeconds = delta / 1000;
+      const panDistance = this.panSpeed * deltaSeconds;
+      
+      let dx = 0;
+      let dy = 0;
+      
+      if (this.panKeys.has('up')) dy -= panDistance;
+      if (this.panKeys.has('down')) dy += panDistance;
+      if (this.panKeys.has('left')) dx -= panDistance;
+      if (this.panKeys.has('right')) dx += panDistance;
+      
+      if (dx !== 0 || dy !== 0) {
+        const newX = this.cameras.main.scrollX + dx;
+        const newY = this.cameras.main.scrollY + dy;
+        this.cameras.main.pan(newX, newY, 0); // Instant pan (0ms duration)
+      }
+    }
+
     // Check for game over conditions first (before updating)
     if (!this.hasShownGameOver && this.economySystem.isBankrupt()) {
       this.hasShownGameOver = true;

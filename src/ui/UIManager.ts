@@ -7,6 +7,7 @@ import { VictoryOverlay } from './components/VictoryOverlay';
 import { GameOverOverlay } from './components/GameOverOverlay';
 import { EconomyBreakdownPanel } from './components/EconomyBreakdownPanel';
 import { Notification, NotificationType } from './components/Notification';
+import { CameraControls } from './components/CameraControls';
 
 export class UIManager {
   private registry: Phaser.Data.DataManager;
@@ -19,6 +20,7 @@ export class UIManager {
   private gameOverOverlay: GameOverOverlay;
   private economyBreakdownPanel: EconomyBreakdownPanel;
   private notification: Notification;
+  private cameraControls: CameraControls;
 
   constructor(registry: Phaser.Data.DataManager) {
     this.registry = registry;
@@ -59,6 +61,7 @@ export class UIManager {
     this.gameOverOverlay = new GameOverOverlay(this.overlay);
     this.economyBreakdownPanel = new EconomyBreakdownPanel(this.overlay);
     this.notification = new Notification(this.overlay);
+    this.cameraControls = new CameraControls(this.overlay);
 
     // Listen to registry changes
     this.registry.events.on('changedata-money', (_: Phaser.Game, value: number) => {
@@ -193,6 +196,16 @@ export class UIManager {
     return this.notification.showError(message, duration);
   }
 
+  setCameraCallbacks(
+    onFocusLobby?: () => void,
+    onZoomIn?: () => void,
+    onZoomOut?: () => void,
+    onZoomReset?: () => void,
+    onZoomFit?: () => void
+  ): void {
+    this.cameraControls.setCallbacks(onFocusLobby, onZoomIn, onZoomOut, onZoomReset, onZoomFit);
+  }
+
   destroy(): void {
     this.sidebar.destroy();
     this.topBar.destroy();
@@ -202,5 +215,6 @@ export class UIManager {
     this.gameOverOverlay.destroy();
     this.economyBreakdownPanel.destroy();
     this.notification.destroy();
+    this.cameraControls.destroy();
   }
 }

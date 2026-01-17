@@ -405,6 +405,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
   - [x] Left sidebar with navigation (✅ implemented - Sidebar.ts)
   - [x] Build Zone menu with all room types (✅ implemented - BuildMenu.ts)
   - [x] Camera pan with right-click drag (✅ implemented - GameScene.ts)
+  - [x] Camera pan with WASD/Arrow keys (✅ implemented - GameScene.ts)
   - [x] Camera zoom with scroll wheel (✅ implemented - GameScene.ts)
   - [x] Ghost preview during placement (✅ implemented - GameScene.ts)
   - [x] Cyan/magenta validity feedback (✅ implemented - UI_COLORS in constants.ts)
@@ -623,7 +624,7 @@ All critical gaps remain as identified. Plan accurately reflects current impleme
 - [x] Top bar (Credits, Rations, Residents, Time, Star Rating, Satisfaction)
 - [x] Left sidebar navigation (collapsible, VENUS_OS branding)
 - [x] Build Zone menu with all room types
-- [x] Camera controls (right-click pan, scroll zoom)
+  - [x] Camera controls (right-click pan, WASD/Arrow keys, scroll zoom, keyboard shortcuts, UI panel)
 - [x] Glass panel CSS styling
 - [x] Ghost preview for room placement
 - [x] Room selection & info panel

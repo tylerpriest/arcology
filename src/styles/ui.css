@@ -1135,3 +1135,167 @@
   color: var(--secondary);
   text-shadow: 0 0 10px rgba(255, 0, 170, 0.5);
 }
+
+/* Camera Controls */
+.camera-controls {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 200;
+}
+
+.camera-controls-toggle {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.camera-controls-toggle:hover {
+  background: rgba(0, 204, 170, 0.1);
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 8px rgba(0, 204, 170, 0.3);
+}
+
+.camera-controls-toggle .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.camera-controls-panel {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  width: 240px;
+  padding: 16px;
+  border-radius: 8px;
+  z-index: 201;
+  animation: panelFadeIn 0.2s ease-out;
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.camera-controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.camera-controls-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 204, 170, 0.5);
+}
+
+.camera-controls-close {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.camera-controls-close:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  box-shadow: 0 0 8px rgba(0, 204, 170, 0.3);
+}
+
+.camera-controls-close .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.camera-controls-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.camera-control-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(30, 40, 38, 0.8);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.camera-control-btn:hover {
+  background: rgba(40, 55, 50, 0.9);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(0, 204, 170, 0.3);
+}
+
+.camera-control-btn .material-symbols-outlined {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.camera-control-btn span:not(.material-symbols-outlined):not(.camera-control-shortcut) {
+  flex: 1;
+}
+
+.camera-control-shortcut {
+  font-family: monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.camera-controls-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+.camera-controls-hint .material-symbols-outlined {
+  font-size: 16px;
+  opacity: 0.6;
+}
