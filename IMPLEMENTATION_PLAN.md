@@ -1,494 +1,106 @@
 # Implementation Plan - Arcology MVP
 
-> Prioritized task list for Arcology MVP. Updated after spec review and test analysis.
+> Prioritized task list for Arcology MVP. Updated to reflect current codebase analysis and test status.
 
-**Last Updated:** 2026-01-18 - After reviewing comprehensive vision documents (VISION.md, VISION_DEEP_DIVE.md, JTBD_TO_SPECS_MAPPING.md, SPEC_PHASE_DOCUMENTS.md). Vision reveals that MVP is foundation for post-MVP agent-based simulation. Plan: (1) Fix tests, (2) Complete MVP core loops, (3) Prepare architecture for 500+ agents in Phase 2.
+**Last Updated:** 2026-01-18 - Analyzed `src` and tests. 20 test failures confirmed.
 
 ## Executive Summary
 
 **Current Status:**
-- ✅ **Phase 0 (Critical Features): COMPLETE** - Sky lobbies, height limits, tenant types, lunch behavior
-- ✅ **Phase 1 (Audio System): COMPLETE** - AudioSystem with all sound effects and settings integration
-- ✅ **Phase 2 (Resident Visual Variety): COMPLETE** - Color palettes, size variation, traits system
-- ✅ **Phase 3 (Spec Compliance): COMPLETE** - Restaurant visual state, UI component tests
-- ✅ **Phase 4a (Core Economy): COMPLETE** - Star rating system, bankruptcy detection, rent tiers, satisfaction formula
-- ✅ **Phase 4b (Food System): COMPLETE** - Restaurant evaluation, food consumption, operating hours
-
-**TEST VALIDATION:** Test failures exist (54 tests failing) but all core gameplay features are functionally complete and integrated.
-- GameScene.test.ts: 17 failures - glowGraphics.setBlendMode() mock missing
-- ResourceSystem.test.ts: 5 failures - production rate expectations mismatch  
-- EconomySystem.test.ts: 9 failures - mock scene.graphics property missing
-- ResidentSystem.test.ts: 2 failures - mock resourceSystem.addFood() missing
-- Sidebar.test.ts: 1 failure - click handler callback issue
-
-## New Vision Documents & What They Mean for MVP
-
-Five comprehensive vision documents were created that fundamentally reshape post-MVP scope:
-
-### VISION.md
-- One-sentence pitch: Cyberpunk Venus arcology where residents walk (not float), maintenance is gameplay, cascading failures create unique stories
-- 5 core design pillars: Physical realism, economic realism, maintenance as gameplay, 500+ agents, scale & scope
-- 4 core loops: Economic cycle, traffic problem, maintenance crisis, resident stories
-- Thematic anchor: Liminal spaces + cyberpunk aesthetic
-
-**MVP Impact**: MVP establishes foundation for all 5 pillars. The pathfinding system (residents walk) is already in place. Economics loop already exists. Now needs stress/satisfaction to complete.
-
-### VISION_DEEP_DIVE.md
-- Core insight: **Constraints create emergence** (scarcity of money, time, maintenance budget)
-- Why movement matters: Natural congestion emerges from residents walking (lobby extension becomes necessary gameplay)
-- Why maintenance matters: Cascading failures create drama (oxygen → power → elevators)
-- Why 500+ agents matter: Visibility of infrastructure workers makes failures feel real
-- Why map size matters: Enables district stratification, diverse emergent stories
-
-**MVP Impact**: MVP must establish the tension from constraints. Economic loop creates natural scarcity. Movement system creates natural congestion. Satisfaction system creates natural tension about choices.
-
-### JTBD_TO_SPECS_MAPPING.md
-- Maps 13 JTBDs → 30+ specifications needed
-- Prioritizes by phase:
-  - Phase 1: Resident Movement & Congestion (JTBD 2, 5, 10)
-  - Phase 2: Maintenance & Cascading Failures (JTBD 6, 7, 9)
-  - Phase 3: 500+ Agents & Emergence (JTBD 8, 9)
-  - Phase 4: Economy & Large Map (JTBD 1, 3, 4)
-  - Phase 5: Resident Stories & Crisis (JTBD 11, 12, 13)
-
-**MVP Impact**: MVP focuses on Phases 1-2 foundation. Phase 1 (Movement/Congestion) partially done—needs animations + congestion feedback. Phase 2 (Maintenance) is POST-MVP. MVP can prepare architecture for Phase 3+ (agents).
-
-### Key Realization
-The vision documents reveal that **MVP is not the complete game, but the foundation for a much larger vision**. MVP's job is to:
-1. Establish the core loops work (economic, traffic, resident stories, food/time)
-2. Create tension through constraints (money scarcity, maintenance needs)
-3. Show that the core mechanic (residents walk) creates emergent gameplay
-4. Build architecture that scales to 500+ agents in Phase 2+
-
-This reframes what "MVP done" means: not "feature complete game," but "proof of concept that the vision works."
-
----
-
-## Key Insights from JTBD Analysis
-
-The JTBD reveals that **MVP must support these core loops:**
-
-1. **Economic Loop** (JTBD 1, 3, 6): Build apartments → Earn rent → Maintain systems → Reinvest
-   - Blocking: Satisfaction formula + rent tiers + bankruptcy detection
-   - Victory: Reach 300 population (2 stars) = sustainable income
-
-2. **Traffic Loop** (JTBD 2, 5, 10): More residents → Lobby congestion → Player extends lobby → Repeat
-   - Partially done: Pathfinding implemented, needs animations + congestion feedback
-   - Post-MVP: Lobby extension feature
-
-3. **Resident Stories Loop** (JTBD 11, 12, 13): Residents with traits → Succeed/fail → Player cares
-   - Blocking: Satisfaction system showing visible consequences to player choices
-   - MVP: Display how building decisions affect individual residents
-
-4. **Food & Time Loop** (JTBD 5, 12): Hunger → Eating → Working → Earning → Thriving
-   - Blocking: Restaurant system + time progression + food availability feedback
-   - Partially done: Food production chain exists, needs restaurant hours + evaluation
-
-**JTBD-Driven MVP Definition:**
-- Reach 300 population sustainably (economic loop working)
-- Residents walk, eat, work, sleep (time loop functional)
-- Player sees moral consequences of their building choices (resident stories visible)
-- Satisfaction system creates tension (not all residents can be satisfied)
-
-**Post-MVP (JTBD 6-9):**
-- Maintenance system with cascading failures
-- 500+ agent simulation for emergent gameplay
-- Systems Operator loop (maintain vs. expand trade-offs)
-
----
+- ✅ **Phase 0-4 (Core Systems): COMPLETE** - Audio, Economy, Time, Resource, Restaurant, Resident (Visuals/Traits) are implemented.
+- ⚠️ **Phase 5 (Traffic Loop): PARTIALLY IMPLEMENTED**
+    - `CongestionSystem.ts` and `LobbyExtensionSystem.ts` are implemented but isolated.
+    - `Resident.ts` has movement logic but ignores congestion.
+    - **Missing Integration**: Residents walk at constant speed regardless of crowding.
+    - **Missing UI**: No way for player to trigger `extendLobby()`.
+- ❌ **Validation**: 20 failing tests (Mock issues, logic errors, and integration gaps).
 
 ## Prioritized Task List
 
 ### IMMEDIATE (P0 - Validation Critical)
 
-1. **Fix GameScene.test.ts - 17 failures**
-   - Priority: P0 (blocks all 17 GameScene tests)
-   - Status: ❌ Not fixed
-   - Issue: `this.glowGraphics.setBlendMode is not a function` 
-   - Root cause: Mock glowGraphics in GameScene.test.ts doesn't have all required Phaser methods
-   - Solution: Update GameScene mock setup to include setBlendMode(), setAlpha(), other graphics methods
-   - Acceptance: All 17 GameScene tests passing ✅
-   - File: src/scenes/GameScene.test.ts
+Fix the 20 failing tests to establish a stable baseline.
 
-2. **Fix ResourceSystem.test.ts - 5 failures**
-   - Priority: P0 (blocks 5 ResourceSystem tests)
-   - Status: ❌ Not fixed
-   - Issue: Tests expect farm ~10/day, kitchen ~20/day but getting 100+ per update
-   - Root cause: Production rates stored in ROOM_SPECS constants or update() calculation needs verification
-   - Solution: Verify ResourceSystem.ts production rate logic and test expectations are aligned
-   - Acceptance: All 5 ResourceSystem tests passing with correct rates ✅
-   - Files: src/systems/ResourceSystem.ts, src/systems/ResourceSystem.test.ts
+1.  **Fix GameScene.test.ts (9 failures)**
+    -   **Issue**: `window.alert` not implemented in jsdom.
+    -   **Issue**: `createMockPhaserScene` missing `setDepth` and other graphics methods on spies.
+    -   **Issue**: `auto-save` spy not called (logic error or mock time issue).
+    -   **Issue**: `ESC` key test expects `PauseMenuScene` but got `UIScene`.
+    -   **Task**: Update `src/test/setup.ts` to mock `window.alert`.
+    -   **Task**: Update `createMockPhaserScene` in `src/test/setup.ts` to include missing graphics methods.
+    -   **Task**: Fix `GameScene` key handling or test expectation for ESC key.
 
-3. **Fix EconomySystem.test.ts - 9 failures**
-   - Priority: P0 (blocks 9 EconomySystem tests)
-   - Status: ❌ Not fixed
-   - Issue: `Cannot read properties of undefined (reading 'graphics')`
-   - Root cause: Mock scene missing graphics property required by EconomySystem constructor
-   - Solution: Ensure mockScene in test setup has all required properties (graphics, registry, etc.)
-   - Acceptance: All 9 EconomySystem tests passing ✅
-   - File: src/systems/EconomySystem.test.ts
+2.  **Fix BootScene.test.ts (2 failures)**
+    -   **Issue**: Spy argument mismatch for progress bar (y-coordinate changed).
+    -   **Issue**: `loadingText.destroy` is undefined.
+    -   **Task**: Update test expectations to match current layout.
+    -   **Task**: Ensure `loadingText` mock is correctly created/destroyed.
 
-4. **Fix ResidentSystem.test.ts - 2 failures**
-   - Priority: P0 (blocks 2 ResidentSystem tests)
-   - Status: ❌ Not fixed
-   - Issue: `mockScene.resourceSystem.addFood is not a function`
-   - Root cause: Mock resourceSystem incomplete - missing addFood() method
-   - Solution: Add addFood() and other ResourceSystem methods to mock in ResidentSystem.test.ts
-   - Acceptance: Office worker lunch tests passing ✅
-   - File: src/systems/ResidentSystem.test.ts
+3.  **Fix ElevatorSystem.test.ts (1 failure)**
+    -   **Issue**: `should update max floor when building grows` fails (expected 10, got 14).
+    -   **Task**: Fix `update` logic in `ElevatorShaft` or test expectation regarding zone limits.
 
-5. **Fix Sidebar.test.ts - 1 failure**
-   - Priority: P0 (blocks 1 Sidebar test)
-   - Status: ❌ Not fixed
-   - Issue: setActiveSection callback receives 'build-zone' for all clicks instead of correct section
-   - Root cause: Event click handler not properly triggering callback with correct section ID
-   - Solution: Debug Sidebar component click handler and test event dispatching
-   - Acceptance: Sidebar test passing ✅
-   - File: src/ui/components/Sidebar.test.ts
+4.  **Fix ResidentSystem.test.ts (1 failure)**
+    -   **Issue**: Office workers not leaving on weekends (count 6, expected 0).
+    -   **Task**: Debug `spawnOfficeWorkers` / `removeOfficeWorkers` logic in `ResidentSystem.ts`.
 
-### VALIDATION TARGET
+5.  **Fix ResourceSystem.test.ts (5 failures)**
+    -   **Issue**: Production/Consumption logic errors (0 produced).
+    -   **Issue**: Rate mismatch (expected ~10, got ~100).
+    -   **Task**: Debug `update` loop in `ResourceSystem` to ensure correct delta time usage and rate application.
 
-After all P0 fixes:
-- ⏳ All TypeScript type checking passes
-- ⏳ All ESLint linting passes  
-- ⏳ All Vitest tests pass (~415 total)
+6.  **Fix RestaurantSystem.test.ts (3 failures)**
+    -   **Issue**: `processDailyOperations` consuming food when closed.
+    -   **Issue**: Income calculation mismatch.
+    -   **Task**: Add `isRestaurantOpen` check to `processDailyOperations` loop.
 
----
+7.  **Fix Sidebar.test.ts (1 failure)**
+    -   **Issue**: Callback argument mismatch (`build-zone` vs `economy`).
+    -   **Task**: Verify `setActiveSection` logic in `Sidebar.ts`.
 
-## Phase 5 - Post-MVP Features (Spec-Driven)
+### P1 - Traffic Loop Integration (Congestion)
 
-Two major new specs added:
-- **RESIDENT_MOVEMENT.md** - Replace teleportation with realistic walking between rooms
-- **CONGESTION_MECHANICS.md** - Emergent congestion from multiple residents moving simultaneously
+Connect the implemented `CongestionSystem` to gameplay.
 
-### P1 - Resident Movement System (JTBD 2, 5, 10: Traffic Loop)
-- **Walking vs. teleportation** - Residents walk through corridors, not teleport
-- **Movement time calculation** - Time based on distance + floor changes
-- **Pathfinding** - Shortest valid path avoiding walls/obstacles
-- **Movement animations** - Smooth walking animation along paths
-- **Schedule integration** - Movement time affects arrival times and punctuality
-- **Performance** - Pathfinding <50ms, 100+ residents moving at 60 FPS
-- **Status**: 🚧 New feature (blocks JTBD 2, 5, 10 fully)
+1.  **Apply Congestion to Movement**
+    -   **File**: `src/entities/Resident.ts`
+    -   **Task**: Inject `CongestionSystem` into `Resident`.
+    -   **Task**: In `updateWalking` and `updateWalkingToElevator`, call `congestionSystem.getSpeedPenalty(currentRoomId)`.
+    -   **Task**: Multiply movement speed by penalty factor.
 
-### P2 - Congestion System (JTBD 2, 5, 10: Traffic Loop)
-- **Congestion density** - Residents per unit area in lobbies/corridors/elevators
-- **Speed penalties** - Movement slows in crowded areas (30-70% of normal speed)
-- **Visual feedback** - Residents bunch together visually
-- **Capacity limits** - Elevators hold 4, stairs hold 8, corridors 0.5 per unit
-- **Queue behavior** - FIFO queue when capacity exceeded
-- **Integration with satisfaction** - Congestion reduces morale
-- **Status**: 🚧 New feature (depends on P1)
+2.  **Congestion Visualization**
+    -   **File**: `src/graphics/CongestionOverlay.ts` (New)
+    -   **Task**: Create overlay that colors rooms based on `congestionSystem.getCongestionLevel()`.
+    -   **Task**: Toggle with 'C' key or UI button.
 
-### P3 - Core Gameplay Loop (JTBD 1-5: Architect & Builder)
-- **Lobby extension system** (JTBD 2) - Player extends lobby to reduce congestion
-- **Economic planning UI** (JTBD 3) - Income/expense projection, cash flow visualization
-- **Larger map support** (JTBD 4) - Scalable to 100+ unit width (post-MVP infrastructure)
-- **Status**: ⏳ Blocked by P1 & P2
+### P2 - Lobby Extension UI
 
-### P4 - Maintenance & Systems (JTBD 6-9: Systems Operator)
-- **Maintenance system** (JTBD 6, 7) - Rooms degrade over time, require maintenance (POST-MVP, not MVP)
-- **System failure cascades** (JTBD 7, 9) - Oxygen → Power → Elevator failures cascade
-- **Sub-agent simulation** (JTBD 8) - 500+ agents: maintenance workers, oxygen processors, cleaners
-- **Emergent gameplay** (JTBD 9) - Crisis storytelling through cascading failures
-- **Maintenance budget allocation** (JTBD 6, 7) - Compete maintenance vs expansion spending
+Enable the player to use the existing `LobbyExtensionSystem`.
 
-### P5 - Resident Stories (JTBD 11-13: Observer)
-- **Resident trait system** (JTBD 11) - Names, traits, job history, salary expectations (mostly implemented)
-- **Individual resident tracking** (JTBD 11, 12) - UI for viewing specific resident stories
-- **Crisis response mechanics** (JTBD 13) - Emergency alerts, time-pressure decisions
-- **Moral consequences** (JTBD 12) - Visible impact of player decisions on individual residents
+1.  **Add Extension Controls**
+    -   **File**: `src/ui/components/LobbyControlPanel.ts` (New) or extend `RoomInfoPanel.ts`.
+    -   **Task**: When Lobby is selected, show "Current Width: X".
+    -   **Task**: Add "Extend (+5)" and "Shrink (-5)" buttons.
+    -   **Task**: Show cost/refund preview.
 
-### P6 - Gameplay Features by Priority (Old P4)
-**P4a - Core Systems (Blocking JTBD 1-3):**
-- **Stress system** (Residents.md) - Occupancy stress, adjacency noise, elevator congestion
-- **Satisfaction calculation** (Economy.md) - Formula: 100 - Stress - HungerPenalty + FoodBonus + EmploymentBonus
-- **Rent tiers** (Economy.md) - Scale from $50-200 based on satisfaction
-- **Bankruptcy system** (Economy.md) - Game over at -$10,000 balance
-- **Star rating system** (Economy.md) - Population milestones: 1⭐@100, 2⭐@300 (MVP victory)
+2.  **Connect to System**
+    -   **File**: `src/scenes/GameScene.ts`
+    -   **Task**: Wire UI buttons to `lobbyExtensionSystem.extendLobby()`.
 
-**P4b - Time & Food (Blocking JTBD 5-13):**
-- **Time progression** (TIME_EVENTS.md) - 1 game hour = 10 real seconds, speed controls 1x/2x/4x (mostly implemented)
-- **Restaurant evaluation system** (FOOD_SYSTEM.md) - Score 0-100 based on food availability & wait times
-- **Restaurant operating hours** (FOOD_SYSTEM.md) - Fast Food 11-2 & 5-7, Fine Dining 6-11 PM only
-- **Elevator stress impact** (Elevator.md) - Wait times affect resident stress
+### P3 - Polish & Balance
 
-**P4c - UI/Visibility (Enabling JTBD):**
-- **Top bar elements** (UI_UX.md) - Credits, Rations, Residents, Time, Star rating
-- **Sidebar navigation** (UI_UX.md) - Collapsible, section switching (needs mock fix)
-- **Status alerts** (UI_UX.md) - Low rations, bankruptcy, starving residents
-- **Keyboard shortcuts** (UI_UX.md) - Number keys for rooms, Q/Escape, Home key
-
-**P4d - Graphics Polish (JTBD Aesthetic):**
-- **Volcanic Venus atmosphere** (Graphics.md) - Day/night cycle sky colors (implemented, verify)
-- **Room interior lighting** (Graphics.md) - Distinct accent colors by room type (implemented, verify)
-- **Resident color variation** (Graphics.md) - Hunger-based coloring, name-based palette (implemented)
-- **Ghost preview feedback** (Graphics.md) - Cyan valid / Magenta invalid placement
-- **Day/night transitions** (Graphics.md) - Smooth 1-hour blends between phases
-
-**P4e - Persistence & Polish:**
-- **Save/load persistence** (SAVE_LOAD.md) - Auto-save every 5 days, manual save/load
-- **Performance tuning** - Test with 500+ residents at target FPS
-- **Visual polish** - Scanlines, glass panels, glitch effects (partially done)
+1.  **Tuning**: Adjust `CongestionSystem` thresholds and `Resident` movement speed constants.
+2.  **Feedback**: Add audio/visual cues for high congestion (angry bubbles?).
 
 ---
 
----
+## Known Issues
 
-## 🎯 BUILDING READINESS: Phase 1 Specs Complete & Ready for Implementation
+- **Test vs Code Drift**: `GameScene.test.ts` does not check for `congestionSystem` or `lobbyExtensionSystem` presence.
+- **UI Gap**: `BuildMenu.ts` has no extension controls.
 
-Three comprehensive Phase 1 specifications have been created and finalized, forming the "Traffic Loop" (JTBD 2, 5, 10). These specs are **complete, detailed, and ready for implementation**.
+## Next Steps
 
-### 1. RESIDENT_MOVEMENT.md - Foundation
-**What it defines:**
-- Residents walk (not teleport) taking time proportional to distance
-- Movement includes pathfinding (A*), speed variation by resident type
-- Movement time affects schedule adherence (late arrivals matter)
-- Variable speeds: office workers faster, children slower
-- Elevator/stair queue integration, capacity limits
-
-**Key criteria:**
-- Movement time consistent (±0.2 second variance)
-- Congestion creates slowdown (20+ residents = 50% speed reduction)
-- Pathfinding <50ms even with 500+ agents
-- All movement animated, no teleportation
-- Integration points: Schedules, Elevators, Congestion system
-
-**6 Scenarios:** Simple commute (7s), rush hour (queue visible), multi-floor (distance compounds), lobby extension (dynamic improvement), elevator failure (fallback), cascading jam (overflow).
-
-### 2. CONGESTION_MECHANICS.md - Problem Emerges
-**What it defines:**
-- Congestion emerges naturally when residents use same spaces
-- Density = residents ÷ space area → congestion %
-- Speed penalty function: 0% congestion = 1.0x speed, 100% = 0.2x speed
-- Different space capacities: elevator < stairwell < corridor < lobby
-- Congestion cycle: 8 AM rush → peak congestion → drops by noon
-
-**Key criteria:**
-- Congestion forms without scripting (natural emergence)
-- Congestion visible (residents bunching together)
-- Impact measurable (>30 second arrival time difference)
-- Satisfies affected by congestion (−5 per level)
-- Queue behavior: FIFO, respects capacity, overflows wait
-
-**5 Scenarios:** Morning rush (8 residents form congestion), overflow (elevator capacity 4), lobby extension effect (congestion drops 30%), stairwell bottleneck (elevator broken), layout creates natural jam.
-
-**Congestion Scale:** 0-20% (empty), 20-40% (moderate), 40-60% (high), 60-80% (very high), 80-100% (critical), 100%+ (severe).
-
-### 3. LOBBY_EXTENSION.md - Solution Available
-**What it defines:**
-- Player can extend lobby width in increments (1, 5, 10 units)
-- Cost: $100 per unit width added ($500-5000 depending on size)
-- Effect: 25% wider lobby = ~25% less congestion
-- Max width: 60 units (hard cap from 20-unit start)
-- Undo supported: 50% refund like other buildings
-
-**Key criteria:**
-- Extension affordable but significant (cost vs. apartment choice)
-- Congestion reduction measurable (30% width increase → ~30% congestion drop)
-- Effect immediate (residents experience reduced congestion next movement)
-- Player understands purpose (diagnose & solve)
-- Extension is visible change (wider lobby on screen)
-- Strategic choice (sometimes worth it, sometimes not)
-
-**5 Scenarios:** First congestion problem (extends to solve), strategic before crisis (prevents problem), cascading extensions (late game limits), extension doesn't solve everything (diagnose bottleneck), economic pressure (choose between priorities).
-
----
-
-### How They Create The Traffic Loop (JTBD 2):
-1. **Residents walk** (RESIDENT_MOVEMENT) → Takes time, affects schedules
-2. **Multiple residents same corridor** (CONGESTION_MECHANICS) → Density increases → Movement slows
-3. **Player sees congestion** → Residents bunching, arriving late
-4. **Player extends lobby** (LOBBY_EXTENSION) → Wider space → Congestion drops → Residents arrive on time
-5. **Building gets bigger** → More residents → Congestion returns at larger scale
-6. **Loop repeats** → Cycle creates natural expansion mechanic
-
-This is **emergence without scripting**: No developer event saying "you must extend lobby," but the mechanical system creates the need naturally.
-
-**MVP Impact**: These three specs complete Phase 1. Together they explain why congestion matters and how player solves it. This is JTBD 2 fully specified. Without these specs, lobby extension would be arbitrary feature. With them, it's natural consequence of physical movement.
-
----
-
-## JTBD Mapping to Implementation
-
-**JTBD 1-5 (Architect: Building & Strategy):**
-- Place buildings strategically ✅ (Room placement system complete)
-- Extend lobby for traffic flow ⏳ (Requires lobby extension feature - Phase 2)
-- Long-term economic planning ⏳ (Needs economic UI improvements)
-- Larger map/vision scale ⏳ (Post-MVP infrastructure needed)
-- Residents walk naturally ✅⏳ (Pathfinding implemented, needs animations + congestion feedback - RESIDENT_MOVEMENT.md spec created)
-
-**JTBD 6-9 (Systems Operator: Maintenance & Emergence):**
-- Maintain critical systems ⏳ (Maintenance system POST-MVP)
-- Systems fail realistically ⏳ (Failure cascade mechanics POST-MVP)
-- 500+ agent simulation ⏳ (Scale phase, not MVP)
-- Emergent gameplay from interactions ⏳ (Requires all systems mature)
-- Watch residents navigate ✅ (Movement system complete, needs polish)
-
-**JTBD 11-13 (Observer: Resident Stories):**
-- Understand resident stories ✅ (Traits system implemented)
-- Watch success/failure mechanics ⏳ (Needs satisfaction → morale effects)
-- Respond to crises ⏳ (Emergency response system POST-MVP)
-
-**MVP Blocking Features (Must complete for game loop to work):**
-1. Stress system (enables JTBD 12)
-2. Satisfaction formula (enables rent variance, JTBD 1-3)
-3. Bankruptcy detection (enables economic tension, JTBD 3)
-4. Star rating system (enables victory, JTBD 1)
-5. Time progression (enables scheduling, JTBD 5-13)
-6. Restaurant system (enables food variety, JTBD 12)
-
----
-
-## Implementation Status by Feature
-
-### Phase 0 - Critical Features ✅ COMPLETE
-- ✅ **Sky lobby system** - Implemented in constants.ts, ElevatorSystem.ts, Resident.ts pathfinding
-- ✅ **Building height limit** - MAX_FLOORS_MVP = 20, validated in Building.addRoom()
-- ✅ **Tenant type system** - Resident.type field, office workers spawn/leave on schedule (ResidentSystem.ts:100-143)
-- ✅ **Office worker lunch behavior** - handleLunchStart() (Resident.ts:104-129) seeks Fast Food at 12 PM
-
-### Phase 1 - Audio System ✅ COMPLETE
-- ✅ AudioSystem.ts created with Phaser Sound integration and Web Audio API fallback
-- ✅ All sound effects implemented (UI, money, alerts, elevator bell)
-- ✅ SettingsScene volume sliders connected to AudioSystem
-- ✅ Money sounds integrated with EconomySystem
-- ✅ Alert sounds integrated with notification system
-- ✅ Elevator bell sound integrated with ElevatorSystem
-- ✅ Audio asset loading structure (uses generated tones for MVP, ready for .mp3 files)
-- ✅ AudioSystem.test.ts with full coverage
-
-### Phase 2 - Resident Visual Variety ✅ COMPLETE
-- ✅ Color palette system (8 palettes based on name hash, blended with hunger colors)
-- ✅ Size variation (±4px height based on name hash)
-- ✅ Traits system (1-2 traits per resident, displayed in RoomInfoPanel)
-- ✅ Save/load support for traits
-- ✅ Resident.test.ts (needs mock fixes but logic implemented)
-
-### Phase 3 - Spec Compliance & Testing ✅ MOSTLY COMPLETE
-- ✅ Restaurant visual state - Room.ts displays OPEN/CLOSED label and dims closed restaurants (needs mock fix)
-- ✅ Test coverage - UI components have tests (TopBar, BuildMenu, RoomInfoPanel passing; Sidebar needs 1 fix)
-- ✅ Scene tests - Infrastructure complete (needs mock fixes)
-- ⚠️ LLM review system - Placeholder with TODO (5 skipped tests, non-blocking)
-
----
-
-## Test Failure Analysis
-
-| Test File | Failed | Total | Status | Root Cause |
-|-----------|--------|-------|--------|-----------|
-| GameScene.test.ts | 17 | 17 | ❌ Failing | glowGraphics mock missing setBlendMode() |
-| ResourceSystem.test.ts | 5 | 29 | ❌ Failing | Production rate mismatch (100 vs expected 10-20) |
-| EconomySystem.test.ts | 9 | 17 | ❌ Failing | Mock scene.graphics property missing |
-| ResidentSystem.test.ts | 2 | 31 | ❌ Failing | Mock resourceSystem.addFood() missing |
-| Sidebar.test.ts | 1 | 1 | ❌ Failing | Click callback returns wrong section ID |
-| **PASSING** | | | ✅ | |
-| Room.test.ts | 0 | 35 | ✅ Passing | - |
-| Resident.test.ts | 0 | 38 | ✅ Passing | - |
-| Building.test.ts | 0 | 18 | ✅ Passing | - |
-| RestaurantSystem.test.ts | 0 | 17 | ✅ Passing | - |
-| SettingsScene.test.ts | 0 | 23 | ✅ Passing | - |
-| SaveGameScene.test.ts | 0 | 15 | ✅ Passing | - |
-| TopBar.test.ts | 0 | 30 | ✅ Passing | - |
-| RoomInfoPanel.test.ts | 0 | 25 | ✅ Passing | - |
-| TimeSystem.test.ts | 0 | 26 | ✅ Passing | - |
-| AudioSystem.test.ts | 0 | 9 | ✅ Passing | - |
-| ElevatorSystem.test.ts | 0 | 24 | ✅ Passing | - |
-| SaveSystem.test.ts | 0 | 9 | ✅ Passing | - |
-| BootScene.test.ts | 0 | 4 | ✅ Passing | - |
-| LoadGameScene.test.ts | 0 | 2 | ✅ Passing | - |
-| MainMenuScene.test.ts | 0 | 4 | ✅ Passing | - |
-| PauseMenuScene.test.ts | 0 | 7 | ✅ Passing | - |
-| UIScene.test.ts | 0 | 8 | ✅ Passing | - |
-| BuildMenu.test.ts | 0 | 7 | ✅ Passing | - |
-
-**Summary:** 34 failures across 5 test files, 268+ passing across 18 test files
-
----
-
-## File Locations & References
-
-### Key Source Files
-- src/entities/Room.ts (lines 140-144) - statusLabel.setColor() calls in draw()
-- src/entities/Building.ts (lines 42-44) - height limit validation
-- src/systems/ResourceSystem.ts - Production rate logic
-- src/systems/EconomySystem.ts - Satisfaction calculations
-- src/scenes/GameScene.ts - glowGraphics initialization
-- tests/setup.ts (lines 187-212) - Mock setup needs Function type fixes
-
-### Test Files to Fix
-- src/entities/Room.test.ts - Mock statusLabel needs setColor()
-- src/entities/Building.test.ts - Mock Room/Building objects incomplete
-- src/scenes/GameScene.test.ts - Mock glowGraphics incomplete
-- src/entities/Resident.test.ts - Mock scene.building.rooms structure
-- src/systems/ResourceSystem.test.ts - Production rate constants verification
-- src/systems/EconomySystem.test.ts - Mock scene.graphics property
-- src/systems/ResidentSystem.test.ts - Mock resourceSystem.addFood()
-- src/ui/components/Sidebar.test.ts - Click handler callback issue
-
----
-
-## Known Issues & Technical Debt
-
-### Critical (Blocking Validation)
-- 79 test failures due to incomplete mock setup
-- ESLint errors in test/setup.ts (4 @typescript-eslint/no-unsafe-function-type errors)
-- ESLint warnings throughout codebase (83 @typescript-eslint/no-explicit-any warnings)
-
-### Non-Critical (Post-MVP)
-- LLM review system placeholder (src/lib/llm-review.ts TODO at line 42)
-- 5 skipped tests in llm-review.test.ts waiting for LLM implementation
-- Audio system uses synthesized tones instead of recorded .mp3 files (MVP acceptable)
-
----
-
-## Architecture Overview
-
-```
-Core Systems (All Implemented ✅)
-├── Building system (room placement, height limit, sky lobbies)
-├── TimeSystem (day/hour tracking, events, schedules)
-├── EconomySystem (rent tiers, revenue, bankruptcy)
-├── ResidentSystem (spawning, scheduling, lifecycle)
-├── ResourceSystem (farm → kitchen → meals production chain)
-├── RestaurantSystem (operating hours, evaluation, income)
-├── ElevatorSystem (state machine, queues, pathfinding)
-├── AudioSystem (sound effects, volume controls)
-└── SaveSystem (persistence, auto-save, validation)
-
-UI Layer (Mostly Tested ✅)
-├── TopBar (Credits, Rations, Time, Rating) ✅
-├── Sidebar (Navigation, section switching) ⚠️ (1 test issue)
-├── BuildMenu (Room selection) ✅
-├── RoomInfoPanel (Details, traits) ✅
-├── EconomyBreakdown (Income/expenses)
-└── Notifications (Alerts, feedback)
-
-Graphics (Implemented ✅)
-├── VenusAtmosphere (background)
-├── DayNightOverlay (time-based lighting)
-├── Room visuals (neon accents, restaurant states)
-└── Resident visuals (color palettes, size variation, traits)
-```
-
----
-
-## Next Steps After Validation Fix
-
-1. **Run validation to ensure all tests pass and linting succeeds**
-2. **Commit working state with complete test coverage**
-3. **Optional post-MVP enhancements:**
-   - Visual representation of sky lobbies (distinct styling)
-   - Ambient sounds per room type
-   - LLM review system implementation for visual tests
-   - Additional integration tests for complex scenarios
-
----
-
-## Completion Criteria
-
-✅ All MVP features implemented and code-complete
-⏳ **Immediate priority:** Fix test mock setup to validate implementation
-⏳ All tests passing (457 expected total)
-⏳ Zero TypeScript errors
-⏳ Zero ESLint errors (except intentional @ts-expect-error)
-
+1.  **Execute P0 Fixes**: Get to green state.
+2.  **Implement P1**: Make congestion actually affect residents.
+3.  **Implement P2**: Give player control over lobby size.
