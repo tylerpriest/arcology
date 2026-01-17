@@ -1,0 +1,194 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                   ARCOLOGY SPECIFICATION MODE QUICK START                   ║
+║                        Three-Phase Development Workflow                     ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 1: SPECIFICATION MODE (Define What to Build)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 READ FIRST:  docs/SPECIFICATION_GUIDE.md (examples, patterns, tips)
+
+📝 INPUT:       One-liner requirement (you provide)
+                "I want restaurants to show when they're open or closed"
+
+🤖 AGENT:       1. Asks clarifying questions
+                2. Generates AUDIENCE_JTBD.md
+                3. Generates specs/TOPIC_1.md, specs/TOPIC_2.md, ...
+
+✅ OUTPUT:      Complete specifications ready for Planning Mode
+
+💡 KEY CONCEPT: Topic Scope Test
+                "Can I describe this in ONE sentence without 'and'?"
+                ❌ "Restaurant system with hours, evaluation, and income" → 3 topics
+                ✅ "Restaurant operating hours system controls open/closed state" → 1 topic
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SPEC STRUCTURE (Copy this template for each topic)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# [Topic Name]
+
+**Scope**: One sentence without "and"
+**Audience**: Who this serves
+**Related JTBDs**: Why it matters
+
+## Overview
+2-3 paragraphs explaining what and why
+
+## Capabilities
+- [ ] The system should [do X]
+- [ ] The system should [do Y]
+
+## Acceptance Criteria
+- [ ] [Measurable outcome 1] — How to verify
+- [ ] [Measurable outcome 2] — How to verify
+
+## Scenarios by Example
+### Scenario 1: [Case Name]
+Given: [Starting state]
+When: [Action]
+Then: [Expected outcome]
+
+## Edge Cases & Error Handling
+- [Edge case] → [Expected behavior]
+- [Error condition] → [Recovery]
+
+## Performance & Constraints
+- [Technical constraint]
+- [Business constraint]
+
+## Integration Points
+Depends on: [System]: [Capability needed]
+Used by: [System]: [How used]
+
+## Testing Strategy
+- Programmatic: [Test 1], [Test 2]
+- Visual: [Test 1]
+- Integration: [Test 1]
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCEPTANCE CRITERIA (The Golden Rule)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+WRITE (Outcomes - what should happen):
+✅ "Fast Food opens 11-2 PM and 5-7 PM"
+✅ "Income only accrues during operating hours"
+✅ "Closed restaurants show CLOSED label in red, 60% brightness"
+✅ "Residents cannot eat outside operating hours"
+
+DON'T WRITE (Implementation - how to build it):
+❌ "Use RestaurantSystem.isRestaurantOpen()"
+❌ "Add statusLabel Text object"
+❌ "Check time in update() loop"
+❌ "Use K-means clustering for colors"
+
+WHY? The agent knows how to code. You define WHAT; they implement HOW.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 2: PLANNING MODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Once specs are approved:
+1. Switch to PROMPT_plan.md
+2. Agent analyzes specs vs existing code
+3. Agent generates IMPLEMENTATION_PLAN.md with prioritized tasks
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 3: BUILDING MODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Once plan is approved:
+1. Switch to PROMPT_build.md
+2. Agent implements tasks one by one
+3. Agent tests, validates, commits
+4. You review changes and merge
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+FILES & DOCUMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📄 PROMPT_spec.md
+   → Full Phase 1 instructions for agent (read by agent, not humans)
+
+📄 docs/SPECIFICATION_GUIDE.md
+   → Practical guide with real examples, patterns, and common mistakes
+   → START HERE if new to spec mode
+
+📄 docs/SPECIFICATION_METHODOLOGY.md
+   → Deep dive into Ralph, Spec Kit, and OpenSpec methodologies
+   → Why this approach works
+
+📄 AGENTS.md
+   → Project workflow overview with references to all phases
+
+📄 SPEC_MODE_SETUP_SUMMARY.md
+   → Overview of what was created (this entire setup)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SNOWFLAKE METHOD (How Agent Expands Your Idea)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Layer 1: One-liner
+  "I want restaurants to show when they're open or closed"
+
+Layer 2: Capabilities (3-5)
+  - The system should track restaurant operating hours
+  - The system should display open/closed status visually
+  - The system should prevent eating outside operating hours
+  - The system should only generate income during operating hours
+
+Layer 3: Acceptance Criteria
+  - [ ] Fast Food opens 11-2 PM and 5-7 PM
+  - [ ] Closed restaurants show CLOSED label in red
+  - [ ] Income only accrues during operating hours
+
+Layer 4: Concrete Scenarios (Given/When/Then)
+  Given: Fast Food is open (1 PM)
+  When: Resident seeks food
+  Then: Resident finds Fast Food and eats
+
+Layer 5: Edge Cases & Constraints
+  - Restaurants stay closed during night (income = 0)
+  - Multiple restaurants track independently
+  - Status updates immediately at hour boundary
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXTERNAL REFERENCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ralph Playbook:          https://ghuntley.com/ralph-playbook
+GitHub Spec Kit:         https://github.com/github/spec-kit
+OpenSpec:                https://github.com/Fission-AI/OpenSpec
+Ralph Orchestrator:      https://github.com/mikeyobrien/ralph-orchestrator
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GETTING STARTED (Right Now)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Read:    docs/SPECIFICATION_GUIDE.md (5-10 min)
+2. Prepare: One-liner requirement for a feature
+3. Start:   Switch to PROMPT_spec.md mode with agent
+4. Answer:  Agent's clarifying questions
+5. Review:  Agent generates specs
+6. Iterate: Ask for changes until satisfied
+7. Done:    Switch to Planning Mode
+
+Example one-liners to try:
+  - "Residents should look more diverse (colors, sizes, traits)"
+  - "The game should pause/resume with a button"
+  - "I want a better map/grid visualization"
+  - "Add keyboard shortcuts for common actions"
+
+═══════════════════════════════════════════════════════════════════════════════
+Status: ✅ Ready to use (created 2026-01-18)
+Framework: Ralph + Spec Kit + OpenSpec synthesis
+═══════════════════════════════════════════════════════════════════════════════
