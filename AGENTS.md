@@ -25,30 +25,37 @@ This command:
 
 ## How to Work (Fresh Context)
 
-This project uses the **Ralph methodology**.
+This project uses the **Ralph methodology** with **Spec-Driven Development**.
 
-1. **Check mode** - Planning or building?
-   - Planning: Read `PROMPT_plan.md`
-   - Building: Read `PROMPT_build.md`
+1. **Check mode** - Specifying, planning, or building?
+   - Specifying: Read `PROMPT_spec.md` (define requirements, create specs)
+   - Planning: Read `PROMPT_plan.md` (analyze specs vs code, create tasks)
+   - Building: Read `PROMPT_build.md` (implement tasks, test, validate)
 
-2. **Check state** - Read `IMPLEMENTATION_PLAN.md`
+2. **Check state**
+   - Specs exist? Read `specs/*` for requirements
+   - Audience defined? Read `AUDIENCE_JTBD.md` for context
+   - Plan exists? Read `IMPLEMENTATION_PLAN.md` for tasks
 
-3. **Check specs** - Read `specs/*` for requirements
+3. **Check specs** - Read `specs/*` for detailed requirements
 
 ### Key Files
 
 | File | Purpose |
 |------|---------|
-| IMPLEMENTATION_PLAN.md | Current tasks, blockers |
-| PROMPT_build.md | Building mode instructions |
-| PROMPT_plan.md | Planning mode instructions |
-| specs/*.md | Feature requirements |
+| PROMPT_spec.md | Specification mode instructions (Phase 1) |
+| PROMPT_plan.md | Planning mode instructions (Phase 2) |
+| PROMPT_build.md | Building mode instructions (Phase 3) |
+| AUDIENCE_JTBD.md | Target audiences and their jobs to be done |
+| specs/*.md | Feature requirements (one per topic of concern) |
+| IMPLEMENTATION_PLAN.md | Prioritized tasks derived from specs |
+| docs/SPECIFICATION_GUIDE.md | How to use spec mode (examples, patterns) |
 | docs/PRINCIPLES.md | Coding standards |
 
 ### Methodology Docs
 
-- `docs/QUICKSTART_RALPH.md` - Full journey guide
-- `docs/RALPH_PLAYBOOK.md` - Deep methodology
+- `docs/SPECIFICATION_GUIDE.md` - How to use spec mode (examples, patterns, common mistakes)
+- `docs/RALPH_PLAYBOOK.md` - Deep methodology for spec-driven development
 - `docs/PRINCIPLES.md` - Coding standards
 
 ## Project Structure

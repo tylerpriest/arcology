@@ -183,10 +183,13 @@ Object.defineProperty(global, 'navigator', {
 // Mock Phaser completely to avoid issues with missing methods
 vi.mock('phaser', () => {
   // Real EventEmitter for proper event handling in tests
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   class EventEmitter {
-    private listeners: { [key: string]: Function[] } = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private listeners: { [key: string]: Array<(...args: any[]) => void> } = {};
 
-    on(event: string, callback: Function) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    on(event: string, callback: (...args: any[]) => void) {
       if (!this.listeners[event]) {
         this.listeners[event] = [];
       }
@@ -194,14 +197,17 @@ vi.mock('phaser', () => {
       return this;
     }
 
-    off(event: string, callback: Function) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    off(event: string, callback: (...args: any[]) => void) {
       if (this.listeners[event]) {
         this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
       }
       return this;
     }
 
-    once(event: string, callback: Function) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    once(event: string, callback: (...args: any[]) => void) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const wrappedCallback = (...args: any[]) => {
         callback(...args);
         this.off(event, wrappedCallback);
