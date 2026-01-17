@@ -11,7 +11,7 @@ export class RoomInfoPanel {
     parent.appendChild(this.element);
   }
 
-  show(roomId: string, roomType: RoomType, residents: number, workers: number, income: number, expenses: number, residentTraits: string[] = []): void {
+  show(roomId: string, roomType: RoomType, residents: number, workers: number, income: number, expenses: number, residentTraits: string[] = [], tenantTypes: string[] = []): void {
     this.roomId = roomId;
     const spec = ROOM_SPECS[roomType];
     
@@ -23,6 +23,14 @@ export class RoomInfoPanel {
         <div class="room-info-row">
           <span class="room-info-label">Traits:</span>
           <span class="room-info-value">${residentTraits.join(', ')}</span>
+        </div>
+        ` : '';
+
+    // Build tenant types display if there are residents or workers
+    const tenantTypesDisplay = tenantTypes.length > 0 ? `
+        <div class="room-info-row">
+          <span class="room-info-label">Types:</span>
+          <span class="room-info-value">${tenantTypes.join(', ')}</span>
         </div>
         ` : '';
 
@@ -50,6 +58,7 @@ export class RoomInfoPanel {
           <span class="room-info-value">${workers} / ${spec.jobs}</span>
         </div>
         ` : ''}
+        ${tenantTypesDisplay}
         ${traitsDisplay}
         <div class="room-info-row">
           <span class="room-info-label">Income:</span>

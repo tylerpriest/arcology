@@ -685,6 +685,22 @@ export class GameScene extends Phaser.Scene {
           });
         });
 
+        // Collect tenant types for display
+        const tenantTypes: string[] = [];
+        roomResidents.forEach((resident) => {
+          const typeLabel = resident.type === 'office_worker' ? 'Office Worker' : 'Resident';
+          if (!tenantTypes.includes(typeLabel)) {
+            tenantTypes.push(typeLabel);
+          }
+        });
+        const roomWorkers = room.getWorkers();
+        roomWorkers.forEach((worker) => {
+          const typeLabel = worker.type === 'office_worker' ? 'Office Worker' : 'Resident';
+          if (!tenantTypes.includes(typeLabel)) {
+            tenantTypes.push(typeLabel);
+          }
+        });
+
         // Update registry with room info
         this.registry.set('roomInfo', {
           id: room.id,
@@ -694,6 +710,7 @@ export class GameScene extends Phaser.Scene {
           income,
           expenses,
           residentTraits, // Add traits for display
+          tenantTypes, // Add tenant types for display
         });
       }
     } else {

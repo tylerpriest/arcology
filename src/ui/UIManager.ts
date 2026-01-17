@@ -120,7 +120,8 @@ export class UIManager {
           data.workers || 0,
           data.income || 0,
           data.expenses || 0,
-          data.residentTraits || [] // Pass traits
+          data.residentTraits || [], // Pass traits
+          data.tenantTypes || [] // Pass tenant types
         );
       } else {
         this.roomInfoPanel.hide();
