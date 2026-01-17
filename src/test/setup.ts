@@ -95,33 +95,124 @@ Object.defineProperty(global, 'window', {
 (global as any).window = mockWindow;
 
 // Mock document with documentElement (required by Phaser)
-const mockDocumentElement = {
-  ontouchstart: null,
-  onwheel: null,
-  onmousewheel: null,
-};
+// Note: We preserve jsdom's document but ensure Phaser-specific properties exist
+// jsdom should already be available from vitest's jsdom environment
+if (global.document) {
+  // jsdom is available, just ensure Phaser-specific properties exist
+  if (!global.document.documentElement.ontouchstart) {
+    Object.defineProperty(global.document.documentElement, 'ontouchstart', {
+      value: null,
+      writable: true,
+    });
+  }
+  if (!global.document.documentElement.onwheel) {
+    Object.defineProperty(global.document.documentElement, 'onwheel', {
+      value: null,
+      writable: true,
+    });
+  }
+  // onmousewheel is deprecated but Phaser may check for it
+  // Use type assertion to avoid TypeScript error
+  if (!(global.document.documentElement as any).onmousewheel) {
+    Object.defineProperty(global.document.documentElement, 'onmousewheel', {
+      value: null,
+      writable: true,
+    });
+  }
+  
+  // Override createElement for canvas to return our mock (Phaser needs specific canvas behavior)
+  const originalCreateElement = global.document.createElement.bind(global.document);
+  global.document.createElement = function(tagName: string, options?: ElementCreationOptions) {
+    if (tagName.toLowerCase() === 'canvas') {
+      return new MockCanvas() as unknown as HTMLCanvasElement;
+    }
+    return originalCreateElement(tagName, options);
+  };
+} else {
+  // Fallback if jsdom is not available (shouldn't happen with vitest jsdom environment)
+  const mockDocumentElement = {
+    ontouchstart: null,
+    onwheel: null,
+    onmousewheel: null,
+  };
 
-Object.defineProperty(global, 'document', {
-  value: {
-    createElement: (tag: string) => {
-      if (tag === 'canvas') {
-        return new MockCanvas();
-      }
-      return {
-        style: {},
-        setAttribute: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      } as unknown as HTMLElement;
+  // Type for elements with children property
+  interface ElementWithChildren {
+    children?: Node[];
+    style: Record<string, unknown>;
+    setAttribute: () => void;
+    addEventListener: () => void;
+    removeEventListener: () => void;
+    appendChild: (child: Node) => Node;
+    removeChild: (child: Node) => Node;
+    querySelector: (selector: string) => Node | null;
+    querySelectorAll: () => Node[];
+    classList: {
+      contains: () => boolean;
+      add: () => void;
+      remove: () => void;
+    };
+  }
+
+  Object.defineProperty(global, 'document', {
+    value: {
+      createElement: (tag: string): HTMLElement => {
+        if (tag === 'canvas') {
+          return new MockCanvas() as unknown as HTMLCanvasElement;
+        }
+        const element: ElementWithChildren = {
+          style: {},
+          setAttribute: () => {},
+          addEventListener: () => {},
+          removeEventListener: () => {},
+          appendChild: function(child: Node) {
+            if (!this.children) this.children = [];
+            this.children.push(child);
+            return child;
+          },
+          removeChild: function(child: Node) {
+            if (this.children) {
+              const index = this.children.indexOf(child);
+              if (index > -1) this.children.splice(index, 1);
+            }
+            return child;
+          },
+          querySelector: function(_selector: string) {
+            if (!this.children) return null;
+            // Simple mock - just return first child if it matches
+            return this.children[0] || null;
+          },
+          querySelectorAll: function() {
+            return this.children || [];
+          },
+          classList: {
+            contains: () => false,
+            add: () => {},
+            remove: () => {},
+          },
+        };
+        return element as unknown as HTMLElement;
+      },
+      body: {
+        appendChild: function(child: Node) {
+          if (!this.children) this.children = [];
+          this.children.push(child);
+          return child;
+        },
+        removeChild: function(child: Node) {
+          if (this.children) {
+            const index = this.children.indexOf(child);
+            if (index > -1) this.children.splice(index, 1);
+          }
+          return child;
+        },
+        children: [] as Node[],
+      },
+      getElementById: () => null,
+      documentElement: mockDocumentElement,
     },
-    body: {
-      appendChild: () => {},
-      removeChild: () => {},
-    },
-    getElementById: () => null,
-    documentElement: mockDocumentElement,
-  },
-});
+  });
+}
 
 // Mock navigator (required by Phaser for touch detection)
 Object.defineProperty(global, 'navigator', {
