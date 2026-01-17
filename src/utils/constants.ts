@@ -48,6 +48,31 @@ export const HUNGER_COLORS = {
   critical: 0xe44a8a,    // Magenta pulse (0-19)
 } as const;
 
+// Resident color palettes for visual variety (4-8 palettes based on name hash)
+// Each palette has primary and accent colors that work with hunger colors
+export const RESIDENT_PALETTES = [
+  { primary: 0x4ae4e4, accent: 0x2a8a8a }, // Cyan palette
+  { primary: 0xe4a44a, accent: 0x8a6a2a }, // Amber palette
+  { primary: 0x8a4ae4, accent: 0x5a2a8a }, // Purple palette
+  { primary: 0x4ae48a, accent: 0x2a8a5a }, // Green palette
+  { primary: 0xe44a8a, accent: 0x8a2a5a }, // Magenta palette
+  { primary: 0x4a8ae4, accent: 0x2a5a8a }, // Blue palette
+  { primary: 0xe4e44a, accent: 0x8a8a2a }, // Yellow palette
+  { primary: 0xe46a4a, accent: 0x8a4a2a }, // Orange palette
+] as const;
+
+// Resident traits (display only for MVP)
+export const RESIDENT_TRAITS = [
+  'Workaholic',
+  'Foodie',
+  'Night Owl',
+  'Early Bird',
+  'Social',
+  'Introvert',
+] as const;
+
+export type ResidentTrait = typeof RESIDENT_TRAITS[number];
+
 // Sky lobby floor requirements (every 15 floors)
 export const SKY_LOBBY_FLOORS = [15, 30, 45, 60, 75, 90] as const;
 export const SKY_LOBBY_ZONE_SIZE = 15; // Floors per zone (0-14, 15-29, 30-44, etc.)

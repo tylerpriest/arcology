@@ -86,6 +86,9 @@ describe('Resident Entity', () => {
       expect(resident.state).toBe(ResidentState.IDLE);
       expect(resident.home).toBeNull();
       expect(resident.job).toBeNull();
+      expect(Array.isArray(resident.traits)).toBe(true);
+      expect(resident.traits.length).toBeGreaterThanOrEqual(1);
+      expect(resident.traits.length).toBeLessThanOrEqual(2);
     });
 
     test('resident has unique name', () => {
@@ -476,6 +479,9 @@ describe('Resident Entity', () => {
       expect(serialized.homeId).toBe(apartment.id);
       expect(serialized.jobId).toBe(office.id);
       expect(serialized.state).toBe(ResidentState.IDLE);
+      expect(Array.isArray(serialized.traits)).toBe(true);
+      expect(serialized.traits.length).toBeGreaterThanOrEqual(1);
+      expect(serialized.traits.length).toBeLessThanOrEqual(2);
     });
 
     test('serialize handles null home and job', () => {

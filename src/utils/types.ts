@@ -27,6 +27,7 @@ export interface ResidentData {
   homeId: string | null;
   jobId: string | null;
   state: ResidentState;
+  traits: string[]; // Visual variety traits (display only)
 }
 
 export enum ResidentState {
@@ -86,6 +87,7 @@ export interface ResidentSaveData {
   homeRoomId: string | null;
   state: ResidentState;      // 'idle' | 'working' | 'eating' | 'sleeping' | etc.
   position: { x: number; y: number };
+  traits?: string[];          // Visual variety traits (optional for backward compatibility)
 }
 
 export interface EconomySaveData {

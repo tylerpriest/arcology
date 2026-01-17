@@ -11,6 +11,8 @@ import {
   FLOOR_HEIGHT,
   getSkyLobbyZone,
   SKY_LOBBY_FLOORS,
+  RESIDENT_PALETTES,
+  RESIDENT_TRAITS,
 } from '../utils/constants';
 import { ResidentState, ResidentData, ElevatorState } from '../utils/types';
 import type { GameScene } from '../scenes/GameScene';
@@ -28,6 +30,11 @@ export class Resident {
   public hunger: number = HUNGER_MAX;
   public stress: number = 0; // 0-100 stress level
   public state: ResidentState = ResidentState.IDLE;
+  public traits: string[] = []; // Visual variety traits (display only)
+  
+  // Visual variety properties (deterministic based on name)
+  private paletteIndex: number; // Color palette index (0-7)
+  private sizeVariation: number; // Height variation in pixels (-4 to +4)
 
   private scene: Phaser.Scene;
   private graphics: Phaser.GameObjects.Graphics;
@@ -68,6 +75,20 @@ export class Resident {
     this.name = RESIDENT_NAMES[Math.floor(Math.random() * RESIDENT_NAMES.length)];
     this.x = x;
     this.y = y;
+    
+    // Initialize visual variety based on name hash (deterministic)
+    const nameHash = this.hashName(this.name);
+    this.paletteIndex = nameHash % RESIDENT_PALETTES.length;
+    this.sizeVariation = (nameHash % 9) - 4; // -4 to +4 pixels
+    
+    // Assign 1-2 traits based on name hash
+    const numTraits = (nameHash % 2) + 1; // 1 or 2 traits
+    const availableTraits = [...RESIDENT_TRAITS];
+    this.traits = [];
+    for (let i = 0; i < numTraits; i++) {
+      const traitIndex = (nameHash + i * 7) % availableTraits.length;
+      this.traits.push(availableTraits[traitIndex]);
+    }
 
     // Create graphics for silhouette
     this.graphics = scene.add.graphics();
@@ -196,19 +217,55 @@ export class Resident {
     this.nameLabel.setPosition(this.x, this.y - 40);
   }
 
+  /**
+   * Hash a name to a deterministic number for visual variety
+   */
+  private hashName(name: string): number {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      const char = name.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return Math.abs(hash);
+  }
+
+  /**
+   * Recalculate visual variety based on current name (used when restoring from save)
+   */
+  private recalculateVisualVariety(): void {
+    const nameHash = this.hashName(this.name);
+    this.paletteIndex = nameHash % RESIDENT_PALETTES.length;
+    this.sizeVariation = (nameHash % 9) - 4; // -4 to +4 pixels
+    
+    // Reassign traits based on name hash
+    const numTraits = (nameHash % 2) + 1; // 1 or 2 traits
+    const availableTraits = [...RESIDENT_TRAITS];
+    this.traits = [];
+    for (let i = 0; i < numTraits; i++) {
+      const traitIndex = (nameHash + i * 7) % availableTraits.length;
+      this.traits.push(availableTraits[traitIndex]);
+    }
+  }
+
   private drawSilhouette(): void {
     this.graphics.clear();
     this.glowGraphics.clear();
 
-    const color = this.getHungerColor();
+    // Get palette color, blended with hunger color for visual feedback
+    const palette = RESIDENT_PALETTES[this.paletteIndex];
+    const hungerColor = this.getHungerColor();
+    // Blend palette primary with hunger color (70% palette, 30% hunger)
+    const color = this.blendColors(palette.primary, hungerColor, 0.7);
+    
     const bobOffset = (this.state === ResidentState.WALKING || 
                        this.state === ResidentState.WALKING_TO_ELEVATOR) 
                       ? Math.sin(this.walkBob) * 2 : 0;
     const baseY = this.y + bobOffset;
 
-    // Silhouette body (24x32px)
+    // Silhouette body (24x32px) with size variation
     const w = 12;
-    const h = 32;
+    const h = 32 + this.sizeVariation; // Apply size variation
 
     // Draw holographic glow outline
     const glowAlpha = this.hunger < HUNGER_CRITICAL
@@ -248,6 +305,24 @@ export class Resident {
     } else {
       return HUNGER_COLORS.critical; // Magenta
     }
+  }
+
+  /**
+   * Blend two colors with a ratio (0-1, where 0 = all color1, 1 = all color2)
+   */
+  private blendColors(color1: number, color2: number, ratio: number): number {
+    const r1 = (color1 >> 16) & 0xff;
+    const g1 = (color1 >> 8) & 0xff;
+    const b1 = color1 & 0xff;
+    const r2 = (color2 >> 16) & 0xff;
+    const g2 = (color2 >> 8) & 0xff;
+    const b2 = color2 & 0xff;
+    
+    const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
+    const g = Math.round(g1 * (1 - ratio) + g2 * ratio);
+    const b = Math.round(b1 * (1 - ratio) + b2 * ratio);
+    
+    return (r << 16) | (g << 8) | b;
   }
 
   private updateIdle(gameHour: number): void {
@@ -895,6 +970,7 @@ export class Resident {
       homeId: this.home?.id ?? null,
       jobId: this.job?.id ?? null,
       state: this.state,
+      traits: this.traits,
     };
   }
 
