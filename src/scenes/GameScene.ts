@@ -15,6 +15,7 @@ import { INITIAL_MONEY, GRID_SIZE, ROOM_SPECS, RoomType, UI_COLORS, MAX_FLOORS_M
 import { GameState, ElevatorState } from '../utils/types';
 import { SaveSystem } from '../systems/SaveSystem';
 import { ElevatorSystem } from '../systems/ElevatorSystem';
+import { AudioSystem } from '../systems/AudioSystem';
 
 export class GameScene extends Phaser.Scene {
   public building!: Building;
@@ -25,6 +26,7 @@ export class GameScene extends Phaser.Scene {
   public restaurantSystem!: RestaurantSystem;
   public saveSystem!: SaveSystem;
   public elevatorSystem!: ElevatorSystem;
+  public audioSystem!: AudioSystem;
 
   private venusAtmosphere!: VenusAtmosphere;
   private dayNightOverlay!: DayNightOverlay;
@@ -57,6 +59,7 @@ export class GameScene extends Phaser.Scene {
   private hasShownBankruptcyWarning = false;
   private hasShownStarvationAlert = false;
   private lastNotificationCheckHour = -1;
+  private lastElevatorStates: Map<string, ElevatorState> = new Map();
 
   constructor() {
     super({ key: 'GameScene' });
@@ -79,6 +82,7 @@ export class GameScene extends Phaser.Scene {
       this.timeSystem
     );
     this.saveSystem = new SaveSystem(this);
+    this.audioSystem = new AudioSystem(this);
 
     // Check if we need to load a save
     const loadSaveSlot = this.registry.get('loadSaveSlot') as number | undefined;
@@ -401,6 +405,7 @@ export class GameScene extends Phaser.Scene {
           const spec = ROOM_SPECS[room.type];
           const refund = Math.floor(spec.cost * 0.5);
           this.economySystem.earn(refund);
+          this.audioSystem.playDemolish();
 
           // Remove room
           this.building.removeRoom(this.selectedRoomId);
@@ -543,6 +548,7 @@ export class GameScene extends Phaser.Scene {
       if (success) {
         const cost = this.building.getRoomCost(selectedRoom);
         this.economySystem.spend(cost);
+        this.audioSystem.playPlaceSuccess();
         
         // If lobby or sky lobby is placed, create elevator shaft for that zone
         if (selectedRoom === 'lobby' || selectedRoom === 'skylobby') {
@@ -563,6 +569,7 @@ export class GameScene extends Phaser.Scene {
           );
         } else {
           this.uiManager.showError('Cannot place room here. Check floor constraints and overlaps.');
+          this.audioSystem.playPlaceError();
         }
       }
     } else {
@@ -710,6 +717,7 @@ export class GameScene extends Phaser.Scene {
     // Check for game over conditions first (before updating)
     if (!this.hasShownGameOver && this.economySystem.isBankrupt()) {
       this.hasShownGameOver = true;
+      this.audioSystem.playBankruptcyAlert();
       const cycles = this.timeSystem.getDay();
       const credits = this.economySystem.getMoney();
       this.timeSystem.setSpeed(0); // Pause game
@@ -746,6 +754,17 @@ export class GameScene extends Phaser.Scene {
     this.timeSystem.update(delta);
     
     // Update elevator system
+    // Check for elevator arrivals (bell sound) - check before update
+    const shafts = this.elevatorSystem.getAllShafts();
+    for (const shaft of shafts) {
+      const previousState = this.lastElevatorStates.get(shaft.id);
+      // Play bell when elevator transitions from MOVING to DOORS_OPENING
+      if (previousState === ElevatorState.MOVING && shaft.car.state === ElevatorState.DOORS_OPENING) {
+        this.audioSystem.playElevatorBell();
+      }
+      this.lastElevatorStates.set(shaft.id, shaft.car.state);
+    }
+    
     this.elevatorSystem.update(delta);
 
     // Track max population
@@ -802,7 +821,16 @@ export class GameScene extends Phaser.Scene {
           this.resourceSystem,
           this.restaurantSystem
         );
+        const dailyIncome = this.economySystem.getDailyIncome();
+        if (dailyIncome > 0) {
+          this.audioSystem.playMoneyGain(dailyIncome);
+        }
+        
         this.economySystem.processDailyExpenses(this.building);
+        const dailyExpenses = this.economySystem.getDailyExpenses();
+        if (dailyExpenses > 0) {
+          this.audioSystem.playMoneyLoss();
+        }
 
         // Process quarterly office revenue (every 90 days)
         const quarterlyProcessed = this.economySystem.processQuarterlyRevenue(this.building, currentDay);
@@ -815,6 +843,7 @@ export class GameScene extends Phaser.Scene {
             `Quarterly Office Revenue: +${quarterlyAmount.toLocaleString()} CR`,
             7000 // Show for 7 seconds
           );
+          this.audioSystem.playMoneyGain(quarterlyAmount);
         }
 
         // Check for auto-save (every 5 days)
@@ -851,14 +880,15 @@ export class GameScene extends Phaser.Scene {
     // Bankruptcy warning: Show when credits drop below -$5,000 (halfway to bankruptcy)
     const BANKRUPTCY_THRESHOLD = -10000;
     const BANKRUPTCY_WARNING_THRESHOLD = -5000;
-    if (credits < BANKRUPTCY_WARNING_THRESHOLD && credits >= BANKRUPTCY_THRESHOLD) {
-      if (!this.hasShownBankruptcyWarning) {
-        this.uiManager.showWarning(
-          `Warning: Credits critically low (${credits.toLocaleString()} CR). Bankruptcy at ${BANKRUPTCY_THRESHOLD.toLocaleString()} CR.`,
-          8000 // Show for 8 seconds
-        );
-        this.hasShownBankruptcyWarning = true;
-      }
+      if (credits < BANKRUPTCY_WARNING_THRESHOLD && credits >= BANKRUPTCY_THRESHOLD) {
+        if (!this.hasShownBankruptcyWarning) {
+          this.uiManager.showWarning(
+            `Warning: Credits critically low (${credits.toLocaleString()} CR). Bankruptcy at ${BANKRUPTCY_THRESHOLD.toLocaleString()} CR.`,
+            8000 // Show for 8 seconds
+          );
+          this.audioSystem.playLowMoneyAlert();
+          this.hasShownBankruptcyWarning = true;
+        }
     } else if (credits >= BANKRUPTCY_WARNING_THRESHOLD) {
       // Reset warning flag if credits recover
       this.hasShownBankruptcyWarning = false;
@@ -884,6 +914,7 @@ export class GameScene extends Phaser.Scene {
             'Critical: No rations remaining! Residents will starve!',
             10000 // Show for 10 seconds
           );
+          this.audioSystem.playNoFoodAlert();
           this.hasShownZeroRationsAlert = true;
           // Reset low warning flag so it can show again if rations recover then drop
           this.hasShownLowRationsWarning = false;
@@ -894,6 +925,7 @@ export class GameScene extends Phaser.Scene {
             `Low Rations: ${Math.floor(rations)} remaining. Build more farms and kitchens!`,
             7000 // Show for 7 seconds
           );
+          this.audioSystem.playLowFoodAlert();
           this.hasShownLowRationsWarning = true;
         }
         // Reset zero alert flag if rations recover above zero
@@ -918,6 +950,7 @@ export class GameScene extends Phaser.Scene {
           `Alert: ${starvingResidents.length} resident${starvingResidents.length > 1 ? 's' : ''} starving! Build farms and kitchens immediately!`,
           10000 // Show for 10 seconds
         );
+        this.audioSystem.playStarvationAlert();
         this.hasShownStarvationAlert = true;
       }
     } else {
@@ -1049,6 +1082,13 @@ export class GameScene extends Phaser.Scene {
     const population = this.residentSystem.getPopulation();
     const starRating = population >= 300 ? 2 : population >= 100 ? 1 : 0;
     this.registry.set('starRating', starRating);
+  }
+
+  shutdown(): void {
+    // Cleanup AudioSystem
+    if (this.audioSystem) {
+      this.audioSystem.destroy();
+    }
     
     // Calculate building-wide satisfaction
     const foodAvailable = this.resourceSystem.getFood() > 0;

@@ -37,6 +37,14 @@ export class BootScene extends Phaser.Scene {
     // Load assets here
     // this.load.image('tileset', 'assets/tileset.png');
     // this.load.spritesheet('resident', 'assets/resident.png', { frameWidth: 16, frameHeight: 32 });
+    
+    // Audio assets will be loaded here when audio files are added
+    // For MVP, AudioSystem uses programmatically generated sounds
+    // Example:
+    // this.load.audio('ui_click', 'assets/audio/ui_click.mp3');
+    // this.load.audio('place_success', 'assets/audio/place_success.mp3');
+    // this.load.audio('money_gain', 'assets/audio/money_gain.mp3');
+    // this.load.audio('elevator_bell', 'assets/audio/elevator_bell.mp3');
   }
 
   create(): void {

@@ -20,6 +20,15 @@ export class SettingsScene extends Phaser.Scene {
 
   create(): void {
     this.createSettingsUI();
+    
+    // Load current settings into AudioSystem if GameScene is active
+    const gameScene = this.scene.get('GameScene') as any;
+    if (gameScene && gameScene.audioSystem) {
+      const audioSystem = gameScene.audioSystem;
+      audioSystem.setMasterVolume(this.settings.masterVolume / 100);
+      audioSystem.setUIVolume(this.settings.uiVolume / 100);
+      audioSystem.setAmbientVolume(this.settings.ambientVolume / 100);
+    }
   }
 
   private loadSettings(): GameSettings {
@@ -114,9 +123,19 @@ export class SettingsScene extends Phaser.Scene {
       transition: all 0.2s ease;
       margin-top: 10px;
     `;
-    resetBtn.addEventListener('click', () => {
+      resetBtn.addEventListener('click', () => {
       this.settings = { ...DEFAULT_SETTINGS };
       this.saveSettings();
+      
+      // Update AudioSystem if it exists
+      const gameScene = this.scene.get('GameScene') as any;
+      if (gameScene && gameScene.audioSystem) {
+        const audioSystem = gameScene.audioSystem;
+        audioSystem.setMasterVolume(this.settings.masterVolume / 100);
+        audioSystem.setUIVolume(this.settings.uiVolume / 100);
+        audioSystem.setAmbientVolume(this.settings.ambientVolume / 100);
+      }
+      
       this.cleanup();
       this.create();
     });
@@ -205,6 +224,19 @@ export class SettingsScene extends Phaser.Scene {
       (this.settings[key] as number) = value;
       valueDisplay.textContent = `${value}%`;
       this.saveSettings();
+      
+      // Update AudioSystem if it exists (GameScene may not be active)
+      const gameScene = this.scene.get('GameScene') as any;
+      if (gameScene && gameScene.audioSystem) {
+        const audioSystem = gameScene.audioSystem;
+        if (key === 'masterVolume') {
+          audioSystem.setMasterVolume(value / 100);
+        } else if (key === 'uiVolume') {
+          audioSystem.setUIVolume(value / 100);
+        } else if (key === 'ambientVolume') {
+          audioSystem.setAmbientVolume(value / 100);
+        }
+      }
     });
 
     sliderContainer.appendChild(slider);
