@@ -84,8 +84,27 @@ export class GameScene extends Phaser.Scene {
     }
 
     // Set up camera
-    this.cameras.main.setBounds(-1000, -2000, 3280, 3720);
-    this.cameras.main.scrollY = -500;
+    // Add space for 6 basement floors below ground
+    const basementFloors = 6;
+    const basementHeight = basementFloors * GRID_SIZE;
+    this.cameras.main.setBounds(-1000, -2000 - basementHeight, 3280, 3720 + basementHeight);
+    
+    // Center camera on lobby (floor 0)
+    // Lobby is at Y = groundY - (0 + 1) * GRID_SIZE = 500 - 64 = 436
+    // Account for bottom bar (~120px) and center lobby in visible area
+    const groundY = 500;
+    const lobbyY = groundY - (0 + 1) * GRID_SIZE; // 436
+    const screenHeight = this.scale.height || 720; // Fallback to 720 if not available
+    const topBarHeight = 56; // Top bar height from CSS
+    const bottomBarHeight = 120; // Approximate height of build menu
+    const visibleHeight = screenHeight - topBarHeight - bottomBarHeight;
+    
+    // Position camera so lobby is centered in the visible game area (between top and bottom bars)
+    // The lobby should be at the center of the visible area
+    // scrollY is the top of the camera viewport
+    // We want: scrollY + topBarHeight + visibleHeight/2 = lobbyY
+    // So: scrollY = lobbyY - topBarHeight - visibleHeight/2
+    this.cameras.main.scrollY = lobbyY - topBarHeight - visibleHeight / 2;
 
     // Create Venus atmosphere background (behind everything)
     this.venusAtmosphere = new VenusAtmosphere(this);
@@ -190,14 +209,26 @@ export class GameScene extends Phaser.Scene {
     const groundY = 500;
     const buildingLeft = 0;
     const buildingRight = 1280;
+    const basementFloors = 6;
+    const basementHeight = basementFloors * GRID_SIZE;
+    const topHeight = 2000;
 
-    // Vertical lines
+    // Vertical lines (extend to include basements)
     for (let x = buildingLeft; x <= buildingRight; x += GRID_SIZE) {
-      graphics.lineBetween(x, groundY - 2000, x, groundY);
+      graphics.lineBetween(x, groundY - topHeight, x, groundY + basementHeight);
     }
 
-    // Horizontal lines (floors)
-    for (let y = groundY; y >= groundY - 2000; y -= GRID_SIZE) {
+    // Horizontal lines (floors including basements)
+    // Basement floors (below ground, positive Y direction)
+    for (let floor = -basementFloors; floor < 0; floor++) {
+      const y = groundY - (floor + 1) * GRID_SIZE;
+      graphics.lineStyle(1, 0x3a3a4a, 0.15); // Slightly darker for basements
+      graphics.lineBetween(buildingLeft, y, buildingRight, y);
+    }
+    
+    // Above-ground floors
+    for (let y = groundY; y >= groundY - topHeight; y -= GRID_SIZE) {
+      graphics.lineStyle(1, 0x4a4a5a, 0.2);
       graphics.lineBetween(buildingLeft, y, buildingRight, y);
     }
   }
@@ -328,7 +359,83 @@ export class GameScene extends Phaser.Scene {
         }
       }
       });
+
+      // Camera controls
+      // Home key to focus lobby
+      const homeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.HOME);
+      homeKey.on('down', () => {
+        this.focusLobby();
+      });
+
+      // Plus/Minus for zoom
+      const plusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.PLUS);
+      const equalsKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.EQUALS);
+      plusKey.on('down', () => this.zoomIn());
+      equalsKey.on('down', () => this.zoomIn());
+
+      const minusKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.MINUS);
+      minusKey.on('down', () => this.zoomOut());
+
+      // Zero to reset zoom
+      const zeroKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ZERO);
+      zeroKey.on('down', () => this.zoomReset());
+
+      // F key to fit building
+      const fKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+      fKey.on('down', () => this.zoomFit());
     }
+  }
+
+  private focusLobby(): void {
+    const groundY = 500;
+    const lobbyY = groundY - (0 + 1) * GRID_SIZE; // 436
+    const screenHeight = this.scale.height || 720;
+    const topBarHeight = 56;
+    const bottomBarHeight = 120;
+    const visibleHeight = screenHeight - topBarHeight - bottomBarHeight;
+    
+    // Smoothly pan and zoom to lobby
+    this.cameras.main.pan(lobbyY - topBarHeight - visibleHeight / 2, this.cameras.main.scrollY, 500, 'Power2');
+    this.cameras.main.zoomTo(1, 500);
+  }
+
+  private zoomIn(): void {
+    const currentZoom = this.cameras.main.zoom;
+    const newZoom = Phaser.Math.Clamp(currentZoom + 0.25, 0.5, 2);
+    this.cameras.main.zoomTo(newZoom, 200);
+  }
+
+  private zoomOut(): void {
+    const currentZoom = this.cameras.main.zoom;
+    const newZoom = Phaser.Math.Clamp(currentZoom - 0.25, 0.5, 2);
+    this.cameras.main.zoomTo(newZoom, 200);
+  }
+
+  private zoomReset(): void {
+    this.cameras.main.zoomTo(1, 300);
+  }
+
+  private zoomFit(): void {
+    const topFloor = this.building.getTopFloor();
+    const basementFloors = 6;
+    const groundY = 500;
+    const topY = groundY - (topFloor + 2) * GRID_SIZE;
+    const bottomY = groundY + basementFloors * GRID_SIZE;
+    const buildingHeight = bottomY - topY;
+    
+    // Calculate zoom to fit building in view (with some padding)
+    const screenHeight = this.scale.height || 720;
+    const topBarHeight = 56;
+    const bottomBarHeight = 120;
+    const visibleHeight = screenHeight - topBarHeight - bottomBarHeight;
+    const targetZoom = Math.min(visibleHeight / buildingHeight * 0.9, 2);
+    
+    // Center on building
+    const centerY = (topY + bottomY) / 2;
+    const targetScrollY = centerY - visibleHeight / 2 / targetZoom;
+    
+    this.cameras.main.zoomTo(targetZoom, 500);
+    this.cameras.main.pan(this.cameras.main.scrollX, targetScrollY, 500, 'Power2');
   }
 
   private handleClick(worldX: number, worldY: number): void {
@@ -336,6 +443,8 @@ export class GameScene extends Phaser.Scene {
     const selectedRoom = this.registry.get('selectedRoom') as string | undefined;
     
     // Convert world coordinates to grid position
+    // Formula: floor = (groundY - worldY) / GRID_SIZE
+    // For basements (negative floors), worldY > groundY
     const groundY = 500;
     const floor = Math.floor((groundY - worldY) / GRID_SIZE);
     const position = Math.floor(worldX / GRID_SIZE);
@@ -401,6 +510,7 @@ export class GameScene extends Phaser.Scene {
     // Get world position
     const worldPoint = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
     const groundY = 500;
+    // Formula works for both positive and negative floors (basements)
     const floor = Math.floor((groundY - worldPoint.y) / GRID_SIZE);
     const position = Math.floor(worldPoint.x / GRID_SIZE);
 

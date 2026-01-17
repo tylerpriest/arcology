@@ -21,18 +21,20 @@ export class BuildingFrame {
     this.graphics.clear();
     this.glowGraphics.clear();
 
+    const basementFloors = 6;
+    const bottomY = this.groundY + basementFloors * GRID_SIZE; // Bottom of basements
     const topY = this.groundY - (topFloor + 2) * GRID_SIZE;
     const frameColor = 0x2a2a3a;
     const accentColor = 0x4a8ae4;
 
-    // Left structural column
-    this.drawColumn(-40, topY, this.groundY, frameColor, accentColor);
+    // Left structural column (extends to basement)
+    this.drawColumn(-40, topY, bottomY, frameColor, accentColor);
 
-    // Right structural column
-    this.drawColumn(this.buildingRight + 8, topY, this.groundY, frameColor, accentColor);
+    // Right structural column (extends to basement)
+    this.drawColumn(this.buildingRight + 8, topY, bottomY, frameColor, accentColor);
 
-    // Horizontal floor beams on the exterior
-    for (let floor = 0; floor <= topFloor + 1; floor++) {
+    // Horizontal floor beams on the exterior (including basements)
+    for (let floor = -basementFloors; floor <= topFloor + 1; floor++) {
       const beamY = this.groundY - floor * GRID_SIZE;
 
       // Left beam extension
@@ -42,8 +44,8 @@ export class BuildingFrame {
       // Right beam extension
       this.graphics.fillRect(this.buildingRight - 4, beamY - 4, 44, 8);
 
-      // Floor number on right side (every 5 floors or if it's the lobby)
-      if (floor % 5 === 0 || floor === 0) {
+      // Floor number on right side (every 5 floors, lobby, or basement floors)
+      if (floor % 5 === 0 || floor === 0 || floor < 0) {
         this.drawFloorNumber(this.buildingRight + 20, beamY, floor);
       }
     }
