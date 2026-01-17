@@ -2,19 +2,20 @@
 
 # Ralph Loop Script
 # Usage:
-#   ./loop.sh              # Build mode with Claude (default)
-#   ./loop.sh plan         # Plan mode with Claude
-#   ./loop.sh --agent      # Build mode with Cursor Agent (auto-run)
-#   ./loop.sh --agent -i   # Build mode with Cursor Agent (interactive)
-#   ./loop.sh plan --agent # Plan mode with Cursor Agent
-#   ./loop.sh 20 --agent   # Build mode, 20 iterations, Cursor Agent
+#   ./loop.sh                # Build mode with Claude (default)
+#   ./loop.sh plan           # Plan mode with Claude
+#   ./loop.sh --agent        # Build mode with Cursor Agent
+
+#   ./loop.sh --opencode     # Build mode with Opencode
+#   ./loop.sh --agent -i     # Build mode with Cursor Agent (interactive)
+#   ./loop.sh plan --agent   # Plan mode with Cursor Agent
 
 set -e
 
 # Parse arguments
 MODE="build"
 MAX_ITERATIONS=0
-USE_AGENT=false
+AGENT_TYPE="claude"
 INTERACTIVE=false
 
 for arg in "$@"; do
@@ -23,7 +24,11 @@ for arg in "$@"; do
             MODE="plan"
             ;;
         --agent)
-            USE_AGENT=true
+            AGENT_TYPE="cursor"
+            ;;
+
+        --opencode)
+            AGENT_TYPE="opencode"
             ;;
         -i|--interactive)
             INTERACTIVE=true
@@ -50,15 +55,22 @@ fi
 
 echo "========================================"
 echo "Ralph Loop - $MODE mode"
-if [[ "$USE_AGENT" == "true" ]]; then
-    if [[ "$INTERACTIVE" == "true" ]]; then
-        echo "Agent: Cursor (interactive - can type input)"
-    else
-        echo "Agent: Cursor (auto-run mode)"
-    fi
-else
-    echo "Agent: Claude (auto-approve enabled)"
-fi
+case $AGENT_TYPE in
+    cursor)
+        if [[ "$INTERACTIVE" == "true" ]]; then
+            echo "Agent: Cursor (interactive)"
+        else
+            echo "Agent: Cursor (auto-run)"
+        fi
+        ;;
+
+    opencode)
+        echo "Agent: Opencode"
+        ;;
+    claude)
+        echo "Agent: Claude (auto-approve enabled)"
+        ;;
+esac
 echo "Prompt: $PROMPT_FILE"
 if [[ $MAX_ITERATIONS -gt 0 ]]; then
     echo "Max iterations: $MAX_ITERATIONS"
@@ -66,7 +78,7 @@ else
     echo "Iterations: unlimited (Ctrl+C to stop)"
 fi
 echo "========================================"
-if [[ "$USE_AGENT" == "true" ]] && [[ "$INTERACTIVE" == "true" ]]; then
+if [[ "$AGENT_TYPE" == "cursor" ]] && [[ "$INTERACTIVE" == "true" ]]; then
     echo ""
     echo "TIP: Type '/auto-run on' in agent to enable auto-approval."
 fi
@@ -96,40 +108,44 @@ while true; do
     echo "----------------------------------------"
 
     # Run the agent with the prompt
-    if [[ "$USE_AGENT" == "true" ]]; then
-        # Cursor Agent CLI
-        if [[ "$INTERACTIVE" == "true" ]]; then
-            # Interactive mode - allows typing input
-            if [[ "$MODE" == "plan" ]]; then
-                agent --plan "$(cat "$PROMPT_FILE")"
+    case $AGENT_TYPE in
+        cursor)
+            # Cursor Agent CLI
+            if [[ "$INTERACTIVE" == "true" ]]; then
+                # Interactive mode
+                if [[ "$MODE" == "plan" ]]; then
+                    agent --plan "$(cat "$PROMPT_FILE")"
+                else
+                    agent "$(cat "$PROMPT_FILE")"
+                fi
             else
-                agent "$(cat "$PROMPT_FILE")"
+                # Auto-run mode
+                if [[ "$MODE" == "plan" ]]; then
+                    agent --print --plan --output-format text "$(cat "$PROMPT_FILE")"
+                else
+                    agent --print --output-format text "$(cat "$PROMPT_FILE")"
+                fi
             fi
-        else
-            # Auto-run mode - non-interactive
-            if [[ "$MODE" == "plan" ]]; then
-                agent --print --plan --output-format text "$(cat "$PROMPT_FILE")"
-            else
-                agent --print --output-format text "$(cat "$PROMPT_FILE")"
-            fi
-        fi
-    else
-        # Claude CLI (default)
-        cat "$PROMPT_FILE" | claude \
-            --dangerously-skip-permissions \
-            --model opus \
-            --verbose \
-            --output-format stream-json
-    fi
+            ;;
+
+        opencode)
+            # Opencode CLI
+            opencode "$(cat "$PROMPT_FILE")"
+            ;;
+        claude)
+            # Claude CLI (default)
+            cat "$PROMPT_FILE" | claude \
+                --dangerously-skip-permissions \
+                --model opus \
+                --verbose \
+                --output-format stream-json
+            ;;
+    esac
 
     EXIT_CODE=$?
 
     if [[ $EXIT_CODE -ne 0 ]]; then
-        if [[ "$USE_AGENT" == "true" ]]; then
-            echo "Cursor exited with code $EXIT_CODE"
-        else
-            echo "Claude exited with code $EXIT_CODE"
-        fi
+        echo "Agent ($AGENT_TYPE) exited with code $EXIT_CODE"
         echo "Stopping loop."
         exit $EXIT_CODE
     fi
@@ -145,7 +161,7 @@ while true; do
         set -e
         
         # Always log validation failures to validation.log for agent reference
-        # Note: Agents should append their attempted fixes to this file to prevent retrying failed fixes or repeatedly trying to fix something that is just a warning
+        # Note: Agents should append their attempted fixes to this file. PROMPT_build.md instructs agents NOT to retry warnings that have failed fix attempts.
         if [[ $VALIDATION_EXIT_CODE -ne 0 ]]; then
             # Preserve previous fix attempts if they exist
             PREVIOUS_ATTEMPTS=""
@@ -214,7 +230,7 @@ while true; do
                 echo "Validation errors logged to validation.log"
             else
                 echo "⚠ Validation has warnings (lint/test) but no critical type errors"
-                echo "Push allowed - warnings logged to validation.log for next iteration"
+                echo "Push allowed - warnings logged to validation.log. Do NOT retry warnings if they have documented failed attempts in log."
                 # Allow push to proceed even with warnings
                 set +e
                 # Try to get upstream branch name

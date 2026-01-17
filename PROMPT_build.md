@@ -9,7 +9,8 @@ You are in BUILDING mode. Implement features from the plan.
 0c. Study @AGENTS.md for build/run commands and operational notes.
 0d. **Check for validation.log** - If `validation.log` exists, read it immediately. It contains validation errors from a previous iteration. 
    - **Priority when fixing**: Fix critical type errors first (they block push), then warnings (lint/test) with up to 20 parallel sub-agents to fix documented errors, prioritizing type errors.
-   - **Update log with attempts**: If you try to fix an error but cannot resolve it, append to `validation.log` what you attempted and why it failed. This prevents future iterations from retrying the same failed fixes. Format: `=== Attempted Fix === [timestamp] [error] [what you tried] [why it failed] === End Attempt ===`
+   - **Update log with attempts**: If you try to fix an error but cannot resolve it, append to `validation.log` what you attempted and why it failed. Format: `=== Attempted Fix === [timestamp] [error] [what you tried] [why it failed] === End Attempt ===`
+   - **Avoid Redundant Fixes**: Check `validation.log` for previous attempts. **If you see a failed attempt for a WARNING, DO NOT retry it.** Only retry critical errors or if you have a substantially new valid approach.
 
 1. Your task is to implement functionality per the specifications. Follow @IMPLEMENTATION_PLAN.md and choose the most important item to address.
 
@@ -21,7 +22,8 @@ You are in BUILDING mode. Implement features from the plan.
    - **When fixing validation issues, prioritize in this order:**
      1. **Critical type errors first** - Must fix before committing/pushing. Push is blocked until type errors are resolved. Fix these immediately.
      2. **Warnings (lint/test) second** - Try to fix after type errors are resolved, but push is allowed even if warnings remain. Warnings are logged to `validation.log` for next iteration.
-   - **Document failed fix attempts**: If you try to fix an error but cannot resolve it, append to `validation.log` what you attempted and why it failed. This prevents future iterations from retrying the same failed fixes. Format: `=== Attempted Fix === [timestamp] [error] [what you tried] [why it failed] === End Attempt ===`
+   - **Document failed fix attempts**: If you try to fix an error but cannot resolve it, append to `validation.log` what you attempted and why it failed. Format: `=== Attempted Fix === [timestamp] [error] [what you tried] [why it failed] === End Attempt ===`
+   - **Avoid Redundant Fixes**: Check `validation.log`. **If a WARNING has a documented failed fix, ignore it.** Do not waste cycles retrying known sticky warnings.
    - Always try to fix all errors, but focus on critical type errors first. You won't be blocked from pushing progress if only warnings remain.
 
 5. **Update @IMPLEMENTATION_PLAN.md** - Mark the completed task, remove resolved items, add any new findings.
