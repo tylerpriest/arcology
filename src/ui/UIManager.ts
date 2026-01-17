@@ -61,6 +61,12 @@ export class UIManager {
       }
     });
     
+    // Initialize Build Zone as active (BuildMenu is visible by default)
+    // This ensures the sidebar state matches the BuildMenu visibility
+    if (this.sidebar.getActiveSection() === 'build-zone') {
+      this.buildMenu.show();
+    }
+    
     // Set up Credits click handler (will be called from GameScene)
     this.topBar.setOnCreditsClick(() => {
       // Emit event that GameScene can listen to

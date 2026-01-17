@@ -1,7 +1,7 @@
 export class Sidebar {
   private element: HTMLDivElement;
   private isCollapsed = false;
-  private activeSection: string = 'sector-view';
+  private activeSection: string = 'build-zone';
   private onSectionToggle?: (section: string, isActive: boolean) => void;
 
   constructor(parent: HTMLElement) {
@@ -20,11 +20,11 @@ export class Sidebar {
       <div class="sidebar-section">
         <div class="section-header">COMMAND</div>
         <nav class="sidebar-nav">
-          <button class="nav-button active" data-section="sector-view">
+          <button class="nav-button" data-section="sector-view">
             <span class="material-symbols-outlined">dashboard</span>
             <span class="nav-label">Sector View</span>
           </button>
-          <button class="nav-button" data-section="build-zone">
+          <button class="nav-button active" data-section="build-zone">
             <span class="material-symbols-outlined">construction</span>
             <span class="nav-label">Build Zone</span>
           </button>
