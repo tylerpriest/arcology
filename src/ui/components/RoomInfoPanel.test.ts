@@ -140,6 +140,32 @@ describe('RoomInfoPanel', () => {
       expect(traitsRow).toBeFalsy();
     });
 
+    test('displays tenant types when provided', () => {
+      roomInfoPanel.show('room-123', 'apartment', 2, 0, 100, 10, [], ['Resident']);
+      
+      const typesRow = Array.from(parent.querySelectorAll('.room-info-row'))
+        .find(el => el.textContent?.includes('Types:'));
+      expect(typesRow).toBeTruthy();
+      expect(typesRow?.textContent).toContain('Resident');
+    });
+
+    test('displays multiple tenant types when provided', () => {
+      roomInfoPanel.show('room-123', 'office', 0, 3, 500, 50, [], ['Office Worker', 'Resident']);
+      
+      const typesRow = Array.from(parent.querySelectorAll('.room-info-row'))
+        .find(el => el.textContent?.includes('Types:'));
+      expect(typesRow).toBeTruthy();
+      expect(typesRow?.textContent).toContain('Office Worker, Resident');
+    });
+
+    test('does not display tenant types row when empty', () => {
+      roomInfoPanel.show('room-123', 'apartment', 2, 0, 100, 10, [], []);
+      
+      const typesRow = Array.from(parent.querySelectorAll('.room-info-row'))
+        .find(el => el.textContent?.includes('Types:'));
+      expect(typesRow).toBeFalsy();
+    });
+
     test('does not display residents row for non-capacity rooms', () => {
       roomInfoPanel.show('room-123', 'lobby', 0, 0, 0, 0);
       

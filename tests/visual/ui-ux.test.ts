@@ -18,7 +18,7 @@ test.describe('UI/UX Acceptance Criteria', () => {
     // Navigate to game and wait for it to load
     await page.goto('/');
     // Wait for game to initialize (adjust selector based on actual game UI)
-    await page.waitForSelector('[data-testid="top-bar"], .top-bar, #game-container', {
+    await page.waitForSelector('[data-testid="top-bar"], .top-bar, #game, canvas', {
       timeout: 10000,
     });
   });
@@ -178,7 +178,7 @@ test.describe('UI/UX Acceptance Criteria', () => {
 
   test('camera pan with right-click drag', async ({ page }) => {
     // Right-click and drag
-    const gameArea = page.locator('#game-container, canvas, [data-game-area]').first();
+    const gameArea = page.locator('#game, canvas, [data-game-area]').first();
     await gameArea.click({ button: 'right' });
     
     // Drag
@@ -189,7 +189,7 @@ test.describe('UI/UX Acceptance Criteria', () => {
   });
 
   test('camera zoom with scroll wheel', async ({ page }) => {
-    const gameArea = page.locator('#game-container, canvas, [data-game-area]').first();
+    const gameArea = page.locator('#game, canvas, [data-game-area]').first();
     
     // Zoom in
     await gameArea.hover();

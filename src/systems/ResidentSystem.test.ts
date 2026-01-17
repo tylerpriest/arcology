@@ -59,6 +59,7 @@ const createMockGameScene = () => {
   } as any;
   
   // Create Building with the mock scene
+  // Cast to Phaser.Scene for Building constructor, but keep the mock structure
   const building = new Building(mockScene as unknown as Phaser.Scene);
   const resourceSystem = new ResourceSystem();
   const restaurantSystem = new RestaurantSystem(building, resourceSystem, timeSystem);
@@ -67,6 +68,10 @@ const createMockGameScene = () => {
   mockScene.building = building;
   mockScene.resourceSystem = resourceSystem;
   mockScene.restaurantSystem = restaurantSystem;
+  
+  // Ensure Building's scene reference points to our mock (Room creation needs scene.add.text)
+  // Building stores scene in constructor, so we need to make sure it has all methods
+  (building as any).scene = mockScene;
   
   return mockScene;
 };
