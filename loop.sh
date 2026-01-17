@@ -5,7 +5,10 @@
 #   ./loop.sh                # Build mode with Claude (default)
 #   ./loop.sh plan           # Plan mode with Claude
 #   ./loop.sh --agent        # Build mode with Cursor Agent
-
+#   ./loop.sh --amp          # Build mode with Ampcode
+#   ./loop.sh --gemini       # Build mode with Gemini
+#   ./loop.sh --codex        # Build mode with Codex
+#   ./loop.sh --copilot      # Build mode with GitHub Copilot
 #   ./loop.sh --opencode     # Build mode with Opencode
 #   ./loop.sh --agent -i     # Build mode with Cursor Agent (interactive)
 #   ./loop.sh plan --agent   # Plan mode with Cursor Agent
@@ -18,6 +21,7 @@ MAX_ITERATIONS=0
 AGENT_TYPE="claude"
 INTERACTIVE=false
 
+
 for arg in "$@"; do
     case $arg in
         plan)
@@ -26,13 +30,25 @@ for arg in "$@"; do
         --agent)
             AGENT_TYPE="cursor"
             ;;
-
+        --amp)
+            AGENT_TYPE="amp"
+            ;;
+        --gemini)
+            AGENT_TYPE="gemini"
+            ;;
+        --codex)
+            AGENT_TYPE="codex"
+            ;;
+        --copilot)
+            AGENT_TYPE="copilot"
+            ;;
         --opencode)
             AGENT_TYPE="opencode"
             ;;
         -i|--interactive)
             INTERACTIVE=true
             ;;
+
         [0-9]*)
             MAX_ITERATIONS=$arg
             ;;
@@ -63,7 +79,18 @@ case $AGENT_TYPE in
             echo "Agent: Cursor (auto-run)"
         fi
         ;;
-
+    amp)
+        echo "Agent: Ampcode"
+        ;;
+    gemini)
+        echo "Agent: Gemini"
+        ;;
+    codex)
+        echo "Agent: Codex"
+        ;;
+    copilot)
+        echo "Agent: GitHub Copilot"
+        ;;
     opencode)
         echo "Agent: Opencode"
         ;;
@@ -82,7 +109,9 @@ if [[ "$AGENT_TYPE" == "cursor" ]] && [[ "$INTERACTIVE" == "true" ]]; then
     echo ""
     echo "TIP: Type '/auto-run on' in agent to enable auto-approval."
 fi
+
 echo ""
+
 
 ITERATION=0
 
@@ -127,7 +156,25 @@ while true; do
                 fi
             fi
             ;;
-
+        amp)
+            # Ampcode CLI
+            amp "$(cat "$PROMPT_FILE")"
+            ;;
+        gemini)
+            # Gemini CLI
+            gemini chat --yolo "$(cat "$PROMPT_FILE")"
+            ;;
+        codex)
+            # Codex CLI
+            codex --approval-mode full-auto "$(cat "$PROMPT_FILE")"
+            ;;
+        copilot)
+            # GitHub Copilot CLI
+            # Assumes 'copilot' binary (npm: @githubnext/github-copilot-cli)
+            # Using -p for programmatic mode. No standard 'yolo' flag found for full file-edit auto-approve in CLI, 
+            # but -s/--shell-out exists for suggestions. We'll use basic programmatic mode.
+            copilot -p "$(cat "$PROMPT_FILE")"
+            ;;
         opencode)
             # Opencode CLI
             opencode "$(cat "$PROMPT_FILE")"
