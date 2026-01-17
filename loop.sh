@@ -145,7 +145,15 @@ while true; do
         set -e
         
         # Always log validation failures to validation.log for agent reference
+        # Note: Agents should append their attempted fixes to this file to prevent retrying failed fixes
         if [[ $VALIDATION_EXIT_CODE -ne 0 ]]; then
+            # Preserve previous fix attempts if they exist
+            PREVIOUS_ATTEMPTS=""
+            if [[ -f validation.log ]]; then
+                # Extract any "=== Attempted Fix ===" sections from previous log
+                PREVIOUS_ATTEMPTS=$(grep -A 1000 "=== Attempted Fix ===" validation.log 2>/dev/null || true)
+            fi
+            
             {
                 echo "=== Validation Failed ==="
                 echo "Timestamp: $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
@@ -156,6 +164,12 @@ while true; do
                 echo ""
                 echo "=== End Validation Log ==="
             } > validation.log
+            
+            # Append previous fix attempts if any exist
+            if [[ -n "$PREVIOUS_ATTEMPTS" ]]; then
+                echo "" >> validation.log
+                echo "$PREVIOUS_ATTEMPTS" >> validation.log
+            fi
         fi
         
         if [[ $VALIDATION_EXIT_CODE -eq 0 ]]; then
