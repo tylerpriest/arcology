@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { SaveSystem } from '../systems/SaveSystem';
 import { SaveSlotMeta } from '../utils/types';
 import type { GameScene } from './GameScene';
-import { playUIClick, playMenuOpen, playMenuClose } from '../utils/audio';
+import { playUIClick } from '../utils/audio';
 
 export class SaveGameScene extends Phaser.Scene {
   private overlayContainer!: HTMLDivElement;

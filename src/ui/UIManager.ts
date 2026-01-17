@@ -111,6 +111,7 @@ export class UIManager {
         this.roomInfoPanel.hide();
       }
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.registry.events.on('changedata-roomInfo', (_: Phaser.Game, data: any) => {
       if (data) {
         this.roomInfoPanel.show(
@@ -154,7 +155,9 @@ export class UIManager {
   }
 
   showEconomyBreakdown(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     incomeBreakdown: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expenseBreakdown: any,
     currentMoney: number,
     quarterlyRevenue: number,
