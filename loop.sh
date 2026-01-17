@@ -12,6 +12,8 @@
 #   ./loop.sh --opencode     # Build mode with Opencode
 #   ./loop.sh --agent -i     # Build mode with Cursor Agent (interactive)
 #   ./loop.sh plan --agent   # Plan mode with Cursor Agent
+#   ./loop.sh --auto         # Build mode with auto-cycling agents
+#   ./loop.sh --auto --amp   # Build mode with auto-cycling agents starting with Ampcode
 
 set -e
 
