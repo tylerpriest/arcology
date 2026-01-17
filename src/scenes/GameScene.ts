@@ -16,6 +16,7 @@ import { GameState, ElevatorState } from '../utils/types';
 import { SaveSystem } from '../systems/SaveSystem';
 import { ElevatorSystem } from '../systems/ElevatorSystem';
 import { AudioSystem } from '../systems/AudioSystem';
+import { CongestionSystem } from '../systems/CongestionSystem';
 import { setAudioSystem } from '../utils/audio';
 
 export class GameScene extends Phaser.Scene {
@@ -28,6 +29,7 @@ export class GameScene extends Phaser.Scene {
   public saveSystem!: SaveSystem;
   public elevatorSystem!: ElevatorSystem;
   public audioSystem!: AudioSystem;
+  public congestionSystem!: CongestionSystem;
 
   private venusAtmosphere!: VenusAtmosphere;
   private dayNightOverlay!: DayNightOverlay;
@@ -84,6 +86,7 @@ export class GameScene extends Phaser.Scene {
     );
     this.saveSystem = new SaveSystem(this);
     this.audioSystem = new AudioSystem(this);
+    this.congestionSystem = new CongestionSystem(this.building);
     setAudioSystem(this.audioSystem);
 
     // Check if we need to load a save
@@ -889,8 +892,13 @@ export class GameScene extends Phaser.Scene {
         }
       }
 
-    // Check for important notifications (check every hour to avoid spamming)
+    // Update congestion metrics (check every hour)
     const currentHour = Math.floor(this.timeSystem.getHour());
+    if (currentHour !== this.lastNotificationCheckHour) {
+      this.congestionSystem.calculateCongestion();
+    }
+
+    // Check for important notifications (check every hour to avoid spamming)
     if (currentHour !== this.lastNotificationCheckHour) {
       this.checkNotifications();
       this.lastNotificationCheckHour = currentHour;
