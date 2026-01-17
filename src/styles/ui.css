@@ -391,7 +391,7 @@
   position: absolute;
   top: 56px;
   left: 0;
-  width: 72px;
+  width: 240px;
   height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
@@ -400,10 +400,11 @@
   border-radius: 0;
   transition: width 0.3s ease;
   z-index: 200;
+  overflow: visible;
 }
 
 .sidebar.collapsed {
-  width: 20px;
+  width: 28px;
 }
 
 .sidebar-header {
@@ -417,9 +418,9 @@
 }
 
 .sidebar.collapsed .sidebar-header {
-  padding: 4px;
+  padding: 6px 4px;
   justify-content: center;
-  min-height: 20px;
+  min-height: 28px;
 }
 
 .brand-header {
@@ -462,8 +463,8 @@
 }
 
 .sidebar.collapsed .collapse-toggle {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   padding: 0;
   border-radius: 4px;
 }
@@ -487,12 +488,12 @@
   flex: 1;
   padding: 12px 8px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   min-height: 0; /* Allows flex item to shrink below content size */
 }
 
 .sidebar.collapsed .sidebar-section {
-  padding: 8px 2px;
+  padding: 8px 4px;
 }
 
 .section-header {
@@ -531,7 +532,7 @@
 
 .sidebar.collapsed .nav-button {
   justify-content: center;
-  padding: 8px 2px;
+  padding: 8px 4px;
   width: 100%;
   min-width: 0;
   gap: 0;
@@ -599,7 +600,7 @@
 }
 
 .sidebar.collapsed .sidebar-footer {
-  padding: 8px 2px;
+  padding: 8px 4px;
   display: flex;
   justify-content: center;
 }
