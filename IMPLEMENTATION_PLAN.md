@@ -155,32 +155,50 @@ After all P0 fixes:
 
 ---
 
-## Phase 4 - Post-MVP Features (Spec-Driven)
+## Phase 5 - Post-MVP Features (Spec-Driven)
 
-After validation passes, implement remaining spec requirements aligned with JTBD:
+Two major new specs added:
+- **RESIDENT_MOVEMENT.md** - Replace teleportation with realistic walking between rooms
+- **CONGESTION_MECHANICS.md** - Emergent congestion from multiple residents moving simultaneously
 
-### P1 - Core Gameplay Loop (JTBD 1-5: Architect & Builder)
-- **Lobby extension system** (JTBD 2) - Allow expanding existing lobby to reduce congestion, costs resources
-- **Movement & pathfinding** (JTBD 5, 10) - Residents walk visibly between locations (already implemented, verify)
-- **Resident walking animations** (Graphics.md) - 2-4 frame subtle animation for residents moving
-- **Congestion feedback** (JTBD 2, 5) - Visible bottlenecks in lobbies when overcrowded
+### P1 - Resident Movement System (JTBD 2, 5, 10: Traffic Loop)
+- **Walking vs. teleportation** - Residents walk through corridors, not teleport
+- **Movement time calculation** - Time based on distance + floor changes
+- **Pathfinding** - Shortest valid path avoiding walls/obstacles
+- **Movement animations** - Smooth walking animation along paths
+- **Schedule integration** - Movement time affects arrival times and punctuality
+- **Performance** - Pathfinding <50ms, 100+ residents moving at 60 FPS
+- **Status**: 🚧 New feature (blocks JTBD 2, 5, 10 fully)
+
+### P2 - Congestion System (JTBD 2, 5, 10: Traffic Loop)
+- **Congestion density** - Residents per unit area in lobbies/corridors/elevators
+- **Speed penalties** - Movement slows in crowded areas (30-70% of normal speed)
+- **Visual feedback** - Residents bunch together visually
+- **Capacity limits** - Elevators hold 4, stairs hold 8, corridors 0.5 per unit
+- **Queue behavior** - FIFO queue when capacity exceeded
+- **Integration with satisfaction** - Congestion reduces morale
+- **Status**: 🚧 New feature (depends on P1)
+
+### P3 - Core Gameplay Loop (JTBD 1-5: Architect & Builder)
+- **Lobby extension system** (JTBD 2) - Player extends lobby to reduce congestion
 - **Economic planning UI** (JTBD 3) - Income/expense projection, cash flow visualization
 - **Larger map support** (JTBD 4) - Scalable to 100+ unit width (post-MVP infrastructure)
+- **Status**: ⏳ Blocked by P1 & P2
 
-### P2 - Maintenance & Systems (JTBD 6-9: Systems Operator)
+### P4 - Maintenance & Systems (JTBD 6-9: Systems Operator)
 - **Maintenance system** (JTBD 6, 7) - Rooms degrade over time, require maintenance (POST-MVP, not MVP)
 - **System failure cascades** (JTBD 7, 9) - Oxygen → Power → Elevator failures cascade
 - **Sub-agent simulation** (JTBD 8) - 500+ agents: maintenance workers, oxygen processors, cleaners
 - **Emergent gameplay** (JTBD 9) - Crisis storytelling through cascading failures
 - **Maintenance budget allocation** (JTBD 6, 7) - Compete maintenance vs expansion spending
 
-### P3 - Resident Stories (JTBD 11-13: Observer)
+### P5 - Resident Stories (JTBD 11-13: Observer)
 - **Resident trait system** (JTBD 11) - Names, traits, job history, salary expectations (mostly implemented)
 - **Individual resident tracking** (JTBD 11, 12) - UI for viewing specific resident stories
 - **Crisis response mechanics** (JTBD 13) - Emergency alerts, time-pressure decisions
 - **Moral consequences** (JTBD 12) - Visible impact of player decisions on individual residents
 
-### P4 - Gameplay Features by Priority
+### P6 - Gameplay Features by Priority (Old P4)
 **P4a - Core Systems (Blocking JTBD 1-3):**
 - **Stress system** (Residents.md) - Occupancy stress, adjacency noise, elevator congestion
 - **Satisfaction calculation** (Economy.md) - Formula: 100 - Stress - HungerPenalty + FoodBonus + EmploymentBonus
