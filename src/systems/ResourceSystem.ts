@@ -10,11 +10,20 @@ export class ResourceSystem {
 
     // Farms produce raw food
     const farms = building.getFarms();
+    console.log('ResourceSystem update:', {
+      delta,
+      hourDelta,
+      farmsCount: farms.length,
+      spec: ROOM_SPECS.farm,
+    });
     for (const _farm of farms) {
       const spec = ROOM_SPECS.farm;
       // Produce food proportional to time passed
-      this.rawFood += (spec.foodProduction / 24) * hourDelta * 10;
+      const production = (spec.foodProduction / 24) * hourDelta * 10;
+      console.log('Farm production:', production);
+      this.rawFood += production;
     }
+    console.log('Total raw food after farms:', this.rawFood);
 
     // Kitchens convert raw food to processed food
     const kitchens = building.getKitchens();

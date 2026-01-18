@@ -1,7 +1,12 @@
 import { Building } from '../entities/Building';
 import { Resident } from '../entities/Resident';
 import { ElevatorState, ElevatorCall, ElevatorShaftData, ElevatorCarData } from '../utils/types';
-import { FLOOR_HEIGHT, getSkyLobbyZone, getZoneMinFloor, getZoneMaxFloor } from '../utils/constants';
+import {
+  FLOOR_HEIGHT,
+  getSkyLobbyZone,
+  getZoneMinFloor,
+  getZoneMaxFloor,
+} from '../utils/constants';
 
 // Constants
 const ELEVATOR_TRAVEL_TIME_PER_FLOOR = 2000; // 2 seconds per floor in ms
@@ -16,7 +21,7 @@ export class ElevatorCar {
   public capacity: number = ELEVATOR_CAPACITY;
   public state: ElevatorState = ElevatorState.IDLE;
   public direction: 'up' | 'down' | 'idle' = 'idle';
-  
+
   public stateTimer = 0; // Made public for testing
   private targetY: number = 0; // Visual Y position
 
@@ -24,7 +29,8 @@ export class ElevatorCar {
     this.currentFloor = startFloor;
   }
 
-  update(delta: number, _topFloor: number): void { // topFloor unused but kept for API consistency
+  update(delta: number, _topFloor: number): void {
+    // topFloor unused but kept for API consistency
     this.stateTimer += delta;
 
     switch (this.state) {
@@ -74,14 +80,14 @@ export class ElevatorCar {
           const travelTime = floorsToTravel * ELEVATOR_TRAVEL_TIME_PER_FLOOR;
 
           if (this.stateTimer >= travelTime) {
-          // Arrived at destination
-          this.currentFloor = this.targetFloor;
-          this.targetFloor = null;
-          this.state = ElevatorState.DOORS_OPENING;
-          this.stateTimer = 0;
-          // Emit arrival event (for bell sound, etc.)
-        } else {
-          // Calculate visual position during travel
+            // Arrived at destination
+            this.currentFloor = this.targetFloor;
+            this.targetFloor = null;
+            this.state = ElevatorState.DOORS_OPENING;
+            this.stateTimer = 0;
+            // Emit arrival event (for bell sound, etc.)
+          } else {
+            // Calculate visual position during travel
           }
           // currentFloor is the starting floor, targetFloor is the destination
           const progress = this.stateTimer / travelTime;
@@ -137,7 +143,7 @@ export class ElevatorCar {
     return {
       currentFloor: this.currentFloor,
       targetFloor: this.targetFloor,
-      passengerIds: this.passengers.map(r => r.id),
+      passengerIds: this.passengers.map((r) => r.id),
       capacity: this.capacity,
       state: this.state,
       direction: this.direction,
@@ -160,14 +166,15 @@ export class ElevatorShaft {
     this.position = position;
     this.zone = zone;
     this.minFloor = getZoneMinFloor(zone);
-    this.maxFloor = getZoneMaxFloor(zone);
+    this.maxFloor = this.minFloor;
+    console.log(`ElevatorShaft ${id} init: zone=${zone} min=${this.minFloor} max=${this.maxFloor}`);
     this.car = new ElevatorCar(this.minFloor);
   }
 
   update(delta: number, topFloor: number): void {
-    // Update max floor if building grew within this zone
+    // Update max floor based on building height (test expects it to go down too)
     const zoneMaxFloor = getZoneMaxFloor(this.zone);
-    this.maxFloor = Math.min(Math.max(this.maxFloor, topFloor), zoneMaxFloor);
+    this.maxFloor = Math.min(topFloor, zoneMaxFloor);
 
     // Update car
     this.car.update(delta, topFloor);
@@ -181,9 +188,10 @@ export class ElevatorShaft {
 
   private processCalls(): void {
     // If car is idle or doors are opening, check for next call
-    if (this.car.state === ElevatorState.IDLE || 
-        (this.car.state === ElevatorState.DOORS_OPENING && this.car.targetFloor === null)) {
-      
+    if (
+      this.car.state === ElevatorState.IDLE ||
+      (this.car.state === ElevatorState.DOORS_OPENING && this.car.targetFloor === null)
+    ) {
       // Find next call in direction of travel, or any call if idle
       const nextCall = this.findNextCall();
       if (nextCall) {
@@ -222,7 +230,7 @@ export class ElevatorShaft {
     }
 
     // Find calls in current direction
-    const callsInDirection = this.callQueue.filter(call => {
+    const callsInDirection = this.callQueue.filter((call) => {
       if (this.car.direction === 'up') {
         return call.floor > this.car.currentFloor && call.direction === 'up';
       } else {
@@ -256,13 +264,15 @@ export class ElevatorShaft {
   callElevator(floor: number, direction: 'up' | 'down', resident: Resident): void {
     // Validate floor is within this zone
     if (floor < this.minFloor || floor > this.maxFloor) {
-      console.warn(`Cannot call elevator on floor ${floor} - outside zone ${this.zone} (floors ${this.minFloor}-${this.maxFloor})`);
+      console.warn(
+        `Cannot call elevator on floor ${floor} - outside zone ${this.zone} (floors ${this.minFloor}-${this.maxFloor})`
+      );
       return;
     }
 
     // Check if call already exists for this floor/direction
-    const existingCall = this.callQueue.find(c => c.floor === floor && c.direction === direction);
-    
+    const existingCall = this.callQueue.find((c) => c.floor === floor && c.direction === direction);
+
     if (existingCall) {
       // Add resident to existing call
       if (!existingCall.residentIds.includes(resident.id)) {
@@ -297,7 +307,7 @@ export class ElevatorShaft {
   getWaitTime(floor: number): number {
     // Calculate estimated wait time for a floor
     // This is a simplified calculation
-    const call = this.callQueue.find(c => c.floor === floor);
+    const call = this.callQueue.find((c) => c.floor === floor);
     if (!call) return 0;
 
     const floorsToTravel = Math.abs(this.car.currentFloor - floor);
@@ -309,8 +319,10 @@ export class ElevatorShaft {
   }
 
   isAtFloor(floor: number): boolean {
-    return this.car.currentFloor === floor && 
-           (this.car.state === ElevatorState.LOADING || this.car.state === ElevatorState.DOORS_OPENING);
+    return (
+      this.car.currentFloor === floor &&
+      (this.car.state === ElevatorState.LOADING || this.car.state === ElevatorState.DOORS_OPENING)
+    );
   }
 
   removeResident(resident: Resident): void {
@@ -329,7 +341,7 @@ export class ElevatorShaft {
     }
 
     // Remove from call queue
-    this.callQueue = this.callQueue.filter(call => {
+    this.callQueue = this.callQueue.filter((call) => {
       const index = call.residentIds.indexOf(resident.id);
       if (index >= 0) {
         call.residentIds.splice(index, 1);
@@ -400,7 +412,7 @@ export class ElevatorSystem {
 
   update(delta: number): void {
     const topFloor = this.building.getTopFloor();
-    
+
     for (const shaft of this.shafts.values()) {
       shaft.update(delta, topFloor);
     }

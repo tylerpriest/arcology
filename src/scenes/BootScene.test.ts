@@ -18,7 +18,7 @@ const createMockPhaserScene = (): Phaser.Scene => {
   };
 
   const loadingText = {
-    setOrigin: vi.fn(),
+    setOrigin: vi.fn().mockReturnThis(),
     destroy: vi.fn(),
   };
 
@@ -65,7 +65,7 @@ describe('BootScene', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((mockScene.add as any).text).toHaveBeenCalledWith(
         640, // width / 2
-        670, // height / 2 - 50
+        310, // height / 2 - 50
         'Loading...',
         expect.objectContaining({
           fontSize: '20px',

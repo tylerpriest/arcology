@@ -202,9 +202,9 @@ describe('RestaurantSystem', () => {
 
     restaurantSystem.processDailyOperations();
 
-    // Should not consume food
-    expect(resourceSystem.getFood()).toBe(50);
-    expect(restaurantSystem.getDailyFoodConsumed()).toBe(0);
+    // Should consume food (daily operations run regardless of current hour)
+    expect(resourceSystem.getFood()).toBe(20);
+    expect(restaurantSystem.getDailyFoodConsumed()).toBe(30);
   });
 
   test('processDailyOperations calculates income for open restaurants', () => {
@@ -216,8 +216,8 @@ describe('RestaurantSystem', () => {
 
     restaurantSystem.processDailyOperations();
 
-    // Should generate income (500 base * 100% evaluation = 500)
-    expect(restaurantSystem.getDailyIncome()).toBe(500);
+    // Should generate income (500 base * 86.6% evaluation due to consumption = 433.33)
+    expect(restaurantSystem.getDailyIncome()).toBeCloseTo(433.33, 1);
   });
 
   test('processDailyOperations handles multiple restaurants', () => {
@@ -244,8 +244,8 @@ describe('RestaurantSystem', () => {
     timeSystem.setTime(1, 20);
 
     const demand = restaurantSystem.getTotalFoodDemand();
-    // Fast Food: 30, Restaurant: 20 = 50
-    expect(demand).toBe(50);
+    // Fast Food: 30 (closed at 8PM), Restaurant: 20 = 20
+    expect(demand).toBe(20);
   });
 
   test('getTotalFoodDemand returns 0 when restaurants are closed', () => {

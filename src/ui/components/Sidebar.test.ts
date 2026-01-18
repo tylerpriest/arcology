@@ -90,19 +90,16 @@ describe('Sidebar', () => {
     });
 
     test('calls callback when section is activated', () => {
-      let callbackSection = '';
-      let callbackIsActive = false;
+      const callbacks: Array<{ section: string; isActive: boolean }> = [];
       
       sidebar.setSectionToggleCallback((section, isActive) => {
-        callbackSection = section;
-        callbackIsActive = isActive;
+        callbacks.push({ section, isActive });
       });
       
       const economyBtn = parent.querySelector('[data-section="economy"]') as HTMLElement;
       economyBtn.click();
       
-      expect(callbackSection).toBe('economy');
-      expect(callbackIsActive).toBe(true);
+      expect(callbacks.some(cb => cb.section === 'economy' && cb.isActive)).toBe(true);
     });
 
     test('calls callback for build-zone deactivation when switching to another section', () => {

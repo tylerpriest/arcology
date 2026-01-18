@@ -1,106 +1,131 @@
-# Implementation Plan - Arcology MVP
+# Implementation Plan - Arcology
 
-> Prioritized task list for Arcology MVP. Updated to reflect current codebase analysis and test status.
-
-**Last Updated:** 2026-01-18 - Analyzed `src` and tests. 20 test failures confirmed.
+> **Master Roadmap** transforming specs into a living city.
+> **Status**: Ready for Execution.
+> **Last Updated**: 2026-01-18
 
 ## Executive Summary
 
-**Current Status:**
-- ✅ **Phase 0-4 (Core Systems): COMPLETE** - Audio, Economy, Time, Resource, Restaurant, Resident (Visuals/Traits) are implemented.
-- ⚠️ **Phase 5 (Traffic Loop): PARTIALLY IMPLEMENTED**
-    - `CongestionSystem.ts` and `LobbyExtensionSystem.ts` are implemented but isolated.
-    - `Resident.ts` has movement logic but ignores congestion.
-    - **Missing Integration**: Residents walk at constant speed regardless of crowding.
-    - **Missing UI**: No way for player to trigger `extendLobby()`.
-- ❌ **Validation**: 20 failing tests (Mock issues, logic errors, and integration gaps).
+This plan executes the **21 completed specifications** to transform the current prototype into a deep, interconnected simulation. We proceed in **5 distinct phases**, validating each loop before adding complexity.
 
-## Prioritized Task List
-
-### IMMEDIATE (P0 - Validation Critical)
-
-Fix the 20 failing tests to establish a stable baseline.
-
-1.  **Fix GameScene.test.ts (9 failures)**
-    -   **Issue**: `window.alert` not implemented in jsdom.
-    -   **Issue**: `createMockPhaserScene` missing `setDepth` and other graphics methods on spies.
-    -   **Issue**: `auto-save` spy not called (logic error or mock time issue).
-    -   **Issue**: `ESC` key test expects `PauseMenuScene` but got `UIScene`.
-    -   **Task**: Update `src/test/setup.ts` to mock `window.alert`.
-    -   **Task**: Update `createMockPhaserScene` in `src/test/setup.ts` to include missing graphics methods.
-    -   **Task**: Fix `GameScene` key handling or test expectation for ESC key.
-
-2.  **Fix BootScene.test.ts (2 failures)**
-    -   **Issue**: Spy argument mismatch for progress bar (y-coordinate changed).
-    -   **Issue**: `loadingText.destroy` is undefined.
-    -   **Task**: Update test expectations to match current layout.
-    -   **Task**: Ensure `loadingText` mock is correctly created/destroyed.
-
-3.  **Fix ElevatorSystem.test.ts (1 failure)**
-    -   **Issue**: `should update max floor when building grows` fails (expected 10, got 14).
-    -   **Task**: Fix `update` logic in `ElevatorShaft` or test expectation regarding zone limits.
-
-4.  **Fix ResidentSystem.test.ts (1 failure)**
-    -   **Issue**: Office workers not leaving on weekends (count 6, expected 0).
-    -   **Task**: Debug `spawnOfficeWorkers` / `removeOfficeWorkers` logic in `ResidentSystem.ts`.
-
-5.  **Fix ResourceSystem.test.ts (5 failures)**
-    -   **Issue**: Production/Consumption logic errors (0 produced).
-    -   **Issue**: Rate mismatch (expected ~10, got ~100).
-    -   **Task**: Debug `update` loop in `ResourceSystem` to ensure correct delta time usage and rate application.
-
-6.  **Fix RestaurantSystem.test.ts (3 failures)**
-    -   **Issue**: `processDailyOperations` consuming food when closed.
-    -   **Issue**: Income calculation mismatch.
-    -   **Task**: Add `isRestaurantOpen` check to `processDailyOperations` loop.
-
-7.  **Fix Sidebar.test.ts (1 failure)**
-    -   **Issue**: Callback argument mismatch (`build-zone` vs `economy`).
-    -   **Task**: Verify `setActiveSection` logic in `Sidebar.ts`.
-
-### P1 - Traffic Loop Integration (Congestion)
-
-Connect the implemented `CongestionSystem` to gameplay.
-
-1.  **Apply Congestion to Movement**
-    -   **File**: `src/entities/Resident.ts`
-    -   **Task**: Inject `CongestionSystem` into `Resident`.
-    -   **Task**: In `updateWalking` and `updateWalkingToElevator`, call `congestionSystem.getSpeedPenalty(currentRoomId)`.
-    -   **Task**: Multiply movement speed by penalty factor.
-
-2.  **Congestion Visualization**
-    -   **File**: `src/graphics/CongestionOverlay.ts` (New)
-    -   **Task**: Create overlay that colors rooms based on `congestionSystem.getCongestionLevel()`.
-    -   **Task**: Toggle with 'C' key or UI button.
-
-### P2 - Lobby Extension UI
-
-Enable the player to use the existing `LobbyExtensionSystem`.
-
-1.  **Add Extension Controls**
-    -   **File**: `src/ui/components/LobbyControlPanel.ts` (New) or extend `RoomInfoPanel.ts`.
-    -   **Task**: When Lobby is selected, show "Current Width: X".
-    -   **Task**: Add "Extend (+5)" and "Shrink (-5)" buttons.
-    -   **Task**: Show cost/refund preview.
-
-2.  **Connect to System**
-    -   **File**: `src/scenes/GameScene.ts`
-    -   **Task**: Wire UI buttons to `lobbyExtensionSystem.extendLobby()`.
-
-### P3 - Polish & Balance
-
-1.  **Tuning**: Adjust `CongestionSystem` thresholds and `Resident` movement speed constants.
-2.  **Feedback**: Add audio/visual cues for high congestion (angry bubbles?).
+**Current State**: Basic systems exist (Time, Economy, Residents) but are isolated. Traffic loop is partially built.
+**Goal**: Integrate Traffic → Add Maintenance → Add Infrastructure → Expand Economy → Deepen Simulation.
 
 ---
 
-## Known Issues
+## Phase 0: Stability & Validation (Immediate Priority)
 
-- **Test vs Code Drift**: `GameScene.test.ts` does not check for `congestionSystem` or `lobbyExtensionSystem` presence.
-- **UI Gap**: `BuildMenu.ts` has no extension controls.
+**Goal**: Establish a green test suite and stable baseline before adding new systems.
+**Status**: ⚠️ 6 Tests Failing
 
-## Next Steps
+- [ ] **Fix GameScene Camera Tests** (P0)
+    - `tests/visual/ui-ux.test.ts` or `src/scenes/GameScene.test.ts`
+    - Fix keyboard key mocking and event handling in tests.
+- [ ] **Fix BootScene Layout Tests** (P0)
+    - Update coordinates in test expectations to match current UI layout.
+- [ ] **Fix ElevatorSystem Test** (P0)
+    - Fix `update max floor` logic error (off by one/zone limit).
+- [ ] **Fix ResidentSystem Office Logic** (P0)
+    - Debug `removeOfficeWorkers` to ensure count drops to 0 on weekends.
+- [ ] **Fix ResourceSystem Production** (P0)
+    - Debug `update` loop delta time usage; fix production rates.
+- [ ] **Fix RestaurantSystem Logic** (P0)
+    - Add `isRestaurantOpen` check to prevent food consumption/income when closed.
+- [ ] **Fix Sidebar Callback** (P0)
+    - Ensure `setActiveSection` calls correct callback with correct ID.
 
-1.  **Execute P0 Fixes**: Get to green state.
-2.  **Implement P1**: Make congestion actually affect residents.
-3.  **Implement P2**: Give player control over lobby size.
+---
+
+## Phase 1: The Traffic Loop (Movement & Congestion)
+
+**Goal**: Make "Movement" the primary physical constraint. Residents must physically travel, creating congestion that the player solves.
+**Specs**: `RESIDENT_MOVEMENT`, `CONGESTION_MECHANICS`, `LOBBY_EXTENSION`
+
+- [ ] **Integrate Congestion System** (P1)
+    - [ ] **Update Resident**: Inject `CongestionSystem`. Modulate speed based on room congestion.
+    - [ ] **Visuals**: Create `CongestionOverlay` to visualize bottlenecks (heatmap).
+    - [ ] **Tuning**: Adjust penalties so 10+ residents in a lobby feels "slow".
+- [ ] **Implement Lobby Extension** (P1)
+    - [ ] **UI**: Add "Extend Lobby" button to `RoomInfoPanel` when Lobby is selected.
+    - [ ] **Logic**: Connect button to `LobbyExtensionSystem.extendLobby()`.
+    - [ ] **Visuals**: Ensure extended lobbies render correctly (wider sprite or repeating texture).
+
+---
+
+## Phase 2: The Maintenance Loop (Survival)
+
+**Goal**: Make "Decay" the primary time constraint. Systems degrade and fail, forcing the player to manage infrastructure.
+**Specs**: `MAINTENANCE_SYSTEM`, `OXYGEN_SYSTEM`, `POWER_SYSTEM`, `FAILURE_CASCADES`
+
+- [ ] **Implement Maintenance System** (P2)
+    - [ ] **Core**: Create `MaintenanceSystem` to track `condition` (0-100%) of all mechanical rooms.
+    - [ ] **Degradation**: Apply daily decay rates based on room type.
+    - [ ] **Repair**: Add `Repair` action (cost $ + time) to restore condition.
+- [ ] **Implement Oxygen System** (P2)
+    - [ ] **Core**: Create `OxygenSystem`. Track `oxygenLevel` (global or per floor).
+    - [ ] **Production**: `AlgaeTank` / `AirScrubber` rooms produce oxygen.
+    - [ ] **Consumption**: Residents consume oxygen.
+    - [ ] **Failure**: If `oxygenLevel` < 20%, trigger "Hypoxia" state (residents leave/die).
+- [ ] **Implement Power System** (P2)
+    - [ ] **Core**: Create `PowerSystem`. Track `gridLoad` vs `gridCapacity`.
+    - [ ] **Production**: `Generator` rooms add capacity.
+    - [ ] **Consumption**: All rooms consume power.
+    - [ ] **Blackout**: If demand > supply, random rooms lose power (functionality stops).
+- [ ] **Implement Failure Cascades** (P2)
+    - [ ] **Logic**: If `Maintenance` < 0%, room stops working.
+    - [ ] **Cascade**: Oxygen room fails → Oxygen drops → Residents panic.
+    - [ ] **Cascade**: Power room fails → Elevators stop → Traffic deadlock.
+
+---
+
+## Phase 3: Infrastructure & Biology (Needs)
+
+**Goal**: Deepen the simulation with physical needs. Residents are biological entities, not just numbers.
+**Specs**: `WATER_WASTE_SYSTEM`, `FOOD_CHAINS`, `MEDICAL_SYSTEM`
+
+- [ ] **Implement Water & Waste** (P3)
+    - [ ] **Core**: `WaterSystem`. `WaterTreatment` rooms needed.
+    - [ ] **Pipe Layer**: Abstract connection; buildings need water access.
+    - [ ] **Disease**: Poor waste management increases disease risk.
+- [ ] **Implement Food Supply Chain** (P3)
+    - [ ] **Production**: `Hydroponics` (Raw Food) → `Kitchen` (Meals) → `Restaurant` (Service).
+    - [ ] **Logistics**: Agents must transport Raw Food to Kitchens.
+    - [ ] **Starvation**: If chain breaks, restaurants empty → residents starve.
+- [ ] **Implement Medical System** (P3)
+    - [ ] **Clinics**: Treat disease and injuries.
+    - [ ] **Health**: Track resident health status.
+
+---
+
+## Phase 4: Economy & Expansion (Growth)
+
+**Goal**: Give the player tools to manage a massive city (Macro-management).
+**Specs**: `ZONING_DISTRICTS`, `MAP_EXPANSION`, `BANKRUPTCY_MECHANICS`, `INVESTMENT_STRATEGY`
+
+- [ ] **Implement Zoning System** (P4)
+    - [ ] **Map Data**: Add `ZoneLayer` to grid (Residential, Commercial, Industrial).
+    - [ ] **Bonuses**: Buildings in correct zone get efficiency/happiness buff.
+    - [ ] **UI**: Paint tool for zones.
+- [ ] **Implement Map Expansion** (P4)
+    - [ ] **Logic**: Unlock new map chunks for $ cost.
+    - [ ] **Camera**: Update camera bounds to handle wider maps.
+- [ ] **Implement Bankruptcy & Loans** (P4)
+    - [ ] **Loans**: Take loan (cash now, daily interest).
+    - [ ] **Game Over**: If balance < -$10,000 for 3 days.
+
+---
+
+## Phase 5: Residents & Stories (Emergence)
+
+**Goal**: Make the city feel alive with unique stories and emergent crises.
+**Specs**: `AGENT_EMERGENCE`, `RESIDENT_AMBITIONS`, `SATISFACTION_MECHANICS`, `CRISIS_MECHANICS`
+
+- [ ] **Deepen Resident Simulation** (P5)
+    - [ ] **Traits**: traits affect needs (e.g., "Claustrophobic" hates elevators).
+    - [ ] **Ambitions**: "Want to live on top floor", "Want to work in medical".
+- [ ] **Implement Employment Market** (P5)
+    - [ ] **Labor**: Residents have skills/education.
+    - [ ] **Jobs**: Buildings require specific workers.
+- [ ] **Implement Crisis System** (P5)
+    - [ ] **Events**: Fire, Riot, Epidemic events triggered by low stats.
+    - [ ] **Response**: Player must dispatch emergency crews (Agents).

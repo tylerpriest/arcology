@@ -151,12 +151,27 @@ This document maps each Job to Be Done (JTBD) to the specification topics needed
 
 ## Specification Writing Order
 
+### 🔴 CRITICAL PRIORITY: UI/Graphics Visual Feedback
+**Integrate alongside all other phases (don't defer until end)**
+
+Write UI/Graphics specs for visual feedback on all systems:
+- **UI_VISUAL_FEEDBACK.md** - Animations, health indicators, cascade visualization, alerts, crisis UI
+- **GRAPHICS_ANIMATION_ENHANCEMENTS.md** - Animation timings, system visuals, particle effects, screen effects
+
+**Why Critical**: Player understanding of mechanics depends entirely on visual feedback. Every mechanic (placement, health, cascades, congestion, crises) needs clear visual communication. Implement these specs **alongside Phase 1-3** core mechanics, not after.
+
+**Integration**: Each Phase 1-5 mechanic implementation must include corresponding UI/Graphics from these specs.
+
+---
+
 ### Phase 1: Core Movement & Traffic (JTBDs 2, 5, 10)
 Write specs for physical reality loop:
 1. RESIDENT_MOVEMENT.md
 2. CONGESTION_MECHANICS.md
 3. LOBBY_EXTENSION.md
 4. STAIRS_ELEVATORS.md
+
+**UI/Graphics for Phase 1**: Building placement animations, resident walking animations, congestion bunching effects
 
 ### Phase 2: Maintenance & Failure (JTBDs 6, 7, 9)
 Write specs for maintenance crisis loop:
@@ -165,11 +180,15 @@ Write specs for maintenance crisis loop:
 7. OXYGEN_SYSTEM.md
 8. POWER_SYSTEM.md
 
+**UI/Graphics for Phase 2**: Health bar progression (4 states), cascade visualization, emergency lighting, system-specific glows
+
 ### Phase 3: Agents & Emergence (JTBDs 8, 9)
 Write specs for deep simulation:
 9. AGENT_SYSTEM.md
 10. AGENT_EMERGENCE.md
 11. INFRASTRUCTURE_AGENTS.md
+
+**UI/Graphics for Phase 3**: Worker activity displays, agent redirect animations, particle effects for maintenance
 
 ### Phase 4: Economy & Expansion (JTBDs 1, 3, 4)
 Write specs for long-term strategy:
@@ -178,12 +197,16 @@ Write specs for long-term strategy:
 14. BANKRUPTCY_MECHANICS.md
 15. INVESTMENT_STRATEGY.md
 
+**UI/Graphics for Phase 4**: Zone visual differentiation, expanded canvas rendering
+
 ### Phase 5: Residents & Stories (JTBDs 11, 12, 13)
 Write specs for emotional engagement:
 16. RESIDENT_AMBITIONS.md
 17. EMPLOYMENT_SYSTEM.md
 18. SATISFACTION_MECHANICS.md
 19. CRISIS_MECHANICS.md
+
+**UI/Graphics for Phase 5**: Resident story UI, mood/satisfaction indicators
 
 ---
 

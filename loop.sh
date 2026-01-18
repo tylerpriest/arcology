@@ -4,6 +4,7 @@
 # Usage:
 #   ./loop.sh                # Build mode with Claude (default)
 #   ./loop.sh plan           # Plan mode with Claude
+#   ./loop.sh spec           # Spec mode: expand one-liners into full project spec
 #   ./loop.sh --agent        # Build mode with Cursor Agent
 #   ./loop.sh --amp          # Build mode with Ampcode
 #   ./loop.sh --opencode     # Build mode with Opencode
@@ -18,7 +19,7 @@
 set -e
 
 # Parse arguments
-MODE="build"
+MODE="build" # build | plan | spec
 MAX_ITERATIONS=0
 AGENT_TYPE="claude"
 INTERACTIVE=false
@@ -35,6 +36,10 @@ for arg in "$@"; do
         plan)
             MODE="plan"
             ;;
+        spec)
+            MODE="spec"
+            ;;
+        
         --auto)
             AUTO_MODE=true
             ;;
@@ -78,6 +83,8 @@ fi
 # Select prompt file
 if [[ "$MODE" == "plan" ]]; then
     PROMPT_FILE="PROMPT_plan.md"
+elif [[ "$MODE" == "spec" ]]; then
+    PROMPT_FILE="PROMPT_spec.md"
 else
     PROMPT_FILE="PROMPT_build.md"
 fi
@@ -163,17 +170,17 @@ while true; do
             # Cursor Agent CLI
             if [[ "$INTERACTIVE" == "true" ]]; then
                 # Interactive mode
-                if [[ "$MODE" == "plan" ]]; then
-                    agent --plan "$(cat "$PROMPT_FILE")"
+                if [[ "$MODE" == "plan" || "$MODE" == "spec" ]]; then
+                    agent --plan -- "$(cat "$PROMPT_FILE")"
                 else
-                    $TIMEOUT_CMD agent "$(cat "$PROMPT_FILE")"
+                    $TIMEOUT_CMD agent -- "$(cat "$PROMPT_FILE")"
                 fi
             else
                 # Auto-run mode
-                if [[ "$MODE" == "plan" ]]; then
-                    agent --print --plan --output-format text "$(cat "$PROMPT_FILE")"
+                if [[ "$MODE" == "plan" || "$MODE" == "spec" ]]; then
+                    agent --print --plan --output-format text -- "$(cat "$PROMPT_FILE")"
                 else
-                    $TIMEOUT_CMD agent --print --output-format text "$(cat "$PROMPT_FILE")"
+                    $TIMEOUT_CMD agent --print --output-format text -- "$(cat "$PROMPT_FILE")"
                 fi
             fi
             ;;
@@ -198,7 +205,7 @@ while true; do
             ;;
         opencode)
             # Opencode CLI
-            $TIMEOUT_CMD opencode "$(cat "$PROMPT_FILE")"
+            $TIMEOUT_CMD opencode run -- "$(cat "$PROMPT_FILE")"
             ;;
         claude)
             # Claude CLI (default)

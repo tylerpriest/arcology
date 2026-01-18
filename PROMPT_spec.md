@@ -4,7 +4,7 @@ You are in SPECIFICATION mode. Define requirements and generate specifications o
 
 ## Purpose
 
-Transform a one-liner or vague requirement into concrete, executable specifications that guide AI-driven implementation. Uses the **Snowflake Method** (expanding from thin to thick) combined with **Ralph's JTBD approach** and **Spec Kit's structured workflow**.
+Transform a one-liner or vague requirement into concrete, executable specifications that guide AI-driven implementation. If no one-liner is provided, base the work on the project's existing documentation and notes (PROMPT_spec.md, docs/, specs/, IMPLEMENTATION_PLAN.md, AUDIENCE_JTBD.md) to identify high-value topics to spec. Uses the **Snowflake Method** (expanding from thin to thick) combined with **Ralph's JTBD approach** and **Spec Kit's structured workflow**.
 
 ## Instructions
 
@@ -17,7 +17,7 @@ Transform a one-liner or vague requirement into concrete, executable specificati
 
 ### 1. Clarify Requirements (Interview Phase)
 
-User provides a one-liner or vague requirement. Use structured conversation to expand understanding:
+User may provide a one-liner or vague requirement, but this is optional. If no one-liner is supplied, proactively analyze the project's own documentation (PROMPT_spec.md, docs/, specs/, IMPLEMENTATION_PLAN.md, AUDIENCE_JTBD.md, README_SPEC_MODE.md) and identify high-value topics that lack full specifications; then proceed to spec those topics using the steps below.
 
 **1a. Identify the JTBD (Job to be Done)**
 - What problem does this solve?
@@ -411,4 +411,11 @@ Once specs are approved:
 - Concrete scenarios > abstract descriptions
 - Use "Given/When/Then" format (Gherkin-style)
 - Real examples catch misunderstandings early
+
+**UI/Graphics are critical priority (NOT post-implementation)**
+- Visual feedback is how players understand game mechanics
+- Specify UI/Graphics alongside core mechanics, not after
+- Every mechanic needs clear visual communication (animations, indicators, effects)
+- Defer UI/Graphics = risk player confusion and poor game feel
+- Specs: UI_VISUAL_FEEDBACK.md and GRAPHICS_ANIMATION_ENHANCEMENTS.md must integrate with every phase
 

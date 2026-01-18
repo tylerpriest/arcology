@@ -5,7 +5,7 @@ try {
   const Module = require('module');
   const originalRequire = Module.prototype.require;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Module.prototype.require = function(id: string, ...args: unknown[]) {
+  Module.prototype.require = function (id: string, ...args: unknown[]) {
     if (id === 'phaser3spectorjs') {
       return {}; // Return empty object for optional dependency
     }
@@ -85,48 +85,67 @@ const mockWindow = {
   innerWidth: 1280,
   innerHeight: 720,
   ontouchstart: null,
+  alert: vi.fn(),
   AudioContext: class {
-    createOscillator() { 
-      return { 
-        connect: vi.fn(), 
-        start: vi.fn(), 
-        stop: vi.fn(), 
+    createOscillator() {
+      return {
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
         frequency: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn() },
-        onended: null
-      }; 
+        onended: null,
+      };
     }
-    createGain() { 
-      return { 
-        connect: vi.fn(), 
-        gain: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() } 
-      }; 
+    createGain() {
+      return {
+        connect: vi.fn(),
+        gain: {
+          value: 0,
+          setValueAtTime: vi.fn(),
+          linearRampToValueAtTime: vi.fn(),
+          exponentialRampToValueAtTime: vi.fn(),
+        },
+      };
     }
     destination = {};
     currentTime = 0;
-    close() { return Promise.resolve(); }
-    decodeAudioData() { return Promise.resolve({}); }
+    close() {
+      return Promise.resolve();
+    }
+    decodeAudioData() {
+      return Promise.resolve({});
+    }
   },
   webkitAudioContext: class {
-    createOscillator() { 
-      return { 
-        connect: vi.fn(), 
-        start: vi.fn(), 
-        stop: vi.fn(), 
+    createOscillator() {
+      return {
+        connect: vi.fn(),
+        start: vi.fn(),
+        stop: vi.fn(),
         frequency: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn() },
-        onended: null
-      }; 
+        onended: null,
+      };
     }
-    createGain() { 
-      return { 
-        connect: vi.fn(), 
-        gain: { value: 0, setValueAtTime: vi.fn(), linearRampToValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() } 
-      }; 
+    createGain() {
+      return {
+        connect: vi.fn(),
+        gain: {
+          value: 0,
+          setValueAtTime: vi.fn(),
+          linearRampToValueAtTime: vi.fn(),
+          exponentialRampToValueAtTime: vi.fn(),
+        },
+      };
     }
     destination = {};
     currentTime = 0;
-    close() { return Promise.resolve(); }
-    decodeAudioData() { return Promise.resolve({}); }
-  }
+    close() {
+      return Promise.resolve();
+    }
+    decodeAudioData() {
+      return Promise.resolve({});
+    }
+  },
 };
 
 Object.defineProperty(global, 'window', {
@@ -158,9 +177,9 @@ if (global.document) {
       writable: true,
     });
   }
-  
+
   const originalCreateElement = global.document.createElement.bind(global.document);
-  global.document.createElement = function(tagName: string, options?: ElementCreationOptions) {
+  global.document.createElement = function (tagName: string, options?: ElementCreationOptions) {
     if (tagName.toLowerCase() === 'canvas') {
       return new MockCanvas() as unknown as HTMLCanvasElement;
     }
@@ -200,7 +219,7 @@ vi.mock('phaser', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     off(event: string, callback: (...args: any[]) => void) {
       if (this.listeners[event]) {
-        this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+        this.listeners[event] = this.listeners[event].filter((cb) => cb !== callback);
       }
       return this;
     }
@@ -217,7 +236,7 @@ vi.mock('phaser', () => {
 
     emit(event: string, ...args: any[]) {
       if (this.listeners[event]) {
-        this.listeners[event].forEach(callback => callback(...args));
+        this.listeners[event].forEach((callback) => callback(...args));
       }
       return this;
     }
@@ -249,6 +268,15 @@ vi.mock('phaser', () => {
       setAlpha: vi.fn(() => graphics),
       setPosition: vi.fn(() => graphics),
       setVisible: vi.fn(() => graphics),
+      setScrollFactor: vi.fn(() => graphics),
+      setOrigin: vi.fn(() => graphics),
+      setScale: vi.fn(() => graphics),
+      setRotation: vi.fn(() => graphics),
+      setTint: vi.fn(() => graphics),
+      setInteractive: vi.fn(() => graphics),
+      on: vi.fn(() => graphics),
+      off: vi.fn(() => graphics),
+      once: vi.fn(() => graphics),
       destroy: vi.fn(),
     };
     return graphics;
@@ -285,7 +313,7 @@ vi.mock('phaser', () => {
         on: vi.fn(),
         off: vi.fn(),
         emit: vi.fn(),
-      }
+      },
     };
     events = {
       on: vi.fn(),
@@ -301,7 +329,7 @@ vi.mock('phaser', () => {
         scrollX: 0,
         scrollY: 0,
         zoom: 1,
-      }
+      },
     };
     time = {
       addEvent: vi.fn(),
@@ -311,14 +339,17 @@ vi.mock('phaser', () => {
       keyboard: {
         addKey: vi.fn(() => ({ on: vi.fn() })),
         on: vi.fn(),
-      }
+      },
     };
   }
 
   return {
     default: {
+      Math: {
+        Clamp: (v: number, min: number, max: number) => Math.min(Math.max(v, min), max),
+      },
       Events: {
-        EventEmitter: EventEmitter
+        EventEmitter: EventEmitter,
       },
       GameObjects: {
         Graphics: class {},
@@ -329,16 +360,76 @@ vi.mock('phaser', () => {
         ADD: 1,
         MULTIPLY: 2,
         SCREEN: 3,
-      }
+      },
+      Input: {
+        Keyboard: {
+          KeyCodes: {
+            ONE: 49,
+            TWO: 50,
+            THREE: 51,
+            FOUR: 52,
+            FIVE: 53,
+            SIX: 54,
+            SEVEN: 55,
+            Q: 81,
+            ESC: 27,
+            DELETE: 46,
+            HOME: 36,
+            PLUS: 187,
+            MINUS: 189,
+            ZERO: 48,
+            F: 70,
+            W: 87,
+            A: 65,
+            S: 83,
+            D: 68,
+            UP: 38,
+            LEFT: 37,
+            DOWN: 40,
+            RIGHT: 39,
+            SPACE: 32,
+          },
+        },
+      },
     },
     Events: {
-      EventEmitter: EventEmitter
+      EventEmitter: EventEmitter,
     },
     BlendModes: {
       ADD: 1,
       MULTIPLY: 2,
       SCREEN: 3,
     },
-    Scene: MockScene
+    Input: {
+      Keyboard: {
+        KeyCodes: {
+          ONE: 49,
+          TWO: 50,
+          THREE: 51,
+          FOUR: 52,
+          FIVE: 53,
+          SIX: 54,
+          SEVEN: 55,
+          Q: 81,
+          ESC: 27,
+          DELETE: 46,
+          HOME: 36,
+          PLUS: 187,
+          MINUS: 189,
+          ZERO: 48,
+          F: 70,
+          W: 87,
+          A: 65,
+          S: 83,
+          D: 68,
+          UP: 38,
+          LEFT: 37,
+          DOWN: 40,
+          RIGHT: 39,
+          SPACE: 32,
+        },
+      },
+    },
+    Scene: MockScene,
   };
 });

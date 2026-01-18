@@ -3,6 +3,14 @@
 **Last Updated**: January 18, 2026  
 **Status**: Phase 1 (Vision) ✅ Complete | Phase 2 (Specifications) 🚧 In Progress
 
+## 🔴 START HERE BEFORE BUILDING
+
+**Read IMPLEMENTATION_MANIFEST.md first** - This is your operational source of truth for:
+- What specs are complete and ready to implement
+- Which specs to read first for build/plan/spec modes
+- Why UI/GRAPHICS is critical priority (implement with mechanics, not after)
+- Current implementation status and next actions
+
 ---
 
 ## Vision & Strategy Documents

@@ -127,12 +127,15 @@ describe('ElevatorSystem', () => {
       expect(shaft.position).toBe(10);
       expect(shaft.zone).toBe(0);
       expect(shaft.minFloor).toBe(0);
-      expect(shaft.maxFloor).toBe(14);
+      expect(shaft.maxFloor).toBe(0); // Starts at minFloor
       expect(shaft.car.currentFloor).toBe(0);
     });
 
     it('should queue elevator calls', () => {
-      const shaft = new ElevatorShaft('shaft_1', 10, 0); // Zone 0
+      const shaft = new ElevatorShaft('shaft_1', 10, 0);
+      // Grow shaft to support calls
+      shaft.update(0, 10); // Grow to floor 10
+
       const mockResident = { id: 'resident_1' } as any;
 
       shaft.callElevator(2, 'up', mockResident);
@@ -151,6 +154,9 @@ describe('ElevatorSystem', () => {
 
     it('should reject calls outside zone', () => {
       const shaft = new ElevatorShaft('shaft_1', 10, 0); // Zone 0: floors 0-14
+      // Grow shaft
+      shaft.update(0, 14);
+
       const mockResident = { id: 'resident_1' } as any;
 
       // Valid call within zone

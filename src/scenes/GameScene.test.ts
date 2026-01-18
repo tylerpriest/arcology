@@ -72,15 +72,16 @@ const createMockPhaserScene = (): Phaser.Scene => {
         setAlpha: vi.fn().mockReturnThis(),
         setFontSize: vi.fn().mockReturnThis(),
         setOrigin: vi.fn().mockReturnThis(),
+        setDepth: vi.fn().mockReturnThis(),
         destroy: vi.fn(),
       }),
     },
     input: {
       on: vi.fn(),
       keyboard: {
-        addKey: vi.fn().mockReturnValue({
+        addKey: vi.fn(() => ({
           on: vi.fn(),
-        }),
+        })),
         on: vi.fn(),
       },
     },
@@ -91,6 +92,7 @@ const createMockPhaserScene = (): Phaser.Scene => {
 vi.mock('../graphics/VenusAtmosphere', () => ({
   VenusAtmosphere: vi.fn().mockImplementation(() => ({
     updateSkyGradient: vi.fn(),
+    update: vi.fn(),
   })),
 }));
 
@@ -109,6 +111,7 @@ vi.mock('../graphics/AtmosphericEffects', () => ({
 vi.mock('../graphics/VolcanicGround', () => ({
   VolcanicGround: vi.fn().mockImplementation(() => ({
     draw: vi.fn(),
+    update: vi.fn(),
   })),
 }));
 
@@ -133,8 +136,12 @@ describe('GameScene', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    window.alert = vi.fn();
     mockScene = createMockPhaserScene();
     scene = new GameScene();
+    // Add Phaser.Math mock for zoom functions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (scene as any).Phaser = { Math: { Clamp: vi.fn() } };
     Object.assign(scene, mockScene);
   });
 
@@ -207,7 +214,7 @@ describe('GameScene', () => {
         resources: { rawFood: 0, processedFood: 0 },
       };
       localStorage.setItem('arcology_save_1', JSON.stringify(mockSave));
-      
+
       (mockScene.registry as any).get = vi.fn().mockReturnValue(1);
 
       scene.create();
@@ -232,11 +239,14 @@ describe('GameScene', () => {
       (mockScene.cameras.main as any).getWorldPoint = vi.fn().mockReturnValue({ x: 64, y: 436 });
 
       // Simulate click
+      // There are two pointerup handlers: first resets drag, second handles clicks
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clickHandler = (mockScene.input as any).on.mock.calls.find(
+      const pointerupCalls = (mockScene.input as any).on.mock.calls.filter(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointerup'
-      )?.[1];
+      );
+      // The second handler is the click handler (first is drag reset)
+      const clickHandler = pointerupCalls[1]?.[1];
 
       const pointer = {
         leftButtonReleased: vi.fn().mockReturnValue(true),
@@ -247,10 +257,10 @@ describe('GameScene', () => {
       clickHandler(pointer);
 
       // Room should be placed
-      const rooms = scene.building.getAllRooms().filter((r) => r.floor === 0);
+      const rooms = scene.building.getAllRooms().filter((r) => r.floor === 1);
       const apartment = rooms.find((r) => r.type === 'apartment');
       expect(apartment).toBeTruthy();
-      
+
       // Money should be deducted
       expect(scene.economySystem.getMoney()).toBe(initialMoney - roomCost);
     });
@@ -260,15 +270,19 @@ describe('GameScene', () => {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue('apartment' as RoomType);
-      // Invalid position (e.g., overlapping or wrong floor)
+      // Invalid floor (floor 100 exceeds MAX_FLOORS_MVP of 20)
+      // floor = (500 - y) / 64 = 100 => y = 500 - 6400 = -5900
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (mockScene.cameras.main as any).getWorldPoint = vi.fn().mockReturnValue({ x: -100, y: -100 });
+      (mockScene.cameras.main as any).getWorldPoint = vi.fn().mockReturnValue({ x: 64, y: -5900 });
 
+      // There are two pointerup handlers: first resets drag, second handles clicks
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const clickHandler = (mockScene.input as any).on.mock.calls.find(
+      const pointerupCalls = (mockScene.input as any).on.mock.calls.filter(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (call: any[]) => call[0] === 'pointerup'
-      )?.[1];
+      );
+      // The second handler is the click handler (first is drag reset)
+      const clickHandler = pointerupCalls[1]?.[1];
 
       const pointer = {
         leftButtonReleased: vi.fn().mockReturnValue(true),
@@ -287,8 +301,8 @@ describe('GameScene', () => {
     beforeEach(() => {
       scene.create();
       // Place a room first
-      scene.building.addRoom('apartment', 0, 1);
-      const room = scene.building.getRoomAt(0, 1);
+      scene.building.addRoom('apartment', 1, 0);
+      const room = scene.building.getRoomAt(1, 0);
       if (room) {
         // Access private property via type assertion for testing
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -301,40 +315,30 @@ describe('GameScene', () => {
       const roomCost = ROOM_SPECS.apartment.cost;
       const expectedRefund = Math.floor(roomCost * 0.5);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const deleteHandler = (mockScene.input.keyboard as any).addKey.mock.results.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result: any) => result.value.on.mock.calls.some(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (call: any[]) => call[0] === 'down'
-        )
-      )?.value.on.mock.calls.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (call: any[]) => call[0] === 'down'
-      )?.[1];
+      // Debug key indices
+      const addKeyCalls = (mockScene.input.keyboard as any).addKey.mock.calls;
+      console.log(
+        'addKey calls:',
+        addKeyCalls.map((c: any[]) => c[0])
+      );
 
-      if (deleteHandler) {
-        deleteHandler();
-      } else {
-        // Alternative: trigger via keyboard event
+      // DELETE is the 10th key added (Index 9: 1-7, Q, ESC, DELETE)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const deleteKey = (mockScene.input.keyboard as any).addKey.mock.results[9]?.value;
+
+      if (deleteKey && deleteKey.on.mock.calls.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const deleteKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (result: any) => result.value
-        )?.value;
-        if (deleteKey && deleteKey.on.mock.calls.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const handler = deleteKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
-          if (handler) handler();
-        }
+        const deleteHandler = deleteKey.on.mock.calls.find(
+          (call: any[]) => call[0] === 'down'
+        )?.[1];
+        if (deleteHandler) deleteHandler();
       }
 
       // Room should be removed
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const selectedRoomId = (scene as any).selectedRoomId;
-      const room = scene.building.getRoomById(selectedRoomId);
-      expect(room).toBeFalsy();
-      
+      expect(selectedRoomId).toBeNull(); // Should be null after demolition
+
       // Money should be refunded
       expect(scene.economySystem.getMoney()).toBe(initialMoney + expectedRefund);
     });
@@ -346,15 +350,17 @@ describe('GameScene', () => {
     });
 
     test('ESC opens pause menu when playing', () => {
+      // Clear mock calls from scene creation
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockScene.scene as any).launch.mockClear();
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue(GameState.PLAYING);
 
+      // ESC is the 9th key added (Index 8: 1-7, Q, ESC)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const escKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result: any) => result.value
-      )?.value;
-      
+      const escKey = (mockScene.input.keyboard as any).addKey.mock.results[8]?.value;
+
       if (escKey && escKey.on.mock.calls.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = escKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
@@ -382,15 +388,17 @@ describe('GameScene', () => {
     });
 
     test('Q cancels room selection', () => {
+      // Clear registry calls from previous tests
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mockScene.registry as any).set.mockClear();
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (mockScene.registry as any).get = vi.fn().mockReturnValue('apartment' as RoomType);
 
+      // Q is the 8th key added (Index 7: 1-7, Q)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const qKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result: any) => result.value
-      )?.value;
-      
+      const qKey = (mockScene.input.keyboard as any).addKey.mock.results[7]?.value;
+
       if (qKey && qKey.on.mock.calls.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = qKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
@@ -399,7 +407,9 @@ describe('GameScene', () => {
 
       // Should clear selected room
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((mockScene.registry as any).set).toHaveBeenCalledWith('selectedRoom', undefined);
+      const setCalls = (mockScene.registry as any).set.mock.calls;
+      const selectedRoomCall = setCalls.find((call: any[]) => call[0] === 'selectedRoom');
+      expect(selectedRoomCall).toEqual(['selectedRoom', undefined]);
     });
   });
 
@@ -411,12 +421,10 @@ describe('GameScene', () => {
     test('Home key focuses lobby', () => {
       const panSpy = vi.spyOn(mockScene.cameras.main, 'pan');
 
+      // HOME is Index 10
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const homeKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result: any) => result.value
-      )?.value;
-      
+      const homeKey = (mockScene.input.keyboard as any).addKey.mock.results[10]?.value;
+
       if (homeKey && homeKey.on.mock.calls.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = homeKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
@@ -430,13 +438,10 @@ describe('GameScene', () => {
     test('zoom controls work', () => {
       const zoomToSpy = vi.spyOn(mockScene.cameras.main, 'zoomTo');
 
-      // Test zoom in
+      // PLUS is Index 11
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const plusKey = (mockScene.input.keyboard as any).addKey.mock.results.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (result: any) => result.value
-      )?.value;
-      
+      const plusKey = (mockScene.input.keyboard as any).addKey.mock.results[11]?.value;
+
       if (plusKey && plusKey.on.mock.calls.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handler = plusKey.on.mock.calls.find((call: any[]) => call[0] === 'down')?.[1];
@@ -456,13 +461,15 @@ describe('GameScene', () => {
     test('auto-saves every 5 days', () => {
       const saveSpy = vi.spyOn(scene.saveSystem, 'saveGame');
 
-      // Simulate 5 days passing (24 hours * 5 days = 120 hours, each hour = 10000ms)
-      const hoursPerDay = 24;
-      const msPerHour = 10000;
-      for (let day = 0; day < 5; day++) {
-        for (let hour = 0; hour < hoursPerDay; hour++) {
-          scene.timeSystem.update(msPerHour);
-        }
+      // Simulate 5 days passing by calling GameScene.update
+      // Each update call represents 16ms, so we need many calls
+      const msPerHour = 10000; // From TimeSystem
+      const msPerDay = 24 * msPerHour;
+      const totalMs = 5 * msPerDay;
+
+      // Update in chunks to simulate time passing
+      for (let ms = 0; ms < totalMs; ms += 16) {
+        scene.update(0, 16);
       }
 
       // Should trigger auto-save

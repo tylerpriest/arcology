@@ -4,9 +4,9 @@
 
 **Audience**: Arcology Architect, Resident Observer
 
-**Related JTBDs**: JTBD 2 (extend lobby to solve congestion), JTBD 5 (residents walk, creating congestion), JTBD 10 (navigate bottlenecks realistically)
+**Related JTBDs**: JTBD 2 (extend lobby to solve congestion), JTBD 5 (residents walk, not float), JTBD 10 (navigate bottlenecks realistically)
 
-**Status**: 🚧 In Progress (New system for walking-based movement)
+**Status**: ✅ Ready (Formulas and Mechanics Defined)
 
 ## Overview
 
@@ -20,6 +20,53 @@ Congestion has consequences:
 - **Creates feedback loop**: Player sees problem → extends lobby → congestion goes away → building gets bigger → congestion returns at larger scale
 
 This creates the **Traffic Loop** (JTBD 2), where congestion is a real problem with real solutions.
+
+## Formulas & Constants
+
+### 1. Capacity Calculation
+Each room/entity has a maximum "Comfortable Capacity" (100% load) based on its dimensions.
+
+**Formula**:
+`Capacity (Residents) = FloorArea / SpacePerResident`
+
+**Constants**:
+- **Lobby**: Width × 1.0 (High density allowed). Example: 20-unit lobby = 20 residents.
+- **Corridor**: Width × 0.8.
+- **Stairwell**: Fixed capacity = 8 residents.
+- **Elevator**: Fixed capacity = 12 residents (standard), 24 (freight).
+
+### 2. Congestion Level
+The real-time load on a space.
+
+**Formula**:
+`Congestion Level (C) = CurrentResidentCount / Capacity`
+
+**Thresholds**:
+- **0.0 - 0.5 (Green)**: Free flow. No penalties.
+- **0.5 - 0.8 (Yellow)**: Moderate traffic. Slight slowing.
+- **0.8 - 1.0 (Orange)**: Heavy traffic. Noticeable delays.
+- **1.0+ (Red)**: Overcrowding. Severe delays. Max visual density.
+
+### 3. Movement Speed Penalty
+Speed decreases non-linearly as congestion rises.
+
+**Formula**:
+- If `C <= 0.5`: `SpeedMultiplier = 1.0`
+- If `0.5 < C <= 1.0`: `SpeedMultiplier = 1.0 - ((C - 0.5) * 0.8)`
+  - At C=0.5, Mult=1.0
+  - At C=0.75, Mult=0.8
+  - At C=1.0, Mult=0.6
+- If `C > 1.0`: `SpeedMultiplier = 0.6 * (1 / C)`
+  - At C=1.2, Mult=0.5
+  - At C=2.0, Mult=0.3
+  - **Minimum Clamp**: `0.1` (Residents never completely stop, just crawl).
+
+### 4. Satisfaction Penalty
+Residents lose satisfaction for every second spent in high congestion.
+
+**Formula**:
+- If `C > 0.8`: `SatisfactionDelta = -1 per game-minute`
+- If `C > 1.2`: `SatisfactionDelta = -3 per game-minute`
 
 ## Capabilities
 
@@ -44,7 +91,7 @@ Success means:
 - [ ] **Lobby extension reduces congestion** - Wider space = less density = faster movement - Verify: congestion metric drops 30% when lobby extended 25%
 - [ ] **Peak times visible to player** - UI shows when traffic is worst (e.g., 8:00-9:00 AM) - Visual test: see congestion spike during morning rush
 - [ ] **Satisfaction affected by congestion** - Residents complain when constantly delayed - Verify: resident satisfaction -5 per congestion level for each room visit
-- [ ] **Different spaces have different capacity limits** - Elevator has lower capacity than stairwell - Verify: elevator holds 4 residents, stairwell holds 8
+- [ ] **Different spaces have different capacity limits** - Elevator has lower capacity than stairwell - Verify: elevator holds 12 residents, stairwell holds 8
 - [ ] **Overflow behavior defined** - When space full, new residents wait/queue - Verify: queue forms when capacity exceeded
 - [ ] **Congestion clears after peak times** - Early morning congestion gone by noon - Verify: congestion metric returns to baseline post-rush
 
@@ -54,7 +101,7 @@ Success means:
 
 **Given**: 
 - 8 office workers on floor 2, all with 8:00 AM start times
-- Lobby is normal 20-unit width
+- Lobby is normal 20-unit width (Capacity 20)
 - No queues exist at 7:55 AM
 
 **When**: Time advances through 8:00 AM, residents leave apartments to go to work
@@ -65,132 +112,62 @@ Success means:
 - 8:02 AM: 3rd resident arrives, finds 2 ahead in elevator queue
 - 8:03 AM: 4th, 5th residents arrive, lobby crowded (5 residents in 20-unit space)
 - 8:04 AM: 6th, 7th, 8th residents arrive, lobby very crowded (8 residents, 0.4 per unit)
-- Congestion level: 70% (high, approaching overflow)
+- Congestion level: 0.4 (40%) -> Green (Speed 1.0)
 
 **And**:
 - First resident reaches elevator by 8:03 (3 seconds in lobby + queue wait)
 - Last resident reaches elevator by 8:07 (5 seconds in lobby + queue wait)
-- All residents experience 2-3 second movement delay due to crowding
-- All arrive at work between 8:05-8:09 (5-9 minutes late)
+- All residents experience normal movement speed (C < 0.5)
+- **Note**: This scenario shows *healthy* flow. Congestion logic handles light traffic gracefully.
 
-### Scenario 2: Capacity Overflow
+### Scenario 2: Capacity Overflow (Severe)
 
 **Given**: 
-- Elevator can hold 4 residents maximum
-- 10 residents waiting to board
-- Queue forms in lobby
+- Lobby Capacity = 20.
+- 30 residents crowd into lobby due to broken elevator.
 
-**When**: Queue reaches 10 residents
+**When**: Congestion calculation runs.
 
 **Then**:
-- First 4 board elevator
-- Next 4 board when first 4 exit (2 seconds later)
-- 3rd group of 2 board after (4 seconds later)
-- Total wait: 6 seconds for last 2 residents
+- `C` = 30 / 20 = 1.5.
+- `SpeedMultiplier` = 0.6 * (1 / 1.5) = 0.4.
+- Residents move at 40% speed.
+- Visuals: Residents bunched tightly. Overlay shows Red.
 
 **And**:
-- Player observes visual queue forming in lobby (residents standing)
-- Residents at back of queue get increasingly unhappy (delayed, frustrated)
-- If queue grows too long (>20 residents), mood drops noticeably
+- Player observes massive slowdown.
+- Residents get angry (-3 satisfaction/min).
+- Player motivated to fix elevator or extend lobby.
 
 ### Scenario 3: Lobby Extension Solves Congestion
 
 **Given**: 
-- Same 8 office workers trying to use same lobby
-- Lobby currently 20 units wide
-- Congestion at 70% during rush
+- 30 residents in 20-unit lobby (C=1.5, Speed=0.4).
+- Player extends lobby to 40 units ($2000 cost).
 
-**When**: Player extends lobby to 30 units wide (50% wider)
-
-**Then**:
-- Same 8 residents in 30-unit space = 0.27 per unit (down from 0.4)
-- Congestion level: 40% (medium, much better)
-- Movement speed: back to 80% of normal (was 50%)
-- Resident transit time through lobby: 2 seconds (down from 5 seconds)
-
-**And**:
-- Residents now arrive 8:05-8:07 (5-7 seconds late, not 5-9)
-- Player notices: "Much better flow"
-- Immediately: some residents arrive on time, mood improves
-
-### Scenario 4: Stairwell Becomes Bottleneck
-
-**Given**:
-- Elevator broken (under maintenance)
-- All 20 residents must use stairs
-- Stairs are 2 units wide (narrow)
-
-**When**: Elevator goes down, residents reroute to stairs
+**When**: Extension completes.
 
 **Then**:
-- 2 units of space for 20 residents = 10 per unit (extreme congestion)
-- Congestion level: 99% (critical)
-- Movement speed: 20% of normal (crawling)
-- Queue backs up into corridor
-- Corridor congestion: 80% (affected by overflow from stairs)
+- New Capacity = 40.
+- New `C` = 30 / 40 = 0.75.
+- New `SpeedMultiplier` = 1.0 - ((0.75 - 0.5) * 0.8) = 1.0 - 0.2 = 0.8.
+- Speed doubles (0.4 -> 0.8).
+- Visuals: Residents spread out. Overlay turns Yellow.
 
 **And**:
-- Residents extremely unhappy (massive delays)
-- Some residents give up, reschedule activities
-- Player sees: "This is unsustainable"
-- Lesson: Elevator reliability is critical infrastructure
-
-### Scenario 5: Layout Creates Natural Bottleneck
-
-**Given**:
-- Lobby connects to 4 stairwells
-- But only 1 stairwell leads to residential floors 1-10
-- Other 3 stairwells lead to different areas
-
-**When**: 20 residents on floors 1-10 all try to use stairs simultaneously
-
-**Then**:
-- All 20 must use same 1 stairwell (no alternatives)
-- Even though total stair capacity could handle them, bottleneck at junction
-- Congestion at junction: 90%
-- Congestion at destination stairwell: 50%
-
-**And**:
-- Player observes: congestion at junction, not in lobby
-- Realizes: building layout creates bottleneck
-- Solution: build additional stairwell or reroute to alternatives
-- Lesson: infrastructure planning has spatial consequences
+- Player feels immediate reward for investment.
 
 ## Edge Cases & Error Handling
 
 **Edge Cases**:
-- **One resident in space**: No congestion (0.1 per unit) - Congestion metric = 0%
-- **Space exactly at capacity**: Congestion = 90% but no queue forms yet
-- **Space at 2x capacity**: Queue forms, overflow behavior - Congestion = 100%+
-- **Multiple connections (lobby has 3 exits)**: Congestion distributed across exits
-- **Congestion fluctuates second-to-second**: Peak at 8:05, drops at 8:06 - Smooth over 5-second window
-- **Construction zone blocks passage**: Residents queue before blocked passage - Congestion at checkpoint, not throughout space
-- **Elevator breaks mid-transit**: 4 residents trapped, reroute those waiting to stairs - Stair congestion spikes, elevator queue clears
+- **One resident in space**: No congestion (0.05 C) - Speed 1.0.
+- **Space exactly at capacity (C=1.0)**: Speed 0.6. Noticeable drag.
+- **Space at 2x capacity (C=2.0)**: Speed 0.3. Crawling.
+- **Congestion fluctuates**: Smooth calculation over 1-second rolling average to prevent jittery movement.
 
 **Error Conditions**:
-- **Congestion metric >200%**: Flag error (shouldn't happen), cap at 100% - Log anomaly for debugging
-- **Queue gets stuck**: Residents waiting >5 minutes - Flag as error, unstick queue
-- **Congestion doesn't update**: Space shows 0% when 20 residents present - Trigger recalculation
-
-## Performance & Constraints
-
-**Performance Requirements**:
-- Congestion calculation <5ms per space (even with 100+ residents)
-- Update every 0.5 seconds (not every frame)
-- Memory for congestion tracking: <1MB (even with 100 spaces)
-- Pathfinding unaffected by congestion calculations
-
-**Technical Constraints**:
-- Must integrate with RESIDENT_MOVEMENT.md (movement speed adjusted based on congestion)
-- Must integrate with SatisfactionSystem (congestion affects morale)
-- Congestion metrics must be visible to player (UI shows current/peak congestion)
-- Must work with dynamic spaces (lobby changing size affects congestion)
-
-**Design/Business Constraints**:
-- Congestion must feel like real problem (not abstract penalty)
-- Player must understand cause (too many residents in small space)
-- Player must see solution (extend space, add exits, improve flow)
-- Congestion shouldn't punish player, should educate (this is how cities work)
+- **Zero Capacity**: If width=0 (bug), default to Capacity=1 to avoid div/0.
+- **Negative Count**: Should be impossible, clamp to 0.
 
 ## Integration Points
 
@@ -205,65 +182,30 @@ Success means:
 - **SatisfactionSystem**: Congestion reduces resident morale (−5 per congestion level)
 - **LOBBY_EXTENSION.md**: Player reduces congestion by extending spaces
 - **EconomySystem**: Late arrivals from congestion reduce productivity/income
-- **Diagnostics System**: Player uses congestion reports to plan improvements
 
 ## Testing Strategy
 
 How to verify this works:
 
 **Programmatic tests** (automated):
-- [ ] Congestion density calculated correctly (residents ÷ space area)
-- [ ] Movement speed reduced proportionally (2x congestion = 0.5x speed)
-- [ ] Peak times identified automatically (rush hour detection)
-- [ ] Queue forms when capacity exceeded
-- [ ] Lobby extension reduces congestion measurably (30-40% reduction for 50% size increase)
-- [ ] Different spaces have correct capacity limits
-- [ ] Congestion clears post-rush (metric returns to baseline)
+- [ ] Formula verification: Input 30 residents/20 cap -> Output 1.5 C, 0.4 Speed.
+- [ ] Speed clamping: Input 100 residents/20 cap -> Output 0.1 Speed (min).
+- [ ] Capacity calculation: Lobby width 20 -> Cap 20.
+- [ ] Satisfaction decay: resident.satisfaction drops when in C > 0.8.
 
 **Visual/Behavioral tests** (human observation):
-- [ ] Residents visibly bunch in congested areas (not spread out)
-- [ ] Congestion UI shows during rush hour (turns red/orange)
-- [ ] Player can diagnose congestion by observing (see where bunching is worst)
-- [ ] Lobby extension visibly improves flow (residents spread out)
-- [ ] Stairwell congestion looks worse than elevator congestion (narrower space)
-- [ ] Peak times match actual rush hours (8 AM, 12 PM, 6 PM)
-- [ ] Elevator queue visible and well-behaved
-
-**Integration tests**:
-- [ ] Movement speed actually reduces in congested areas (timed walk-through)
-- [ ] Resident mood reduced during congestion (check satisfaction delta)
-- [ ] Lobby extension immediately improves satisfaction (next update)
-- [ ] Congestion metrics visible in UI (player sees current/peak)
+- [ ] Residents visibly bunched in congested areas.
+- [ ] Congestion UI shows Red when C > 1.0.
+- [ ] Lobby extension visibly improves flow.
+- [ ] Residents slow down as they enter crowded zone.
 
 ## Definition of Done
 
 This specification is complete when:
-- [ ] Congestion calculation formula defined
-- [ ] Speed penalty function specified
-- [ ] Capacity limits for each space type defined
-- [ ] UI representation designed (how player sees congestion)
+- [x] Congestion calculation formula defined
+- [x] Speed penalty function specified
+- [x] Capacity limits for each space type defined
+- [ ] UI representation designed (how player sees congestion) -> See UI_VISUAL_FEEDBACK.md
 - [ ] Integration with movement speed specified
 - [ ] Integration with satisfaction specified
-- [ ] Bottle neck behavior specified
-- [ ] Peak time detection algorithm specified
 - [ ] All edge cases handled
-
-## Congestion Level Scale
-
-Define the human experience at each level:
-
-- **0-20%** (Empty to Light): Fast movement, smooth flow, no player notice
-- **20-40%** (Moderate): Noticeable slowdown, residents moving carefully, player observes
-- **40-60%** (High): Clear bunching, residents shuffling, delays of 1-3 seconds
-- **60-80%** (Very High): Significant jams, visible queue, 5-10 second delays
-- **80-100%** (Critical): Overflow, residents waiting minutes, queue backs up
-- **100%+** (Severe): Emergency situation, residents giving up, mood crashes
-
-## Next Steps (Planning Phase)
-
-1. Define exact congestion formula (residents/space_area → congestion_%)
-2. Define speed penalty curve (1.0 speed at 0% congestion → 0.2 speed at 100% congestion)
-3. Define capacity limits: elevator, stairwell, corridor, lobby by width
-4. Design UI element to show congestion (color, meter, text)
-5. Plan integration with RESIDENT_MOVEMENT.md
-6. Plan peak time detection (recurring rush hours vs. unusual spikes)

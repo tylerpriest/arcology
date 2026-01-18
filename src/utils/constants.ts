@@ -21,31 +21,31 @@ export const FOOD_PER_MEAL = 30;
 
 // Room color specifications (Cyberpunk Venus palette - dark bases, bright neon)
 export const ROOM_COLORS = {
-  lobby: { base: 0x1a2a2a, accent: 0x4ae4e4 },     // Very dark teal + Bright cyan
+  lobby: { base: 0x1a2a2a, accent: 0x4ae4e4 }, // Very dark teal + Bright cyan
   skylobby: { base: 0x1a2a2a, accent: 0x4ae4e4 }, // Very dark teal + Bright cyan (same as lobby)
   apartment: { base: 0x2a2420, accent: 0xe4a44a }, // Dark brown + Warm orange
-  office: { base: 0x1a2028, accent: 0x4a8ae4 },    // Dark blue-gray + Blue
-  farm: { base: 0x1a2018, accent: 0x4ae44a },      // Dark green-brown + Bright green
-  kitchen: { base: 0x201a1a, accent: 0xe4d4a4 },   // Dark warm gray + Warm yellow
-  fastfood: { base: 0x4a2a2a, accent: 0xe44a4a },  // Dark red-brown + Bright red
+  office: { base: 0x1a2028, accent: 0x4a8ae4 }, // Dark blue-gray + Blue
+  farm: { base: 0x1a2018, accent: 0x4ae44a }, // Dark green-brown + Bright green
+  kitchen: { base: 0x201a1a, accent: 0xe4d4a4 }, // Dark warm gray + Warm yellow
+  fastfood: { base: 0x4a2a2a, accent: 0xe44a4a }, // Dark red-brown + Bright red
   restaurant: { base: 0x3a2a3a, accent: 0xe44ae4 }, // Dark purple-brown + Bright magenta
 } as const;
 
 // UI Colors
 export const UI_COLORS = {
-  validPlacement: 0x4ae4e4,   // Cyan glow
+  validPlacement: 0x4ae4e4, // Cyan glow
   invalidPlacement: 0xe44a8a, // Magenta warning
-  selection: 0xe4e44a,        // Electric yellow
-  textPrimary: 0xe4e4e4,      // Off-white
-  textSecondary: 0xa4a4c4,    // Muted lavender
+  selection: 0xe4e44a, // Electric yellow
+  textPrimary: 0xe4e4e4, // Off-white
+  textSecondary: 0xa4a4c4, // Muted lavender
 } as const;
 
 // Resident hunger indicator colors (Holographic tint)
 export const HUNGER_COLORS = {
-  satisfied: 0x4ae4e4,   // Cyan (70-100)
-  hungry: 0xe4a44a,      // Amber (40-69)
-  veryHungry: 0xe46a4a,  // Orange (20-39)
-  critical: 0xe44a8a,    // Magenta pulse (0-19)
+  satisfied: 0x4ae4e4, // Cyan (70-100)
+  hungry: 0xe4a44a, // Amber (40-69)
+  veryHungry: 0xe46a4a, // Orange (20-39)
+  critical: 0xe44a8a, // Magenta pulse (0-19)
 } as const;
 
 // Resident color palettes for visual variety (4-8 palettes based on name hash)
@@ -71,7 +71,7 @@ export const RESIDENT_TRAITS = [
   'Introvert',
 ] as const;
 
-export type ResidentTrait = typeof RESIDENT_TRAITS[number];
+export type ResidentTrait = (typeof RESIDENT_TRAITS)[number];
 
 // Sky lobby floor requirements (every 15 floors)
 export const SKY_LOBBY_FLOORS = [15, 30, 45, 60, 75, 90] as const;

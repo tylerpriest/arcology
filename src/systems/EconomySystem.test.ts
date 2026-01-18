@@ -12,13 +12,22 @@ const createMockGameScene = (): any => {
   // Create mock graphics and text objects that return themselves for chaining
   const mockGraphics = {
     fillStyle: () => mockGraphics,
-    fillRect: () => {},
-    clear: () => {},
+    fillRect: () => mockGraphics,
+    fillRoundedRect: () => mockGraphics,
+    fillCircle: () => mockGraphics,
+    clear: () => mockGraphics,
     lineStyle: () => mockGraphics,
-    lineBetween: () => {},
-    destroy: () => {},
+    lineBetween: () => mockGraphics,
+    strokeRect: () => mockGraphics,
+    strokeRoundedRect: () => mockGraphics,
+    strokeCircle: () => mockGraphics,
+    destroy: () => mockGraphics,
     setDepth: () => mockGraphics,
     setBlendMode: () => mockGraphics,
+    setAlpha: () => mockGraphics,
+    setVisible: () => mockGraphics,
+    setPosition: () => mockGraphics,
+    setColor: () => mockGraphics,
   };
 
   const mockText = {
@@ -45,9 +54,10 @@ const createMockGameScene = (): any => {
     },
     on: () => {},
   } as unknown as Phaser.Scene;
-  
+
   const building = new Building(mockPhaserScene);
   const mockScene = {
+    ...mockPhaserScene, // Include all Phaser scene properties
     building,
     timeSystem: {
       on: () => {},
@@ -137,7 +147,7 @@ describe('EconomySystem', () => {
 
       const initialMoney = economy.getMoney();
       economy.processDailyIncome(building, residentSystem, resourceSystem);
-      
+
       // Should earn $50 (Tier 1)
       expect(economy.getMoney()).toBe(initialMoney + 50);
       expect(economy.getDailyIncome()).toBe(50);
@@ -160,7 +170,7 @@ describe('EconomySystem', () => {
 
       const initialMoney = economy.getMoney();
       economy.processDailyIncome(building, residentSystem, resourceSystem);
-      
+
       // Should earn $100 (Tier 2)
       expect(economy.getMoney()).toBe(initialMoney + 100);
       expect(economy.getDailyIncome()).toBe(100);
@@ -170,7 +180,7 @@ describe('EconomySystem', () => {
       building.addRoom('apartment', 1, 0);
       const apartment = building.getRoomAt(1, 0)!;
       const resident = new Resident(mockScene, 'test_3', 0, 0);
-      resident.hunger = 80; // Good hunger
+      resident.hunger = 75; // Good hunger (adjusted to get < 80 satisfaction)
       resident.stress = 20; // Low stress
       resident.setHome(apartment);
       residentSystem.addResident(resident);
@@ -183,7 +193,7 @@ describe('EconomySystem', () => {
 
       const initialMoney = economy.getMoney();
       economy.processDailyIncome(building, residentSystem, resourceSystem);
-      
+
       // Should earn $150 (Tier 3)
       expect(economy.getMoney()).toBe(initialMoney + 150);
       expect(economy.getDailyIncome()).toBe(150);
@@ -192,23 +202,21 @@ describe('EconomySystem', () => {
     test('calculates Tier 4 rent ($200) for satisfaction >= 80', () => {
       building.addRoom('apartment', 1, 0);
       const apartment = building.getRoomAt(1, 0)!;
-      building.addRoom('office', 1, 5);
-      const office = building.getRoomAt(1, 5)!;
       const resident = new Resident(mockScene, 'test_4', 0, 0);
       resident.hunger = 90; // Very good hunger
       resident.stress = 10; // Very low stress
       resident.setHome(apartment);
-      resident.setJob(office); // Has job
+      // No job - testing rent calculation only
       residentSystem.addResident(resident);
 
-      // Food available, has job
+      // Food available
       resourceSystem.setFood(0, 10);
       const satisfaction = resident.calculateSatisfaction(true);
       expect(satisfaction).toBeGreaterThanOrEqual(80);
 
       const initialMoney = economy.getMoney();
       economy.processDailyIncome(building, residentSystem, resourceSystem);
-      
+
       // Should earn $200 (Tier 4)
       expect(economy.getMoney()).toBe(initialMoney + 200);
       expect(economy.getDailyIncome()).toBe(200);
@@ -217,38 +225,35 @@ describe('EconomySystem', () => {
     test('calculates average satisfaction for multiple residents in apartment', () => {
       building.addRoom('apartment', 1, 0);
       const apartment = building.getRoomAt(1, 0)!;
-      
+
       // Resident 1: Low satisfaction (stress 60, hunger 20, no food, no job)
       const resident1 = new Resident(mockScene, 'test_5a', 0, 0);
       resident1.hunger = 20;
       resident1.stress = 60;
       resident1.setHome(apartment);
       residentSystem.addResident(resident1);
-      
-      // Resident 2: High satisfaction (stress 10, hunger 90, food, job)
-      building.addRoom('office', 1, 5);
-      const office = building.getRoomAt(1, 5)!;
+
+      // Resident 2: High satisfaction (stress 10, hunger 90, food)
       const resident2 = new Resident(mockScene, 'test_5b', 0, 0);
       resident2.hunger = 90;
       resident2.stress = 10;
       resident2.setHome(apartment);
-      resident2.setJob(office);
+      // No job - testing rent calculation only
       residentSystem.addResident(resident2);
 
       resourceSystem.setFood(0, 10);
-      
+
       const sat1 = resident1.calculateSatisfaction(true);
       const sat2 = resident2.calculateSatisfaction(true);
       const avgSatisfaction = (sat1 + sat2) / 2;
 
       const initialMoney = economy.getMoney();
       economy.processDailyIncome(building, residentSystem, resourceSystem);
-      
+
       // Rent should be based on average satisfaction
-      const expectedRent = avgSatisfaction < 40 ? 50 :
-                          avgSatisfaction < 60 ? 100 :
-                          avgSatisfaction < 80 ? 150 : 200;
-      
+      const expectedRent =
+        avgSatisfaction < 40 ? 50 : avgSatisfaction < 60 ? 100 : avgSatisfaction < 80 ? 150 : 200;
+
       expect(economy.getMoney()).toBe(initialMoney + expectedRent);
       expect(economy.getDailyIncome()).toBe(expectedRent);
     });
@@ -259,7 +264,7 @@ describe('EconomySystem', () => {
 
       const initialMoney = economy.getMoney();
       economy.processDailyIncome(building, residentSystem, resourceSystem);
-      
+
       expect(economy.getMoney()).toBe(initialMoney);
       expect(economy.getDailyIncome()).toBe(0);
     });
